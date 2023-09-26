@@ -26,6 +26,8 @@ builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IBoundingBoxRepository, BoundingBoxRepository>();
 builder.Services.AddHostedService<MqttBackgroundService>();
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 builder.WebHost.UseUrls("http://*:8102;https://*:8103");
 
 var app = builder.Build();
