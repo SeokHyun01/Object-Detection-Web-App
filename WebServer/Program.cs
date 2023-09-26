@@ -26,12 +26,6 @@ builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IBoundingBoxRepository, BoundingBoxRepository>();
 builder.Services.AddHostedService<MqttBackgroundService>();
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies()); builder.Services.AddCors(options =>
-{
-	options.AddPolicy("NewPolicy", 
-        builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-});
-
 builder.WebHost.UseUrls("http://*:8102;https://*:8103");
 
 var app = builder.Build();
@@ -53,8 +47,6 @@ app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = provider });
 app.UseStaticFiles();
 
 app.UseRouting();
-
-app.UseCors("NewPolicy");
 
 app.MapBlazorHub();
 app.MapFallbackToPage("/_Host");
