@@ -361,3 +361,5 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/WebServer/wwwroot/models/yolov8l.onnx
+/WebServer/wwwroot/models/yolov8n.onnx
