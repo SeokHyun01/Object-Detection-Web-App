@@ -1,0 +1,109 @@
+﻿@page "/user/camera"
+
+@inject ICameraRepository _cameraRepository
+@inject IJSRuntime _jsRuntime
+
+@if (Cameras.Any())
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">Name</th>
+				<th scope="col">Camera</th>
+				<th scope="col">Action</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var camera in Cameras)
+			{
+				<tr>
+					<th scope="row">@camera.Id</th>
+					<td>@camera.Name</td>
+					<td>
+						<div style="width: 18rem;">
+							<img id="@camera.Id">
+						</div>
+					</td>
+					<td>
+						<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-primary">Goto</NavLink>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
+}
+<EditForm Model="@Camera" OnValidSubmit="CreateCamera">
+	<DataAnnotationsValidator />
+	<div class="input-group mb-3">
+		<InputText @bind-Value="Camera.Name" type="text" class="form-control" placeholder="Camera name"></InputText>
+		<button class="btn btn-outline-secondary">New Camera</button>
+	</div>
+</EditForm>
+
+@code {
+	private bool IsLoading { get; set; } = false;
+	private string UserId { get; set; } = "04cec5fb-256f-4c50-8ed5-d5ffeb54b66d";
+	private IEnumerable<CameraDTO> Cameras { get; set; } = new List<CameraDTO>();
+	private CameraDTO Camera { get; set; } = new CameraDTO();
+
+	private IMqttClient? MqttClient { get; set; } = null;
+
+	private async ValueTask getCameras(string userId)
+	{
+		IsLoading = true;
+		StateHasChanged();
+
+		Cameras = await _cameraRepository.GetAllByUserId(userId);
+
+		IsLoading = false;
+		StateHasChanged();
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await getCameras(UserId);
+
+			var mqttFactory = new MqttFactory();
+			MqttClient = mqttFactory.CreateMqttClient();
+			MqttClient.ApplicationMessageReceivedAsync += async e =>
+			{
+				var message = e.ApplicationMessage;
+				if (message.Topic == "camera/image")
+				{
+					var cameraMessage = JsonSerializer.Deserialize<CameraMessageDTO>(message.PayloadSegment);
+					if (cameraMessage != null)
+					{
+						await _jsRuntime.InvokeVoidAsync("draw_image", cameraMessage.Id, cameraMessage.Image);
+					}
+				}
+			};
+
+			var mqttClientOptions = new MqttClientOptionsBuilder()
+				.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
+				.Build();
+			await MqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
+
+			var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
+				.WithTopicFilter(f => { f.WithTopic("camera/image"); })
+				.Build();
+			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
+		}
+	}
+
+	private async Task CreateCamera()
+	{
+		Camera.UserId = UserId;
+		try
+		{
+			await _cameraRepository.Create(Camera);
+		}
+
+		catch (Exception ex)
+		{
+			Console.WriteLine(ex.ToString());
+		}
+	}
+}

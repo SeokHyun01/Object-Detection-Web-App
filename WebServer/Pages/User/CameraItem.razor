@@ -1,0 +1,23 @@
+﻿@page "/user/camera/{cameraId:int}"
+
+@inject IJSRuntime _jsRuntime
+
+<video id="video" width="640" height="640"></video>
+<canvas></canvas>
+
+@code {
+	[Parameter]
+	public int CameraId { get; set; }
+
+	private string UserId { get; set; } = "04cec5fb-256f-4c50-8ed5-d5ffeb54b66d";
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			await _jsRuntime.InvokeVoidAsync("connect_mqtt_client", UserId, CameraId);
+			await _jsRuntime.InvokeVoidAsync("start_video", "video");
+			await _jsRuntime.InvokeVoidAsync("execute");
+		}
+	}
+}
