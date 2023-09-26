@@ -44,7 +44,6 @@ app.UseHttpsRedirection();
 
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".onnx"] = "application/octet-stream";
-provider.Mappings[".wasm"] = "application/wasm";
 app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = provider });
 app.UseStaticFiles();
 

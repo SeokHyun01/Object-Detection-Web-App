@@ -17,7 +17,7 @@ namespace WebServer.Service
 		private IMqttClient? MqttClient { get; set; } = null;
 
 		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
-		private static readonly Font FONT = new FontCollection().Add(@"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot/CONSOLA.TTF").CreateFont(11, FontStyle.Bold);
+		private static readonly Font FONT = new FontCollection().Add($"{ROOT}/CONSOLA.TTF").CreateFont(11, FontStyle.Bold);
 
 		public MqttBackgroundService(IServiceProvider serviceProvider)
 		{
@@ -58,7 +58,7 @@ namespace WebServer.Service
 								}
 							}
 
-							using var model = YoloV8Predictor.Create(@"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot/models/yolov8l.onnx", useCuda: true);
+							using var model = YoloV8Predictor.Create($"{ROOT}/models/yolov8l.onnx", useCuda: true);
 							using var input = Image.Load(inputImagePath);
 							if (model == null)
 							{
