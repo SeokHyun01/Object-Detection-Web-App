@@ -24,11 +24,20 @@ namespace Business.Repository
 
 		public async ValueTask<int> Create(IEnumerable<BoundingBoxDTO> objDTOs)
 		{
-			var objs = _mapper.Map<IEnumerable<BoundingBoxDTO>, IEnumerable<BoundingBox>>(objDTOs);
-			_db.BoundingBoxes.AddRange(objs);
-			await _db.SaveChangesAsync();
+			try
+			{
+				var objs = _mapper.Map<IEnumerable<BoundingBoxDTO>, IEnumerable<BoundingBox>>(objDTOs);
+				_db.BoundingBoxes.AddRange(objs);
+				await _db.SaveChangesAsync();
 
-			return objs.Count();
+				return objs.Count();
+
+			} catch (Exception ex)
+			{
+				Console.WriteLine(ex.StackTrace);
+
+				throw;
+			}
 		}
 
 		public ValueTask<int> Delete(int id)

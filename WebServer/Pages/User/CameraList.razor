@@ -1,60 +1,101 @@
 ﻿@page "/user/camera"
 
+@attribute [Authorize(Roles = SD.ROLE_CLIENT)]
+
 @inject ICameraRepository _cameraRepository
 @inject IJSRuntime _jsRuntime
+@inject NavigationManager _navigationManager
+@inject UserManager<IdentityUser> _userManager
 
-@if (Cameras.Any())
+
+@if (IsLoading)
 {
-	<table class="table">
-		<thead>
-			<tr>
-				<th scope="col">#</th>
-				<th scope="col">Name</th>
-				<th scope="col">Camera</th>
-				<th scope="col">Action</th>
-			</tr>
-		</thead>
-		<tbody>
-			@foreach (var camera in Cameras)
-			{
-				<tr>
-					<th scope="row">@camera.Id</th>
-					<td>@camera.Name</td>
-					<td>
-						<div style="width: 18rem;">
-							<img id="@camera.Id">
-						</div>
-					</td>
-					<td>
-						<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-primary">Goto</NavLink>
-					</td>
-				</tr>
-			}
-		</tbody>
-	</table>
+	<p class="placeholder-glow">
+		<span class="placeholder col-10 bg-primary placeholder-lg"></span>
+		<span class="placeholder col-12 bg-primary placeholder-lg"></span>
+		<span class="placeholder col-6 bg-primary placeholder-lg"></span>
+	</p>
 }
-<EditForm Model="@Camera" OnValidSubmit="CreateCamera">
-	<DataAnnotationsValidator />
-	<div class="input-group mb-3">
-		<InputText @bind-Value="Camera.Name" type="text" class="form-control" placeholder="Camera name"></InputText>
-		<button class="btn btn-outline-secondary">New Camera</button>
-	</div>
-</EditForm>
+else
+{
+	@if (Cameras.Any())
+	{
+		<table class="table">
+			<thead>
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">camera</th>
+					<th scope="col">angle</th>
+					<th scope="col">detail</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var camera in Cameras)
+				{
+					<tr>
+						<th scope="row">
+							<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/camera/{camera.Id}")><QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText></SfQRCodeGenerator>
+						</th>
+						<td>
+							<div style="width: 18rem;">
+								<img id="@($"img-{camera.Id}")">
+							</div>
+						</td>
+						<td>
+							<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
+						</td>
+						<td>
+							<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-primary">Goto</NavLink>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	} else
+	{
+		<p>Not found.</p>
+	}
+
+	<EditForm Model="@Camera" OnValidSubmit="CreateCamera">
+		<DataAnnotationsValidator />
+		<div class="input-group">
+			<InputText @bind-Value="Camera.Name" type="text" class="form-control" placeholder="set camera name" style="margin-right: 1rem;"></InputText>
+			<button class="btn btn-outline-secondary">new camera</button>
+		</div>
+	</EditForm>
+}
+
 
 @code {
-	private bool IsLoading { get; set; } = false;
-	private string UserId { get; set; } = "04cec5fb-256f-4c50-8ed5-d5ffeb54b66d";
+	[CascadingParameter]
+	public Task<AuthenticationState> AuthenticationState { get; set; }
+	private IdentityUser? User { get; set; } = null;
+
+	private bool IsLoading { get; set; } = true;
+
 	private IEnumerable<CameraDTO> Cameras { get; set; } = new List<CameraDTO>();
 	private CameraDTO Camera { get; set; } = new CameraDTO();
 
 	private IMqttClient? MqttClient { get; set; } = null;
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthenticationState;
+		if (!authState.User.Identity.IsAuthenticated)
+		{
+			var uri = new Uri(_navigationManager.Uri);
+			_navigationManager.NavigateTo($"/identity/account/login?returnUrl={uri.LocalPath}", forceLoad: true);
+		}
+		User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
+	}
 
 	private async ValueTask getCameras(string userId)
 	{
 		IsLoading = true;
 		StateHasChanged();
 
-		Cameras = await _cameraRepository.GetAllByUserId(userId);
+		Cameras = await _cameraRepository.GetAllByUserId(User.Id);
 
 		IsLoading = false;
 		StateHasChanged();
@@ -64,7 +105,7 @@
 	{
 		if (firstRender)
 		{
-			await getCameras(UserId);
+			await getCameras(User.Id);
 
 			var mqttFactory = new MqttFactory();
 			MqttClient = mqttFactory.CreateMqttClient();
@@ -73,10 +114,19 @@
 				var message = e.ApplicationMessage;
 				if (message.Topic == "camera/image")
 				{
-					var cameraMessage = JsonSerializer.Deserialize<CameraMessageDTO>(message.PayloadSegment);
+					var cameraMessage = JsonSerializer.Deserialize<CameraDTO>(message.PayloadSegment);
 					if (cameraMessage != null)
 					{
-						await _jsRuntime.InvokeVoidAsync("draw_image", cameraMessage.Id, cameraMessage.Image);
+						await _jsRuntime.InvokeVoidAsync("set_img_src", $"img-{cameraMessage.Id}", cameraMessage.Image);
+					}
+				}
+				else if (e.ApplicationMessage.Topic == "camera/update/angle/ack")
+				{
+					var cameraMessage = JsonSerializer.Deserialize<CameraDTO>(message.PayloadSegment);
+					if (cameraMessage != null)
+					{
+						var input = $"input-{cameraMessage.Id}";
+						await _jsRuntime.InvokeVoidAsync("set_input_disabled", input, false);
 					}
 				}
 			};
@@ -88,6 +138,7 @@
 
 			var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
 				.WithTopicFilter(f => { f.WithTopic("camera/image"); })
+				.WithTopicFilter(f => { f.WithTopic("camera/update/angle/ack"); })
 				.Build();
 			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 		}
@@ -95,15 +146,48 @@
 
 	private async Task CreateCamera()
 	{
-		Camera.UserId = UserId;
 		try
 		{
+			Camera.UserId = User.Id;
 			await _cameraRepository.Create(Camera);
+			await getCameras(User.Id);
 		}
 
 		catch (Exception ex)
 		{
-			Console.WriteLine(ex.ToString());
+			Console.WriteLine(ex.StackTrace);
+		}
+	}
+
+	private async Task SetCameraAngle(ChangeEventArgs args, int id)
+	{
+		if (args.Value != null)
+		{
+			var angle = int.Parse(args.Value.ToString());
+			var camera = await _cameraRepository.Get(id);
+			if (camera != null)
+			{
+				camera.Angle = angle;
+				await _cameraRepository.Update(camera);
+			}
+			var cameraMessage = new CameraDTO
+				{
+					Id = id,
+					Angle = angle,
+				};
+			var payload = JsonSerializer.Serialize<CameraDTO>(cameraMessage);
+
+			if (MqttClient != null && MqttClient.IsConnected)
+			{
+				var applicationMessage = new MqttApplicationMessageBuilder()
+				.WithTopic("camera/update/angle/syn")
+				.WithPayload(payload)
+				.Build();
+				await MqttClient.PublishAsync(applicationMessage, CancellationToken.None);
+
+				var input = $"input-{cameraMessage.Id}";
+				await _jsRuntime.InvokeVoidAsync("set_input_disabled", input, true);
+			}
 		}
 	}
 }

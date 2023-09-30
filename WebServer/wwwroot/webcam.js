@@ -1,8 +1,8 @@
-﻿async function start_video(src) {
+﻿async function start_video(id) {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            const video = document.getElementById(src);
+            const video = document.getElementById(id);
             if (`srcObject` in video) {
                 video.srcObject = stream;
             } else {
@@ -10,16 +10,14 @@
             }
             video.onloadedmetadata = _ => video.play();
 
-            video.style.visibility = `hidden`;
-
         } catch (err) {
             console.log(err)
         }
     }
 }
 
-function stop_video(src) {
-    const video = document.getElementById(src);
+function stop_video(id) {
+    const video = document.getElementById(id);
     const stream = video.srcObject;
 
     if (stream) {
@@ -30,4 +28,6 @@ function stop_video(src) {
 
         video.srcObject = null;
     }
+
+    clearInterval(interval_id);
 }

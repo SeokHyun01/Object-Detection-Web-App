@@ -58,8 +58,9 @@ namespace WebServer.Service
 								}
 							}
 
-							using var model = YoloV8Predictor.Create($"{ROOT}/models/yolov8l.onnx", useCuda: true);
-							using var input = Image.Load(inputImagePath);
+                            using var model = YoloV8Predictor.Create($"{ROOT}/models/yolov8l.onnx");
+                            // using var model = YoloV8Predictor.Create($"{ROOT}/models/yolov8l.onnx", useCuda: true);
+                            using var input = Image.Load(inputImagePath);
 							if (model == null)
 							{
 								throw new ArgumentNullException(nameof(model));

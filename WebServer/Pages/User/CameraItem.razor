@@ -1,23 +1,224 @@
 ﻿@page "/user/camera/{cameraId:int}"
 
-@inject IJSRuntime _jsRuntime
+@attribute [Authorize(Roles = SD.ROLE_CLIENT)]
 
-<video id="video" width="640" height="640"></video>
-<canvas></canvas>
+@inject ICameraRepository _cameraRepository
+@inject IJSRuntime _jsRuntime
+@inject NavigationManager _navigationManager
+@inject UserManager<IdentityUser> _userManager
+
+@implements IAsyncDisposable
+
+
+@if (IsLoading)
+{
+	<p class="placeholder-glow">
+		<span class="placeholder col-10 bg-primary placeholder-lg"></span>
+		<span class="placeholder col-12 bg-primary placeholder-lg"></span>
+		<span class="placeholder col-6 bg-primary placeholder-lg"></span>
+	</p>
+}
+else
+{
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">camera</th>
+				<th scope="col">angle</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr>
+				<td>
+					<div style="width: 18rem;">
+						<video id="video"></video>
+					</div>
+				</td>
+				<td>
+					<input id="input" type="range" class="form-range" value=@(Camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, CameraId)" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+
+	<canvas style="visibility: hidden"></canvas>
+}
+
 
 @code {
+	[CascadingParameter]
+	public Task<AuthenticationState> AuthenticationState { get; set; }
+	private IdentityUser? User { get; set; } = null;
+
 	[Parameter]
 	public int CameraId { get; set; }
 
-	private string UserId { get; set; } = "04cec5fb-256f-4c50-8ed5-d5ffeb54b66d";
+	private bool IsLoading { get; set; } = true;
+
+	private CameraDTO Camera { get; set; } = new CameraDTO();
+
+	private IMqttClient? MqttClient { get; set; } = null;
+
+	private HubConnection? hubConnection = null;
+	private string RoomName { get; set; } = string.Empty;
+	private string ConnectionId { get; set; } = string.Empty;
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthenticationState;
+		if (!authState.User.Identity.IsAuthenticated)
+		{
+			var uri = new Uri(_navigationManager.Uri);
+			_navigationManager.NavigateTo($"/identity/account/login?returnUrl={uri.LocalPath}", forceLoad: true);
+		}
+		User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
+	}
+
+	private async ValueTask getCamera(int id)
+	{
+		IsLoading = true;
+		StateHasChanged();
+
+		Camera = await _cameraRepository.Get(id);
+
+		IsLoading = false;
+		StateHasChanged();
+	}
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			await _jsRuntime.InvokeVoidAsync("connect_mqtt_client", UserId, CameraId);
+			// MQTT
+			var mqttFactory = new MqttFactory();
+			MqttClient = mqttFactory.CreateMqttClient();
+
+			// Delegation
+			MqttClient.ApplicationMessageReceivedAsync += async e =>
+			{
+				var message = e.ApplicationMessage;
+				if (e.ApplicationMessage.Topic == "camera/update/angle/ack")
+				{
+					var cameraMessage = JsonSerializer.Deserialize<CameraDTO>(message.PayloadSegment);
+					if (cameraMessage != null)
+					{
+						var input = "input";
+						await _jsRuntime.InvokeVoidAsync("set_input_disabled", input, false);
+					}
+				}
+			};
+
+			var mqttClientOptions = new MqttClientOptionsBuilder()
+				.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
+				.Build();
+			await MqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
+
+			// Subscribe
+			var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
+				.WithTopicFilter(f => { f.WithTopic("camera/image"); })
+				.WithTopicFilter(f => { f.WithTopic("camera/update/angle/ack"); })
+				.Build();
+
+			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
+
+			// RTC Signaling
+			//hubConnection = new HubConnectionBuilder()
+			//	.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), options =>
+			//	{
+			//		options.HttpMessageHandlerFactory = message =>
+			//		{
+			//			if (message is HttpClientHandler clientHandler)
+			//			{
+			//				clientHandler.ServerCertificateCustomValidationCallback +=
+			//					(sender, certificate, chain, sslPolicyErrors) => true;
+			//			}
+			//			return message;
+			//		};
+			//	})
+			//	.Build();
+
+			//hubConnection.On<string>("OnConnected", async (senderId) =>
+			//{
+			//	ConnectionId = senderId;
+			//	await _jsRuntime.InvokeVoidAsync("initializeCamera", ConnectionId, User.Id, CameraId);
+			//});
+
+			//hubConnection.On("Welcome", async () =>
+			//{
+			//	var offer = await _jsRuntime.InvokeAsync<string>("sendOffer");
+			//	await hubConnection.SendAsync("SendOffer", offer, RoomName);
+			//});
+
+			//hubConnection.On<string>("ReceiveOffer", async (receivedOffer) =>
+			//{
+			//	var answer = await _jsRuntime.InvokeAsync<string>("sendAnswer", receivedOffer);
+			//	await hubConnection.SendAsync("SendAnswer", answer, RoomName);
+			//});
+
+			//hubConnection.On<string>("ReceiveAnswer", async (receivedAnswer) =>
+			//{
+			//	await _jsRuntime.InvokeVoidAsync("receiveAnswer", receivedAnswer);
+			//});
+
+			//hubConnection.On<string>("ReceiveIce", async (receivedIce) =>
+			//{
+			//	await _jsRuntime.InvokeVoidAsync("receiveIce", receivedIce);
+			//});
+
+			//await hubConnection.StartAsync();
+
+			//RoomName = $"room-{CameraId.ToString()}";
+			//await hubConnection.SendAsync("JoinRoom", RoomName);
+
+			// Etc.
+			await getCamera(CameraId);
+			await _jsRuntime.InvokeVoidAsync("connect_mqtt_client", User.Id, CameraId);
 			await _jsRuntime.InvokeVoidAsync("start_video", "video");
 			await _jsRuntime.InvokeVoidAsync("execute");
 		}
+	}
+
+	private async Task SetCameraAngle(ChangeEventArgs args, int id)
+	{
+		if (args.Value != null)
+		{
+			var angle = int.Parse(args.Value.ToString());
+			var camera = await _cameraRepository.Get(id);
+			if (camera != null)
+			{
+				camera.Angle = angle;
+				await _cameraRepository.Update(camera);
+			}
+			var cameraMessage = new CameraDTO
+				{
+					Id = id,
+					Angle = angle,
+				};
+			var payload = JsonSerializer.Serialize<CameraDTO>(cameraMessage);
+
+			var mqttFactory = new MqttFactory();
+			using (var mqttClient = mqttFactory.CreateMqttClient())
+			{
+				var mqttClientOptions = new MqttClientOptionsBuilder()
+					.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
+					.Build();
+				await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
+				var applicationMessage = new MqttApplicationMessageBuilder()
+					.WithTopic("camera/update/angle/syn")
+					.WithPayload(payload)
+					.Build();
+				await mqttClient.PublishAsync(applicationMessage, CancellationToken.None);
+				await mqttClient.DisconnectAsync();
+			}
+
+			var input = $"input-{cameraMessage.Id}";
+			await _jsRuntime.InvokeVoidAsync("set_input_disabled", input, true);
+		}
+	}
+
+	public async ValueTask DisposeAsync()
+	{
+		await _jsRuntime.InvokeVoidAsync("stop_video", "video");
 	}
 }

@@ -25,34 +25,67 @@ namespace Business.Repository
 
 		public async ValueTask<CameraDTO> Create(CameraDTO objDTO)
 		{
-			var obj = _mapper.Map<CameraDTO, Camera>(objDTO);
-			var createdObj = _db.Cameras.Add(obj);
-			await _db.SaveChangesAsync();
+			try
+			{
+				if (string.IsNullOrEmpty(objDTO.Name))
+				{
+					objDTO.Name = "untitled";
+				}
+				var obj = _mapper.Map<CameraDTO, Camera>(objDTO);
+				var createdObj = _db.Cameras.Add(obj);
+				await _db.SaveChangesAsync();
 
-			return _mapper.Map<Camera, CameraDTO>(createdObj.Entity);
+				return _mapper.Map<Camera, CameraDTO>(createdObj.Entity);
+
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.StackTrace);
+
+				throw;
+			}
 		}
 
 		public async ValueTask<int> Delete(int id)
 		{
-			var obj = await _db.Cameras.FirstOrDefaultAsync(x => x.Id == id);
-			if (obj != null)
+			try
 			{
-				_db.Cameras.Remove(obj);
-				return await _db.SaveChangesAsync();
-			}
+				var obj = await _db.Cameras.FirstOrDefaultAsync(x => x.Id == id);
+				if (obj != null)
+				{
+					_db.Cameras.Remove(obj);
 
-			return 0;
+					return await _db.SaveChangesAsync();
+				}
+				return 0;
+
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.StackTrace);
+
+				throw;
+			}
 		}
 
 		public async ValueTask<CameraDTO> Get(int id)
 		{
-			var obj = await _db.Cameras.FirstOrDefaultAsync(x => x.Id == id);
-			if (obj != null)
+			try
 			{
-				return _mapper.Map<Camera, CameraDTO>(obj);
-			}
+				var obj = await _db.Cameras.FirstOrDefaultAsync(x => x.Id == id);
+				if (obj != null)
+				{
+					return _mapper.Map<Camera, CameraDTO>(obj);
+				}
+				return new CameraDTO();
 
-			return new CameraDTO();
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.StackTrace);
+
+				throw;
+			}
 		}
 
 		public async ValueTask<IEnumerable<CameraDTO>> GetAll()
@@ -60,14 +93,31 @@ namespace Business.Repository
 			return _mapper.Map<IEnumerable<Camera>, IEnumerable<CameraDTO>>(_db.Cameras);
 		}
 
-		public async ValueTask<IEnumerable<CameraDTO>> GetAllByUserId(string userId)
+		public async ValueTask<IEnumerable<CameraDTO>> GetAllByUserId(string id)
 		{
-			return _mapper.Map<IEnumerable<Camera>, IEnumerable<CameraDTO>>(_db.Cameras.Where(x => x.UserId == userId));
+			return _mapper.Map<IEnumerable<Camera>, IEnumerable<CameraDTO>>(_db.Cameras.Where(x => x.UserId == id));
 		}
 
-		public ValueTask<CameraDTO> Update(CameraDTO objDTO)
+		public async ValueTask<CameraDTO> Update(CameraDTO objDTO)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				var objFromDb = await _db.Cameras.FirstOrDefaultAsync(x => x.Id == objDTO.Id);
+				if (objFromDb != null)
+				{
+					objFromDb.Angle = objDTO.Angle;
+					_db.Cameras.Update(objFromDb);
+					await _db.SaveChangesAsync();
+					return _mapper.Map<Camera, CameraDTO>(objFromDb);
+				}
+				return null;
+
+			} catch (Exception ex)
+			{
+				Console.WriteLine(ex.StackTrace);
+
+				throw;
+			}
 		}
 	}
 }

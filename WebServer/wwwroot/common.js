@@ -1,4 +1,9 @@
-﻿function draw_image(camera_id, image) {
-    const camera = document.getElementById(camera_id);
-    camera.src = image;
+﻿function set_img_src(id, source) {
+    const view = document.getElementById(id);
+    view.src = source;
+}
+
+function set_input_disabled(id, value) {
+    const view = document.getElementById(id);
+    view.disabled = value;
 }
