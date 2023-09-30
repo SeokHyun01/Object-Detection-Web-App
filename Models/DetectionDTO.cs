@@ -12,5 +12,6 @@ namespace Models
 		public string? UserId { get; set; }
 		public int CameraId { get; set; }
 		public string? Image { get; set; }
+		public string? Model { get; set; }
 	}
 }
