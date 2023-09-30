@@ -1,7 +1,54 @@
 ﻿@page "/user/camera/setting/{cameraId:int}"
 
-<h3>CameraSetting</h3>
+@attribute [Authorize(Roles = SD.ROLE_CLIENT)]
+
+@inject IJSRuntime _jsRuntime
+@inject NavigationManager _navigationManager
+@inject UserManager<IdentityUser> _userManager
+
+@implements IAsyncDisposable
+
+
+@if (IsLoading)
+{
+	<p class="placeholder-glow">
+		<span class="placeholder col-10 bg-primary placeholder-lg"></span>
+		<span class="placeholder col-12 bg-primary placeholder-lg"></span>
+		<span class="placeholder col-6 bg-primary placeholder-lg"></span>
+	</p>
+} else
+{
+	<h3>CameraSetting</h3>
+}
+
 
 @code {
+	[CascadingParameter]
+	public Task<AuthenticationState> AuthenticationState { get; set; }
+	private IdentityUser? User { get; set; } = null;
 
+	private bool IsLoading { get; set; } = true;
+
+	[Parameter]
+	public int CameraId { get; set; }
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthenticationState;
+		if (!authState.User.Identity.IsAuthenticated)
+		{
+			var uri = new Uri(_navigationManager.Uri);
+			_navigationManager.NavigateTo($"/identity/account/login?returnUrl={uri.LocalPath}", forceLoad: true);
+		}
+		User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
+	}
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			// 여기에서 User.Id 로 사용하면 됨.
+		}
+	}
 }
