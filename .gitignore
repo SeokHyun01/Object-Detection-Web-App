@@ -363,3 +363,5 @@ MigrationBackup/
 FodyWeavers.xsd
 /WebServer/wwwroot/models/yolov8l.onnx
 /WebServer/wwwroot/models/yolov8n.onnx
+/WebServer/wwwroot/models/coco.onnx
+/WebServer/wwwroot/models/fire.onnx
