@@ -1,0 +1,89 @@
+﻿@page "/user/event"
+@using System.Text.RegularExpressions;
+
+@attribute [Authorize(Roles = SD.ROLE_CLIENT)]
+
+@inject IEventVideoRepository _eventVideoRepository
+@inject UserManager<IdentityUser> _userManager
+
+
+@if (IsLoading)
+{
+	<p class="placeholder-glow">
+		<span class="placeholder col-10 bg-primary placeholder-lg"></span>
+		<span class="placeholder col-12 bg-primary placeholder-lg"></span>
+		<span class="placeholder col-6 bg-primary placeholder-lg"></span>
+	</p>
+}
+else
+{
+	@if (EventVideos.Any())
+	{
+		<table class="table">
+			<thead>
+				<tr>
+					<th scope="col">#</th>
+					<th scope="col">video</th>
+					<th scope="col">action</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var eventVideo in EventVideos)
+				{
+					<tr>
+						<th scope="row">
+							@eventVideo.Id
+						</th>
+						<td>
+							<div style="width: 18rem;">
+								<video controls>
+									<source src=@(Regex.Match(eventVideo.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
+								</video>
+							</div>
+						</td>
+						<td>
+							<button type="button" class="btn btn-outline-danger">delete</button>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+	else
+	{
+		<p>Not found.</p>
+	}
+}
+
+
+@code {
+	[CascadingParameter]
+	public Task<AuthenticationState> AuthenticationState { get; set; }
+	private IdentityUser? User { get; set; } = null;
+
+	private IEnumerable<EventVideoDTO> EventVideos { get; set; } = new List<EventVideoDTO>();
+
+	private bool IsLoading { get; set; } = true;
+
+
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			var authState = await AuthenticationState;
+			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
+			await getEventVideos(User.Id);
+		}
+	}
+
+	private async ValueTask getEventVideos(string userId)
+	{
+		IsLoading = true;
+		StateHasChanged();
+
+		EventVideos = await _eventVideoRepository.GetAllByUserId(userId);
+
+		IsLoading = false;
+		StateHasChanged();
+	}
+}

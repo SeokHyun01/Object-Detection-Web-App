@@ -25,11 +25,20 @@ namespace Business.Repository
 
 		public async ValueTask<EventDTO> Create(EventDTO objDTO)
 		{
-			var obj = _mapper.Map<EventDTO, Event>(objDTO);
-			var createdObj = _db.Events.Add(obj);
-			await _db.SaveChangesAsync();
+			try
+			{
+				var obj = _mapper.Map<EventDTO, Event>(objDTO);
+				var createdObj = _db.Events.Add(obj);
+				await _db.SaveChangesAsync();
 
-			return _mapper.Map<Event, EventDTO>(createdObj.Entity);
+				return _mapper.Map<Event, EventDTO>(createdObj.Entity);
+
+			} catch (Exception ex)
+			{
+				Console.WriteLine(ex.StackTrace);
+
+				throw;
+			}
 		}
 
 		public ValueTask<int> Delete(int id)

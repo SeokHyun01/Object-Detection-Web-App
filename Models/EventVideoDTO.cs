@@ -10,6 +10,5 @@ namespace Models
 	{
 		public int Id { get; set; }
 		public string? Path { get; set; }
-		public IEnumerable<EventDTO> Events { get; set; }
 	}
 }
