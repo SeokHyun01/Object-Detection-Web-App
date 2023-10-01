@@ -12,6 +12,5 @@ namespace DataAccess
 		[Key]
 		public int Id { get; set; }
 		public string? Path { get; set; }
-		public IEnumerable<Event> Events { get; set; }
 	}
 }

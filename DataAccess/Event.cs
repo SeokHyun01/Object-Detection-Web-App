@@ -19,7 +19,5 @@ namespace DataAccess
 		public string? Path { get; set; }
 		public IEnumerable<BoundingBox> BoundingBoxes { get; set; }
 		public int EventVideoId { get; set; }
-		[ForeignKey(nameof(EventVideoId))]
-		public EventVideo? EventVideo { get; set; }
 	}
 }

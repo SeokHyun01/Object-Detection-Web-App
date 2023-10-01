@@ -3,6 +3,7 @@ using System;
 using DataAccess.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231001135440_DisableMappingBetweenEventAndEventVideo")]
+    partial class DisableMappingBetweenEventAndEventVideo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -98,6 +101,8 @@ namespace DataAccess.Migrations
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EventVideoId");
 
                     b.ToTable("Events");
                 });
@@ -337,6 +342,15 @@ namespace DataAccess.Migrations
                     b.Navigation("Event");
                 });
 
+            modelBuilder.Entity("DataAccess.Event", b =>
+                {
+                    b.HasOne("DataAccess.EventVideo", null)
+                        .WithMany("Events")
+                        .HasForeignKey("EventVideoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -391,6 +405,11 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("DataAccess.Event", b =>
                 {
                     b.Navigation("BoundingBoxes");
+                });
+
+            modelBuilder.Entity("DataAccess.EventVideo", b =>
+                {
+                    b.Navigation("Events");
                 });
 #pragma warning restore 612, 618
         }
