@@ -25,9 +25,9 @@ namespace WebServer.Service
 		private IMqttClient? MqttClient { get; set; } = null;
 		private IMqttClient? AckSender { get; set; } = null;
 
-		private List<IPredictor> Models { get; set; } = new List<IPredictor>();
-
 		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
+		// private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
+
 		private Font Font { get; set; } = null;
 
 		public MqttBackgroundService(IServiceProvider serviceProvider)
@@ -45,8 +45,8 @@ namespace WebServer.Service
 
 				Font = new FontCollection().Add($"{ROOT}/CONSOLA.TTF").CreateFont(11, FontStyle.Bold);
 
-				Models.Append(YoloV8Predictor.Create($"{ROOT}/models/coco.onnx", useCuda: true));
-				Models.Append(YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" }, useCuda: true));
+				using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx", useCuda: true);
+				using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" }, useCuda: true);
 
 				var mqttFactory = new MqttFactory();
 				AckSender = mqttFactory.CreateMqttClient();
@@ -85,10 +85,10 @@ namespace WebServer.Service
 							switch (request.Model)
 							{
 								case "coco":
-									model = Models[0];
+									model = coco;
 									break;
 								case "fire":
-									model = Models[1];
+									model = fire;
 									break;
 							}
 
@@ -101,7 +101,12 @@ namespace WebServer.Service
 							{
 								throw new ArgumentNullException(nameof(input));
 							}
+							var stopwatch = new Stopwatch();
+							stopwatch.Start();
 							var predictions = model.Predict(input);
+							stopwatch.Stop();
+							Console.WriteLine("Elapsed Milliseconds: " + stopwatch.ElapsedMilliseconds);
+
 							if (!predictions.Any())
 							{
 								await Task.CompletedTask;
