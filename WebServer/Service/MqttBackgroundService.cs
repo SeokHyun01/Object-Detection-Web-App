@@ -28,8 +28,6 @@ namespace WebServer.Service
 		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
 		// private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
 
-		private Font Font { get; set; } = null;
-
 		public MqttBackgroundService(IServiceProvider serviceProvider)
 		{
 			_serviceProvider = serviceProvider;
@@ -43,7 +41,7 @@ namespace WebServer.Service
 				_boundingBoxRepository = scope.ServiceProvider.GetRequiredService<IBoundingBoxRepository>();
 				_eventVideoRepository = scope.ServiceProvider.GetRequiredService<IEventVideoRepository>();
 
-				Font = new FontCollection().Add($"{ROOT}/CONSOLA.TTF").CreateFont(11, FontStyle.Bold);
+				var font = new FontCollection().Add($"{ROOT}/CONSOLA.TTF").CreateFont(11, FontStyle.Bold);
 
 				using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx", useCuda: true);
 				using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" }, useCuda: true);
@@ -122,9 +120,9 @@ namespace WebServer.Service
 								var width = (int)Math.Min(originalImageWidth - x, prediction.Rectangle.Width);
 								var height = (int)Math.Min(originalImageHeight - y, prediction.Rectangle.Height);
 								var text = $"{prediction.Label.Name}: {prediction.Score}";
-								var size = TextMeasurer.Measure(text, new TextOptions(Font));
+								var size = TextMeasurer.Measure(text, new TextOptions(font));
 								input.Mutate(d => d.Draw(Pens.Solid(Color.Yellow, 2), new Rectangle(x, y, width, height)));
-								input.Mutate(d => d.DrawText(new TextOptions(Font) { Origin = new Point(x, (int)(y - size.Height - 1)) }, text, Color.Yellow));
+								input.Mutate(d => d.DrawText(new TextOptions(font) { Origin = new Point(x, (int)(y - size.Height - 1)) }, text, Color.Yellow));
 								var boundingBox = new BoundingBoxDTO
 								{
 									X = x,
