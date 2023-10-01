@@ -119,7 +119,7 @@ namespace WebServer.Service
 								boundingBoxes.Add(boundingBox);
 							}
 
-							var eventImagePath = Path.Combine(ROOT, "events", $"{request.Date}_{request.UserId}_{request.CameraId}.jpeg");
+							var eventImagePath = Path.Combine(ROOT, "images", $"{request.Date}_{request.UserId}_{request.CameraId}.jpeg");
 							input.Save(eventImagePath);
 							var eventDTO = new EventDTO
 							{
