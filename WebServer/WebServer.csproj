@@ -38,6 +38,8 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\models\" />
+    <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\videos\" />
   </ItemGroup>
 
 </Project>
