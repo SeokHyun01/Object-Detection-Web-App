@@ -38,7 +38,7 @@ else
 						</th>
 						<td>
 							<div style="width: 18rem;">
-								<img id="@($"img-{camera.Id}")">
+								<img id="@($"img-{camera.Id}")" src="@camera.Image">
 							</div>
 						</td>
 						<td>
@@ -108,7 +108,12 @@ else
 					var cameraMessage = JsonSerializer.Deserialize<CameraDTO>(message.PayloadSegment);
 					if (cameraMessage != null)
 					{
-						await _jsRuntime.InvokeVoidAsync("set_img_src", $"img-{cameraMessage.Id}", cameraMessage.Image);
+						var camera = Cameras.FirstOrDefault(c => c.Id == cameraMessage.Id);
+						if (camera != null)
+						{
+							camera.Image = cameraMessage.Image;
+							StateHasChanged();
+						}
 					}
 				}
 				else if (e.ApplicationMessage.Topic == "camera/update/angle/ack")
