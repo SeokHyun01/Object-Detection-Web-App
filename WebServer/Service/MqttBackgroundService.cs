@@ -130,6 +130,24 @@ namespace WebServer.Service
 							};
 
 							var createdEventDTO = await _eventRepositroy.Create(eventDTO);
+							var createdEvent = JsonSerializer.Serialize<CreatedEventDTO>(new CreatedEventDTO
+							{
+								Id = createdEventDTO.Id,
+								CameraId = createdEventDTO.CameraId
+							});
+							using (var mqttClient = mqttFactory.CreateMqttClient())
+							{
+								var mqttClientOptions = new MqttClientOptionsBuilder()
+									.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
+									.Build();
+								await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
+								var applicationMessage = new MqttApplicationMessageBuilder()
+									.WithTopic("event/create")
+									.WithPayload(createdEvent)
+									.Build();
+								await mqttClient.PublishAsync(applicationMessage, CancellationToken.None);
+								await mqttClient.DisconnectAsync();
+							}
 
 							foreach (var boundingBox in boundingBoxes)
 							{
@@ -236,7 +254,8 @@ namespace WebServer.Service
 				await MqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
 
 				var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
-					.WithTopicFilter(f => { f.WithTopic("redetection"); })
+					.WithTopicFilter(f => { f.WithTopic("event"); })
+					.WithTopicFilter(f => { f.WithTopic("event/video/create"); })
 					.Build();
 				await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
