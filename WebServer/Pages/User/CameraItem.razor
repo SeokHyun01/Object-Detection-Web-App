@@ -64,15 +64,6 @@ else
 	private string ConnectionId { get; set; } = string.Empty;
 
 
-	protected override async Task OnInitializedAsync()
-	{
-		var authState = await AuthenticationState;
-		if (authState.User.Identity.IsAuthenticated && authState.User.IsInRole(SD.ROLE_CLIENT))
-		{
-			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
-		}
-	}
-
 	private async ValueTask getCamera(int id)
 	{
 		IsLoading = true;
@@ -88,6 +79,9 @@ else
 	{
 		if (firstRender)
 		{
+			var authState = await AuthenticationState;
+			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
+			
 			// MQTT
 			var mqttFactory = new MqttFactory();
 			MqttClient = mqttFactory.CreateMqttClient();

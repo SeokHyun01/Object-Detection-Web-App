@@ -31,20 +31,12 @@
 	public int CameraId { get; set; }
 
 
-	protected override async Task OnInitializedAsync()
-	{
-		var authState = await AuthenticationState;
-		if (authState.User.Identity.IsAuthenticated && authState.User.IsInRole(SD.ROLE_CLIENT))
-		{
-			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
-		}
-	}
-
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			// User.Id
+			var authState = await AuthenticationState;
+			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 		}
 	}
 }
