@@ -17,13 +17,18 @@ namespace WebServer.Service
 	public class MqttBackgroundService : BackgroundService
 	{
 		private readonly IServiceProvider _serviceProvider;
+
 		private IEventRepository? _eventRepositroy = null;
 		private IBoundingBoxRepository? _boundingBoxRepository = null;
 		private IEventVideoRepository? _eventVideoRepository = null;
+
 		private IMqttClient? MqttClient { get; set; } = null;
+		private IMqttClient? AckSender { get; set; } = null;
+
+		private List<IPredictor> Models { get; set; } = new List<IPredictor>();
 
 		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
-		private static readonly Font FONT = new FontCollection().Add($"{ROOT}/CONSOLA.TTF").CreateFont(11, FontStyle.Bold);
+		private Font Font { get; set; } = null;
 
 		public MqttBackgroundService(IServiceProvider serviceProvider)
 		{
@@ -38,7 +43,18 @@ namespace WebServer.Service
 				_boundingBoxRepository = scope.ServiceProvider.GetRequiredService<IBoundingBoxRepository>();
 				_eventVideoRepository = scope.ServiceProvider.GetRequiredService<IEventVideoRepository>();
 
+				Font = new FontCollection().Add($"{ROOT}/CONSOLA.TTF").CreateFont(11, FontStyle.Bold);
+
+				Models.Append(YoloV8Predictor.Create($"{ROOT}/models/coco.onnx", useCuda: true));
+				Models.Append(YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" }, useCuda: true));
+
 				var mqttFactory = new MqttFactory();
+				AckSender = mqttFactory.CreateMqttClient();
+				var options = new MqttClientOptionsBuilder()
+					.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
+					.Build();
+				await AckSender.ConnectAsync(options, CancellationToken.None);
+
 				MqttClient = mqttFactory.CreateMqttClient();
 				MqttClient.ApplicationMessageReceivedAsync += async e =>
 				{
@@ -65,19 +81,16 @@ namespace WebServer.Service
 								}
 							}
 
-							var modelPath = string.Empty;
-							string[] s = null;
+							IPredictor model = null;
 							switch (request.Model)
 							{
 								case "coco":
-									modelPath = $"{ROOT}/models/coco.onnx";
+									model = Models[0];
 									break;
 								case "fire":
-									modelPath = $"{ROOT}/models/fire.onnx";
-									s = new string[] { "fire", "smoke" };
+									model = Models[1];
 									break;
 							}
-							using var model = YoloV8Predictor.Create(modelPath, labels: s, useCuda: true);
 
 							using var input = Image.Load(inputImagePath);
 							if (model == null)
@@ -104,9 +117,9 @@ namespace WebServer.Service
 								var width = (int)Math.Min(originalImageWidth - x, prediction.Rectangle.Width);
 								var height = (int)Math.Min(originalImageHeight - y, prediction.Rectangle.Height);
 								var text = $"{prediction.Label.Name}: {prediction.Score}";
-								var size = TextMeasurer.Measure(text, new TextOptions(FONT));
+								var size = TextMeasurer.Measure(text, new TextOptions(Font));
 								input.Mutate(d => d.Draw(Pens.Solid(Color.Yellow, 2), new Rectangle(x, y, width, height)));
-								input.Mutate(d => d.DrawText(new TextOptions(FONT) { Origin = new Point(x, (int)(y - size.Height - 1)) }, text, Color.Yellow));
+								input.Mutate(d => d.DrawText(new TextOptions(Font) { Origin = new Point(x, (int)(y - size.Height - 1)) }, text, Color.Yellow));
 								var boundingBox = new BoundingBoxDTO
 								{
 									X = x,
@@ -135,19 +148,11 @@ namespace WebServer.Service
 								Id = createdEventDTO.Id,
 								CameraId = createdEventDTO.CameraId
 							});
-							using (var mqttClient = mqttFactory.CreateMqttClient())
-							{
-								var mqttClientOptions = new MqttClientOptionsBuilder()
-									.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
-									.Build();
-								await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
-								var applicationMessage = new MqttApplicationMessageBuilder()
-									.WithTopic("event/create")
-									.WithPayload(createdEvent)
-									.Build();
-								await mqttClient.PublishAsync(applicationMessage, CancellationToken.None);
-								await mqttClient.DisconnectAsync();
-							}
+							var applicationMessage = new MqttApplicationMessageBuilder()
+								.WithTopic("event/create")
+								.WithPayload(createdEvent)
+								.Build();
+							await AckSender.PublishAsync(applicationMessage, CancellationToken.None);
 
 							foreach (var boundingBox in boundingBoxes)
 							{
