@@ -13,6 +13,7 @@ namespace Models
 		public string? UserId { get; set; }
 		public int CameraId { get; set; }
 		public string? Path { get; set; }
-		public IEnumerable<BoundingBoxDTO> BoundingBoxes { get; set; } = Enumerable.Empty<BoundingBoxDTO>();
+		public IEnumerable<BoundingBoxDTO> BoundingBoxes { get; set; }
+		public int EventVideoId { get; set; }
 	}
 }

@@ -34,6 +34,7 @@ builder.Services.AddSyncfusionBlazor();
 builder.Services.AddScoped<ICameraRepository, CameraRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IBoundingBoxRepository, BoundingBoxRepository>();
+builder.Services.AddScoped<IEventVideoRepository, EventVideoRepository>();
 builder.Services.AddHostedService<MqttBackgroundService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

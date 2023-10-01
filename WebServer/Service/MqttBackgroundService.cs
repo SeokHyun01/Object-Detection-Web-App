@@ -6,6 +6,11 @@ using SixLabors.Fonts;
 using SixLabors.ImageSharp.Drawing.Processing;
 using Models;
 using Business.Repository.IRepository;
+using System.Globalization;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Diagnostics;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Business.Repository;
 
 namespace WebServer.Service
 {
@@ -14,6 +19,7 @@ namespace WebServer.Service
 		private readonly IServiceProvider _serviceProvider;
 		private IEventRepository? _eventRepositroy = null;
 		private IBoundingBoxRepository? _boundingBoxRepository = null;
+		private IEventVideoRepository? _eventVideoRepository = null;
 		private IMqttClient? MqttClient { get; set; } = null;
 
 		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
@@ -30,6 +36,7 @@ namespace WebServer.Service
 			{
 				_eventRepositroy = scope.ServiceProvider.GetRequiredService<IEventRepository>();
 				_boundingBoxRepository = scope.ServiceProvider.GetRequiredService<IBoundingBoxRepository>();
+				_eventVideoRepository = scope.ServiceProvider.GetRequiredService<IEventVideoRepository>();
 
 				var mqttFactory = new MqttFactory();
 				MqttClient = mqttFactory.CreateMqttClient();
@@ -51,16 +58,28 @@ namespace WebServer.Service
 							string inputImagePath = string.Empty;
 							using (var stream = new MemoryStream(image))
 							{
-								inputImagePath = Path.Combine(ROOT, "redetections", $"{request.Date}_{request.UserId}_{request.CameraId}.jpeg");
+								inputImagePath = Path.Combine(ROOT, "images", $"{request.Date}_{request.UserId}_{request.CameraId}.jpeg");
 								using (var fileStream = new FileStream(inputImagePath, FileMode.Create))
 								{
 									await stream.CopyToAsync(fileStream);
 								}
 							}
 
-                            using var model = YoloV8Predictor.Create($"{ROOT}/models/yolov8l.onnx");
-                            // using var model = YoloV8Predictor.Create($"{ROOT}/models/yolov8l.onnx", useCuda: true);
-                            using var input = Image.Load(inputImagePath);
+							var modelPath = string.Empty;
+							string[] s = null;
+							switch (request.Model)
+							{
+								case "coco":
+									modelPath = "{ROOT}/models/coco.onnx";
+									break;
+								case "fire":
+									modelPath = "{ROOT}/models/fire.onnx";
+									s = new string[] { "fire", "smoke" };
+									break;
+							}
+							using var model = YoloV8Predictor.Create(modelPath, labels: s);
+
+							using var input = Image.Load(inputImagePath);
 							if (model == null)
 							{
 								throw new ArgumentNullException(nameof(model));
@@ -109,6 +128,7 @@ namespace WebServer.Service
 								CameraId = request.CameraId,
 								Path = eventImagePath
 							};
+
 							var createdEventDTO = await _eventRepositroy.Create(eventDTO);
 
 							foreach (var boundingBox in boundingBoxes)
@@ -124,6 +144,87 @@ namespace WebServer.Service
 							if (File.Exists(inputImagePath))
 							{
 								File.Delete(inputImagePath);
+							}
+
+						} else if (message.Topic == "event/video/create")
+						{
+							var payload = e.ApplicationMessage.PayloadSegment;
+
+							var request = JsonSerializer.Deserialize<CreateEventVideoDTO>(payload);
+							if (request == null)
+							{
+								return;
+							}
+							var eventDTOs = (await _eventRepositroy.GetAll(request.EventIds)).ToList();
+							if (!eventDTOs.Any())
+							{
+								return;
+							}
+
+							var imagePaths = new List<string>();
+							foreach (var eventDTO in eventDTOs)
+							{
+								if (!string.IsNullOrEmpty(eventDTO.Path))
+								{
+									imagePaths.Add(eventDTO.Path);
+								}
+							}
+
+							if (imagePaths.Any())
+							{
+								var identifier = Guid.NewGuid().ToString();
+								for (int i = 0; i < imagePaths.Count; i++)
+								{
+									var destinationPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", $"{identifier}_{i + 1}.jpeg");
+									File.Copy(imagePaths[i], destinationPath);
+									//if (File.Exists(imagePaths[i]))
+									//{
+									//	File.Delete(imagePaths[i]);
+									//}
+								}
+
+								var videoPath = $"{Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "videos", $"{request.UserId}_{Guid.NewGuid()}")}.mp4";
+								var args = $"-framerate 1 -i {Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", identifier)}_%d.jpeg -c:v libx264 -r 30 -pix_fmt yuv420p {videoPath}";
+								var ffMpeg = new Process
+								{
+									StartInfo = new ProcessStartInfo
+									{
+										FileName = "ffmpeg",
+										Arguments = args,
+										UseShellExecute = false,
+										RedirectStandardOutput = true,
+										CreateNoWindow = false,
+										RedirectStandardError = true
+									},
+									EnableRaisingEvents = true
+								};
+								ffMpeg.Start();
+
+								var processOutput = string.Empty;
+								while ((processOutput = ffMpeg.StandardError.ReadLine()) != null)
+								{
+									Console.WriteLine(processOutput);
+								}
+
+								var createdVideoDTO = await _eventVideoRepository.Create(new EventVideoDTO
+								{
+									Path = videoPath
+								});
+
+								foreach (var eventDTO in eventDTOs)
+								{
+									eventDTO.EventVideoId = createdVideoDTO.Id;
+									await _eventRepositroy.Update(eventDTO);
+								}
+
+								for (int i = 0; i < imagePaths.Count; i++)
+								{
+									var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", $"{identifier}_{i + 1}.png");
+									if (File.Exists(filePath))
+									{
+										File.Delete(filePath);
+									}
+								}
 							}
 						}
 					});

@@ -1,0 +1,33 @@
+﻿@inject NavigationManager _navigationManager
+
+
+@code {
+	[CascadingParameter]
+	public Task<AuthenticationState> AuthenticationState { get; set; }
+
+
+	protected override async Task OnInitializedAsync()
+	{
+		var authState = await AuthenticationState;
+
+		if (!authState.User.Identity.IsAuthenticated)
+		{
+			var returnUrl = _navigationManager.ToBaseRelativePath(_navigationManager.Uri);
+			if (string.IsNullOrEmpty(returnUrl))
+			{
+				_navigationManager.NavigateTo("identity/account/login");
+			}
+			else
+			{
+				_navigationManager.NavigateTo($"identity/account/login?returnUrl=/{returnUrl}", true);
+			}
+		}
+		else
+		{
+			if (!authState.User.IsInRole(SD.ROLE_CLIENT))
+			{
+				_navigationManager.NavigateTo("denied");
+			}
+		}
+	}
+}

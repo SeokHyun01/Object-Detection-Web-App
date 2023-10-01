@@ -68,7 +68,7 @@ namespace Business.Repository
 			}
 		}
 
-		public async ValueTask<CameraDTO> Get(int id)
+		public async ValueTask<CameraDTO?> Get(int id)
 		{
 			try
 			{
@@ -77,7 +77,7 @@ namespace Business.Repository
 				{
 					return _mapper.Map<Camera, CameraDTO>(obj);
 				}
-				return new CameraDTO();
+				return null;
 
 			}
 			catch (Exception ex)
@@ -110,7 +110,7 @@ namespace Business.Repository
 					await _db.SaveChangesAsync();
 					return _mapper.Map<Camera, CameraDTO>(objFromDb);
 				}
-				return null;
+				return objDTO;
 
 			} catch (Exception ex)
 			{

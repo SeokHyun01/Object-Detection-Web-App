@@ -82,12 +82,10 @@ else
 	protected override async Task OnInitializedAsync()
 	{
 		var authState = await AuthenticationState;
-		if (!authState.User.Identity.IsAuthenticated)
+		if (authState.User.Identity.IsAuthenticated && authState.User.IsInRole(SD.ROLE_CLIENT))
 		{
-			var uri = new Uri(_navigationManager.Uri);
-			_navigationManager.NavigateTo($"/identity/account/login?returnUrl={uri.LocalPath}", forceLoad: true);
+			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 		}
-		User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 	}
 
 	private async ValueTask getCameras(string userId)

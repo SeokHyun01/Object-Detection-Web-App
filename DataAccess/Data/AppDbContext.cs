@@ -19,5 +19,6 @@ namespace DataAccess.Data
 		public DbSet<Event> Events { get; set; }
 		public DbSet<BoundingBox> BoundingBoxes { get; set; }
 		public DbSet<AppUser> AppUsers { get; set; }
+		public DbSet<EventVideo> EventVideos { get; set; }
 	}
 }
