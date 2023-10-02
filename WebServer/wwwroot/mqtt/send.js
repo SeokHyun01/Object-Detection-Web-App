@@ -122,6 +122,10 @@ function disconncet_mqtt() {
     if (client != null && client.isConnected()) {
         if (list.length > 0) {
             send_list();
+            
+            list = [];
+            count = 1;
+            prev_time = 0;
         }
         client.disconnect();
     }
