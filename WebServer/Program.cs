@@ -54,7 +54,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 var provider = new FileExtensionContentTypeProvider();
-provider.Mappings[".onnx"] = "application/octet-stream";
+provider.Mappings[".tflite"] = "application/octet-stream";
 app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = provider });
 app.UseStaticFiles();
 
