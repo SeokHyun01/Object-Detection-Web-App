@@ -62,8 +62,8 @@
 			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 
 			await _jsRuntime.InvokeVoidAsync("start_video", "video");
-			await _jsRuntime.InvokeVoidAsync("mqtt", User.Id, CameraId);
 			await _jsRuntime.InvokeVoidAsync("detect");
+			await _jsRuntime.InvokeVoidAsync("mqtt", User.Id, CameraId);
 		}
 	}
 
