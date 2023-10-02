@@ -165,9 +165,9 @@ else
 
 			// Etc.
 			@* await getCamera(CameraId);
-			await _jsRuntime.InvokeVoidAsync("connect_mqtt_client", User.Id, CameraId);
+			await _jsRuntime.InvokeVoidAsync("connect_mqtt_client", User.Id, CameraId); *@
 			await _jsRuntime.InvokeVoidAsync("start_video", "video");
-			await _jsRuntime.InvokeVoidAsync("execute"); *@
+			@* await _jsRuntime.InvokeVoidAsync("execute"); *@
 		}
 	}
 
