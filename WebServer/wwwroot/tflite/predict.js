@@ -37,9 +37,9 @@ function predict() {
         const ctx = canvas.getContext("2d", { willReadFrequently: true });
         ctx.drawImage(flippedCanvas, 0, 0, canvas.width, canvas.height);
        
-        if (client != null && client.isConnected()) {
-            sendImage(canvas);
-        }
+        if (model_name == "face" && boxes.length > 0) draw_blur(ctx, boxes);
+
+        if (client != null && client.isConnected()) sendImage(canvas);
 
         // 현재 시간 표시
         ctx.font = "20px Arial";
