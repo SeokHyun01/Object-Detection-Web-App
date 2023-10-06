@@ -54,16 +54,14 @@ namespace Business.Repository
 				File.Delete(path);
 			}
 			_db.EventVideos.Remove(video);
-
 			await _db.SaveChangesAsync();
 
-			var objs = _db.Events.Where(x => x.EventVideoId == id);
+			var objs = await _db.Events.Where(x => x.EventVideoId == id).ToListAsync();
 			foreach (var obj in objs)
 			{
 				var boundingBoxes = _db.BoundingBoxes.Where(x => x.EventId == obj.Id);
 				_db.BoundingBoxes.RemoveRange(boundingBoxes);
 				_db.Events.Remove(obj);
-
 				await _db.SaveChangesAsync();
 			}
 		}
