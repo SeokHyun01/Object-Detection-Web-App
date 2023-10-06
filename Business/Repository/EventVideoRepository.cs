@@ -49,7 +49,7 @@ namespace Business.Repository
 				return 0;
 			}
 			var path = video.Path;
-			if (string.IsNullOrEmpty(path) && File.Exists(path))
+			if (!string.IsNullOrEmpty(path) && File.Exists(path))
 			{
 				File.Delete(path);
 			}
