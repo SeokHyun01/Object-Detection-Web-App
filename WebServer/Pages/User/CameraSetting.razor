@@ -15,7 +15,7 @@
 		{
 			<option value="@item">@item</option>
 		}
-	</select>	
+	</select>
 
 	<button style="margin-left: 10px; margin-top: -5px; height: 1.25em;  line-height: 5px;  background-color: yellow;" @onclick="Bluetooth" id="bluetooth">connect bluetooth</button>
 </div>
@@ -24,23 +24,14 @@
 	<h6 style="margin-right: 10px;">Confidence Threshold</h6>
 	<input style="width: 200px; height: 1.25em; margin-top: -5px;" type="text" id="conf" value="0.3" />
 	<button style="margin-left: 10px; margin-top: -5px; height: 1.25em;  line-height: 5px;"
-	@onclick="ChangeConfidenceThreshold" id="changeConfidence">change</button>
+			@onclick="ChangeConfidenceThreshold" id="changeConfidence">
+		change
+	</button>
 </div>
 
 <canvas></canvas>
 <video id="video" width="224" height="224"></video>
-
-@* @if (IsLoading)
-{
-	<p class="placeholder-glow">
-		<span class="placeholder col-10 bg-primary placeholder-lg"></span>
-		<span class="placeholder col-12 bg-primary placeholder-lg"></span>
-		<span class="placeholder col-6 bg-primary placeholder-lg"></span>
-	</p>
-} else
-{
-	<h3>CameraSetting</h3>
-} *@
+<video id="peer_video"></video>
 
 
 @code {
@@ -48,7 +39,10 @@
 	public Task<AuthenticationState> AuthenticationState { get; set; }
 	private IdentityUser? User { get; set; } = null;
 
-	@* private bool IsLoading { get; set; } = true; *@
+	private string ConnectionId { get; set; } = string.Empty;
+	private string RoomName { get; set; } = string.Empty;
+
+	private HubConnection? RTCHubConnection { get; set; } = null;
 
 	[Parameter]
 	public int CameraId { get; set; }
@@ -61,7 +55,56 @@
 			var authState = await AuthenticationState;
 			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 
-			await _jsRuntime.InvokeVoidAsync("start_video", "video");
+			// SignalR 클라이언트 빌드
+			RTCHubConnection = new HubConnectionBuilder()
+			.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), (opts) =>
+			{
+				opts.HttpMessageHandlerFactory = (message) =>
+				{
+					if (message is HttpClientHandler clientHandler)
+					{
+						// SSL 무시
+						clientHandler.ServerCertificateCustomValidationCallback +=
+							(sender, certificate, chain, sslPolicyErrors) => { return true; };
+					}
+					return message;
+				};
+			}).Build();
+
+			RTCHubConnection.On<string>("OnConnected", async connectionId =>
+			{
+				ConnectionId = connectionId;
+				await _jsRuntime.InvokeVoidAsync("init_rtc", ConnectionId);
+			});
+
+			RTCHubConnection.On("Welcome", async () =>
+			{
+				var offer = await _jsRuntime.InvokeAsync<string>("send_offer");
+				await RTCHubConnection.SendAsync("SendOffer", offer, RoomName);
+			});
+
+			RTCHubConnection.On<string>("ReceiveOffer", async receivedOffer =>
+			{
+				var answer = await _jsRuntime.InvokeAsync<string>("send_answer", receivedOffer);
+				await RTCHubConnection.SendAsync("SendAnswer", answer, RoomName);
+			});
+
+			RTCHubConnection.On<string>("ReceiveAnswer", async receivedAnswer =>
+			{
+				await _jsRuntime.InvokeVoidAsync("receive_answer", receivedAnswer);
+			});
+
+			RTCHubConnection.On<string>("ReceiveIce", async receivedIce =>
+			{
+				await _jsRuntime.InvokeVoidAsync("receive_ice", receivedIce);
+			});
+
+			await RTCHubConnection.StartAsync();
+
+			RoomName = $"{CameraId.ToString()}";
+			await RTCHubConnection.SendAsync("JoinRoom", RoomName);
+
+			await _jsRuntime.InvokeVoidAsync("start_video", "video", "none");
 			await _jsRuntime.InvokeVoidAsync("detect");
 			await _jsRuntime.InvokeVoidAsync("mqtt", User.Id, CameraId);
 		}
@@ -71,9 +114,14 @@
 	{
 		try
 		{
+			if (RTCHubConnection != null)
+			{
+				await RTCHubConnection.StopAsync();
+				await RTCHubConnection.DisposeAsync();
+			}
+
 			await _jsRuntime.InvokeVoidAsync("stop_video", "video");
 			await _jsRuntime.InvokeVoidAsync("unload");
-
 		}
 		catch (Exception ex)
 		{

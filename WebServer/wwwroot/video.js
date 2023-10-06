@@ -1,4 +1,4 @@
-async function start_video(src) {
+async function start_video(src, display = '') {
     if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         try {
             const stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -9,7 +9,7 @@ async function start_video(src) {
                 video.src = window.URL.createObjectURL(stream);
             }
             video.onloadedmetadata = _ => video.play();
-            video.style.display = `none`;
+            video.style.display = display;
         } catch (err) {
             console.log(err)
         }

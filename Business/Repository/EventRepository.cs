@@ -41,16 +41,37 @@ namespace Business.Repository
 			}
 		}
 
-		public ValueTask<int> Delete(int id)
+		public async ValueTask<int> Delete(IEnumerable<EventDTO> events)
 		{
-			throw new NotImplementedException();
+			try
+			{
+				var objs = _mapper.Map<IEnumerable<EventDTO>, IEnumerable<Event>>(events);
+				if (objs.Any())
+				{
+					foreach (var obj in objs)
+					{
+						_db.BoundingBoxes.RemoveRange(obj.BoundingBoxes);
+					}
+					_db.Events.RemoveRange(objs);
+
+					return await _db.SaveChangesAsync();
+				}
+				return 0;
+
+			}
+			catch (Exception ex)
+			{
+				Console.WriteLine(ex.StackTrace);
+
+				throw;
+			}
 		}
 
 		public async ValueTask<IEnumerable<EventDTO>> GetAll(IEnumerable<int> ids)
 		{
 			if (ids.Any())
 			{
-				return _mapper.Map<IEnumerable<Event>, IEnumerable<EventDTO>>(_db.Events.Include(x => x.BoundingBoxes).Where(x => ids.Contains(x.Id)));
+				return _mapper.Map<IEnumerable<Event>, IEnumerable<EventDTO>>(_db.Events.Where(x => ids.Contains(x.Id)));
 			}
 			else
 			{
@@ -74,6 +95,11 @@ namespace Business.Repository
 				return _mapper.Map<Event, EventDTO>(objFromDb);
 			}
 			return objDTO;
+		}
+
+		public async ValueTask<IEnumerable<EventDTO>> GetAllByVideoId(int videoId)
+		{
+			return _mapper.Map<IEnumerable<Event>, IEnumerable<EventDTO>>(_db.Events.Include(u => u.BoundingBoxes).Where(x => x.EventVideoId == videoId));
 		}
 	}
 }

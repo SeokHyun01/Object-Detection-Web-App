@@ -3,6 +3,7 @@
 
 @attribute [Authorize(Roles = SD.ROLE_CLIENT)]
 
+@inject IEventRepository _eventRepository
 @inject IEventVideoRepository _eventVideoRepository
 @inject UserManager<IdentityUser> _userManager
 
@@ -42,7 +43,7 @@ else
 							</div>
 						</td>
 						<td>
-							<button type="button" class="btn btn-outline-danger">delete</button>
+							<button type="button" class="btn btn-outline-danger" @onclick="()=>OnEventDeleted(eventVideo)">delete</button>
 						</td>
 					</tr>
 				}
@@ -85,5 +86,14 @@ else
 
 		IsLoading = false;
 		StateHasChanged();
+	}
+
+	private async Task OnEventDeleted(EventVideoDTO eventVideo)
+	{
+		var events = await _eventRepository.GetAllByVideoId(eventVideo.Id);
+		await _eventVideoRepository.Delete(eventVideo.Id);
+		var count = await _eventRepository.Delete(events);
+
+		await getEventVideos(User.Id);
 	}
 }

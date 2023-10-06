@@ -39,7 +39,7 @@ builder.Services.AddHostedService<MqttBackgroundService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-builder.WebHost.UseUrls("http://*:8102;https://*:8103");
+//builder.WebHost.UseUrls("http://*:8102;https://*:8103");
 
 var app = builder.Build();
 

@@ -41,22 +41,30 @@ namespace Business.Repository
 			}
 		}
 
-		public ValueTask<int> Delete(int id)
+		public async ValueTask<int> Delete(int id)
 		{
-			throw new NotImplementedException();
+			var video = await _db.EventVideos.FirstOrDefaultAsync(x => x.Id == id);
+			if (video == null)
+			{
+				return 0;
+			}
+			var path = video.Path;
+			if (string.IsNullOrEmpty(path) && File.Exists(path))
+			{
+				File.Delete(path);
+			}
+			_db.EventVideos.Remove(video);
+
+			return await _db.SaveChangesAsync();
 		}
 
 		public async ValueTask<IEnumerable<EventVideoDTO>> GetAllByUserId(string userId)
 		{
 			try
 			{
-				var events = await _db.Events.Where(x => x.UserId == userId).ToListAsync();
-				var eventVideoIds = events.Select(e => e.EventVideoId).Distinct().ToList();
-				var eventVideos = await _db.EventVideos.Where(e => eventVideoIds.Contains(e.Id)).ToListAsync();
+                return _mapper.Map<IEnumerable<EventVideo>, IEnumerable<EventVideoDTO>>(_db.EventVideos.Where(x => x.UserId == userId));
 
-				return _mapper.Map<IEnumerable<EventVideo>, IEnumerable<EventVideoDTO>>(eventVideos);
-
-			} catch (Exception ex)
+            } catch (Exception ex)
 			{
 				Console.WriteLine(ex.StackTrace);
 

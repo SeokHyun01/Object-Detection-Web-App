@@ -10,5 +10,6 @@ namespace Models
 	{
 		public IEnumerable<int> EventIds { get; set; }
 		public string? UserId { get; set; }
+		public int CameraId { get; set; }
 	}
 }

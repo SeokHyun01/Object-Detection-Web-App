@@ -23,24 +23,27 @@ namespace WebServer.Hubs
 
 		public async ValueTask JoinRoom(string roomName)
 		{
-			if (!Rooms.ContainsKey(roomName))
+			try
 			{
-				Rooms[roomName] = new List<string>();
-			}
-			else
-			{
-				await Clients.Group(roomName).SendAsync("Welcome");
-			}
-
-			if (Rooms[roomName].Count < 3)
-			{
+				if (!Rooms.ContainsKey(roomName))
+				{
+					Rooms[roomName] = new List<string>();
+				}
+				if (Rooms[roomName].Count >= 3)
+				{
+					throw new Exception($"Room {roomName}: 정원 초과.");
+				}
 				Rooms[roomName].Add(Context.ConnectionId);
 				await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
 				_logger.LogInformation($"유저 {Context.ConnectionId}가 {roomName}에 입장하였습니다.");
+
+				await Clients.GroupExcept(roomName, Context.ConnectionId).SendAsync("Welcome");
+
 			}
-			else
+			catch (Exception ex)
 			{
-				throw new Exception($"{roomName}: 정원 초과.");
+				_logger.LogInformation(ex.Message);
+				_logger.LogError(ex.StackTrace);
 			}
 		}
 

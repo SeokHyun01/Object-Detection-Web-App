@@ -26,7 +26,7 @@ else
 					<th scope="col">#</th>
 					<th scope="col">camera</th>
 					<th scope="col">angle</th>
-					<th scope="col">detail</th>
+					<th scope="col">action</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -34,7 +34,7 @@ else
 				{
 					<tr>
 						<th scope="row">
-							<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/camera/{camera.Id}")><QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText></SfQRCodeGenerator>
+							<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/camera/setting/{camera.Id}")><QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText></SfQRCodeGenerator>
 						</th>
 						<td>
 							<div style="width: 18rem;">
@@ -45,18 +45,22 @@ else
 							<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
 						</td>
 						<td>
-							<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-primary">Goto</NavLink>
+							<div>
+								<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-primary mx-3">goto</NavLink>
+								<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">delete</button>
+							</div>
 						</td>
 					</tr>
 				}
 			</tbody>
 		</table>
-	} else
+	}
+	else
 	{
 		<p>Not found.</p>
 	}
 
-	<EditForm Model="@Camera" OnValidSubmit="CreateCamera">
+	<EditForm Model="@Camera" OnValidSubmit="OnCameraCreated">
 		<DataAnnotationsValidator />
 		<div class="input-group">
 			<InputText @bind-Value="Camera.Name" type="text" class="form-control" placeholder="set camera name" style="margin-right: 1rem;"></InputText>
@@ -135,19 +139,17 @@ else
 		}
 	}
 
-	private async Task CreateCamera()
+	private async Task OnCameraCreated()
 	{
-		try
-		{
-			Camera.UserId = User.Id;
-			await _cameraRepository.Create(Camera);
-			await getCameras(User.Id);
-		}
+		Camera.UserId = User.Id;
+		await _cameraRepository.Create(Camera);
+		await getCameras(User.Id);
+	}
 
-		catch (Exception ex)
-		{
-			Console.WriteLine(ex.StackTrace);
-		}
+	private async Task OnCameraDeleted(CameraDTO camera)
+	{
+		await _cameraRepository.Delete(camera.Id);
+		await getCameras(User.Id);
 	}
 
 	private async Task SetCameraAngle(ChangeEventArgs args, int id)

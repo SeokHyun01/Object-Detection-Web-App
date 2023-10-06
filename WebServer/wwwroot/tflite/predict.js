@@ -151,14 +151,18 @@ function get_date(){
 }
 
 // webRTC 실행할 때 사전에 이 메서드 실행 필요!!
-function set_webRTC() {
+function start_rtc() {
     stop_detect();
+    const video = document.getElementById('video');
+    video.style.display = ``;
 }
 
 // webRTC 종료가 다 되고 나서 이 메서드 실행 필요!!
-function set_detect() {
-    if (model_name == null) model_name = "none";
+function stop_rtc() {
+    if (model_name == null) model_name = 'none';
 
-    start_video("video");
+    const video = document.getElementById('video');
+    video.style.display = `none`;
+
     detect();
 }

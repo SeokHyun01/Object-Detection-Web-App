@@ -31,7 +31,7 @@ else
 			<tr>
 				<td>
 					<div style="width: 18rem;">
-						<video id="video"></video>
+						<video id="video" style="transform: scaleX(-1);"></video>
 					</div>
 				</td>
 				<td>
@@ -41,7 +41,7 @@ else
 		</tbody>
 	</table>
 
-	<canvas style="visibility: hidden"></canvas>
+	<video id="peer_video" style="transform: scaleX(-1);"></video>
 }
 
 
@@ -59,7 +59,7 @@ else
 
 	private IMqttClient? MqttClient { get; set; } = null;
 
-	private HubConnection? hubConnection = null;
+	private HubConnection? RTCHubConnection { get; set; } = null;
 	private string RoomName { get; set; } = string.Empty;
 	private string ConnectionId { get; set; } = string.Empty;
 
@@ -86,7 +86,6 @@ else
 			var mqttFactory = new MqttFactory();
 			MqttClient = mqttFactory.CreateMqttClient();
 
-			// Delegation
 			MqttClient.ApplicationMessageReceivedAsync += async e =>
 			{
 				var message = e.ApplicationMessage;
@@ -106,7 +105,6 @@ else
 				.Build();
 			await MqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
 
-			// Subscribe
 			var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
 				.WithTopicFilter(f => { f.WithTopic("camera/image"); })
 				.WithTopicFilter(f => { f.WithTopic("camera/update/angle/ack"); })
@@ -114,60 +112,58 @@ else
 
 			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
-			// RTC Signaling
-			//hubConnection = new HubConnectionBuilder()
-			//	.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), options =>
-			//	{
-			//		options.HttpMessageHandlerFactory = message =>
-			//		{
-			//			if (message is HttpClientHandler clientHandler)
-			//			{
-			//				clientHandler.ServerCertificateCustomValidationCallback +=
-			//					(sender, certificate, chain, sslPolicyErrors) => true;
-			//			}
-			//			return message;
-			//		};
-			//	})
-			//	.Build();
+			// SignalR 클라이언트 빌드
+			RTCHubConnection = new HubConnectionBuilder()
+			.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), (opts) =>
+			{
+				opts.HttpMessageHandlerFactory = (message) =>
+				{
+					if (message is HttpClientHandler clientHandler)
+					{
+						// SSL 무시
+						clientHandler.ServerCertificateCustomValidationCallback +=
+							(sender, certificate, chain, sslPolicyErrors) => { return true; };
+					}
+					return message;
+				};
+			}).Build();
 
-			//hubConnection.On<string>("OnConnected", async (senderId) =>
-			//{
-			//	ConnectionId = senderId;
-			//	await _jsRuntime.InvokeVoidAsync("initializeCamera", ConnectionId, User.Id, CameraId);
-			//});
+			RTCHubConnection.On<string>("OnConnected", async connectionId =>
+			{
+				ConnectionId = connectionId;
+				await _jsRuntime.InvokeVoidAsync("init_rtc", ConnectionId);
+			});
 
-			//hubConnection.On("Welcome", async () =>
-			//{
-			//	var offer = await _jsRuntime.InvokeAsync<string>("sendOffer");
-			//	await hubConnection.SendAsync("SendOffer", offer, RoomName);
-			//});
+			RTCHubConnection.On("Welcome", async () =>
+			{
+				var offer = await _jsRuntime.InvokeAsync<string>("send_offer");
+				await RTCHubConnection.SendAsync("SendOffer", offer, RoomName);
+			});
 
-			//hubConnection.On<string>("ReceiveOffer", async (receivedOffer) =>
-			//{
-			//	var answer = await _jsRuntime.InvokeAsync<string>("sendAnswer", receivedOffer);
-			//	await hubConnection.SendAsync("SendAnswer", answer, RoomName);
-			//});
+			RTCHubConnection.On<string>("ReceiveOffer", async receivedOffer =>
+			{
+				var answer = await _jsRuntime.InvokeAsync<string>("send_answer", receivedOffer);
+				await RTCHubConnection.SendAsync("SendAnswer", answer, RoomName);
+			});
 
-			//hubConnection.On<string>("ReceiveAnswer", async (receivedAnswer) =>
-			//{
-			//	await _jsRuntime.InvokeVoidAsync("receiveAnswer", receivedAnswer);
-			//});
+			RTCHubConnection.On<string>("ReceiveAnswer", async receivedAnswer =>
+			{
+				await _jsRuntime.InvokeVoidAsync("receive_answer", receivedAnswer);
+			});
 
-			//hubConnection.On<string>("ReceiveIce", async (receivedIce) =>
-			//{
-			//	await _jsRuntime.InvokeVoidAsync("receiveIce", receivedIce);
-			//});
+			RTCHubConnection.On<string>("ReceiveIce", async receivedIce =>
+			{
+				await _jsRuntime.InvokeVoidAsync("receive_ice", receivedIce);
+			});
 
-			//await hubConnection.StartAsync();
+			await RTCHubConnection.StartAsync();
 
-			//RoomName = $"room-{CameraId.ToString()}";
-			//await hubConnection.SendAsync("JoinRoom", RoomName);
+			RoomName = $"{CameraId.ToString()}";
+			await RTCHubConnection.SendAsync("JoinRoom", RoomName);
 
 			// Etc.
-			@* await getCamera(CameraId);
-			await _jsRuntime.InvokeVoidAsync("connect_mqtt_client", User.Id, CameraId); *@
+			await getCamera(CameraId);
 			await _jsRuntime.InvokeVoidAsync("start_video", "video");
-			@* await _jsRuntime.InvokeVoidAsync("execute"); *@
 		}
 	}
 
@@ -211,6 +207,17 @@ else
 
 	public async ValueTask DisposeAsync()
 	{
+		if (MqttClient != null && MqttClient.IsConnected)
+		{
+			await MqttClient.DisconnectAsync();
+		}
+
+		if (RTCHubConnection != null)
+		{
+			await RTCHubConnection.StopAsync();
+			await RTCHubConnection.DisposeAsync();
+		}
+
 		await _jsRuntime.InvokeVoidAsync("stop_video", "video");
 	}
 }
