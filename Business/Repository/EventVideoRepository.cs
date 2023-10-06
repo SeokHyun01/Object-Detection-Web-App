@@ -55,11 +55,15 @@ namespace Business.Repository
 			}
 			_db.EventVideos.Remove(video);
 
+			await _db.SaveChangesAsync();
+
 			var objs = _db.Events.Where(x => x.EventVideoId == id);
 			foreach (var obj in objs)
 			{
 				var boundingBoxes = _db.BoundingBoxes.Where(x => x.EventId == obj.Id);
 				_db.BoundingBoxes.RemoveRange(boundingBoxes);
+
+				await _db.SaveChangesAsync();
 			}
 			_db.Events.RemoveRange(objs);
 
