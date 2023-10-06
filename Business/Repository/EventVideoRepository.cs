@@ -41,12 +41,12 @@ namespace Business.Repository
 			}
 		}
 
-		public async ValueTask<int> Delete(int id)
+		public async ValueTask Delete(int id)
 		{
 			var video = await _db.EventVideos.FirstOrDefaultAsync(x => x.Id == id);
 			if (video == null)
 			{
-				return 0;
+				return;
 			}
 			var path = video.Path;
 			if (!string.IsNullOrEmpty(path) && File.Exists(path))
@@ -62,12 +62,10 @@ namespace Business.Repository
 			{
 				var boundingBoxes = _db.BoundingBoxes.Where(x => x.EventId == obj.Id);
 				_db.BoundingBoxes.RemoveRange(boundingBoxes);
+				_db.Events.Remove(obj);
 
 				await _db.SaveChangesAsync();
 			}
-			_db.Events.RemoveRange(objs);
-
-			return await _db.SaveChangesAsync();
 		}
 
 		public async ValueTask<IEnumerable<EventVideoDTO>> GetAllByUserId(string userId)
