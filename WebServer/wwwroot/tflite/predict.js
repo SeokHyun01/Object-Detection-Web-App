@@ -115,7 +115,7 @@ function change_model(name) {
     stop_detect();
 
     model_name = name;
-    start_video("video");
+    start_video("video", 'none');
     detect();
     mqtt(user_id, camera_id);
 }

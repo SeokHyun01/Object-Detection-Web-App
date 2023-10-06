@@ -41,33 +41,6 @@ namespace Business.Repository
 			}
 		}
 
-		public async ValueTask<int> Delete(IEnumerable<EventDTO> events)
-		{
-			try
-			{
-				var objs = _mapper.Map<IEnumerable<EventDTO>, IEnumerable<Event>>(events);
-				if (objs.Any())
-				{
-					foreach (var obj in objs)
-					{
-						var boundingBoxes = _db.BoundingBoxes.Where(x => x.EventId == obj.Id);
-						_db.BoundingBoxes.RemoveRange(boundingBoxes);
-					}
-					_db.Events.RemoveRange(objs);
-
-					return await _db.SaveChangesAsync();
-				}
-				return 0;
-
-			}
-			catch (Exception ex)
-			{
-				Console.WriteLine(ex.StackTrace);
-
-				throw;
-			}
-		}
-
 		public async ValueTask<IEnumerable<EventDTO>> GetAll(IEnumerable<int> ids)
 		{
 			if (ids.Any())

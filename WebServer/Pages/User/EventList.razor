@@ -90,10 +90,7 @@ else
 
 	private async Task OnEventDeleted(EventVideoDTO eventVideo)
 	{
-		var events = await _eventRepository.GetAllByVideoId(eventVideo.Id);
 		await _eventVideoRepository.Delete(eventVideo.Id);
-		var count = await _eventRepository.Delete(events);
-
 		await getEventVideos(User.Id);
 	}
 }

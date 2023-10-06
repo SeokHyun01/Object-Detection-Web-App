@@ -10,7 +10,6 @@ namespace Business.Repository.IRepository
 	public interface IEventRepository
 	{
 		ValueTask<EventDTO> Create(EventDTO objDTO);
-		ValueTask<int> Delete(IEnumerable<EventDTO> events);
 		ValueTask<IEnumerable<EventDTO>> GetAll(IEnumerable<int> ids);
 		ValueTask<IEnumerable<EventDTO>> GetAllByUserId(string userId);
 		ValueTask<IEnumerable<EventDTO>> GetAllByVideoId(int videoId);
