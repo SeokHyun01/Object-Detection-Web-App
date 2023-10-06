@@ -50,7 +50,8 @@ namespace Business.Repository
 				{
 					foreach (var obj in objs)
 					{
-						_db.BoundingBoxes.RemoveRange(obj.BoundingBoxes);
+						var boundingBoxes = _db.BoundingBoxes.Where(x => x.EventId == obj.Id);
+						_db.BoundingBoxes.RemoveRange(boundingBoxes);
 					}
 					_db.Events.RemoveRange(objs);
 
@@ -99,7 +100,7 @@ namespace Business.Repository
 
 		public async ValueTask<IEnumerable<EventDTO>> GetAllByVideoId(int videoId)
 		{
-			return _mapper.Map<IEnumerable<Event>, IEnumerable<EventDTO>>(_db.Events.Include(u => u.BoundingBoxes).Where(x => x.EventVideoId == videoId));
+			return _mapper.Map<IEnumerable<Event>, IEnumerable<EventDTO>>(_db.Events.Where(x => x.EventVideoId == videoId));
 		}
 	}
 }
