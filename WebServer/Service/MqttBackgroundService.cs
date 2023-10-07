@@ -25,8 +25,8 @@ namespace WebServer.Service
 		private IMqttClient? MqttClient { get; set; } = null;
 		private IMqttClient? AckSender { get; set; } = null;
 
-		//private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
-		private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
+		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
+		//private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
 
 		public MqttBackgroundService(IServiceProvider serviceProvider)
 		{
@@ -43,11 +43,11 @@ namespace WebServer.Service
 
 				var font = new FontCollection().Add($"{ROOT}/CONSOLA.TTF").CreateFont(11, FontStyle.Bold);
 
-				//using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx", useCuda: true);
-				//using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" }, useCuda: true);
+				using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx", useCuda: true);
+				using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" }, useCuda: true);
 
-				using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx");
-				using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" });
+				//using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx");
+				//using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" });
 
 				var mqttFactory = new MqttFactory();
 				AckSender = mqttFactory.CreateMqttClient();
