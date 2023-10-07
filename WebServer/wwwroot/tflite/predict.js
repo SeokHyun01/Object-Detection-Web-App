@@ -1,4 +1,4 @@
-let model_name = "none"
+let model_name = "none";
 let intervalId;
 let FPS = 15;
 let frameInterval = 1000 / FPS;
@@ -150,19 +150,16 @@ function get_date(){
     return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
 }
 
-// webRTC 실행할 때 사전에 이 메서드 실행 필요!!
 function start_rtc() {
     stop_detect();
-    const video = document.getElementById('video');
-    video.style.display = ``;
+    start_video('video');
 }
 
-// webRTC 종료가 다 되고 나서 이 메서드 실행 필요!!
 function stop_rtc() {
-    if (model_name == null) model_name = 'none';
-
-    const video = document.getElementById('video');
-    video.style.display = `none`;
-
+    if (model_name == null) {
+        model_name = 'none';
+    }
+    stop_video('video');
+    start_video('video', 'none');
     detect();
 }

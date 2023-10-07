@@ -29,13 +29,18 @@ namespace WebServer.Hubs
 				{
 					Rooms[roomName] = new List<string>();
 				}
-				if (Rooms[roomName].Count >= 3)
+				if (Rooms[roomName].Count > 2)
 				{
 					throw new Exception($"Room {roomName}: 정원 초과.");
 				}
 				Rooms[roomName].Add(Context.ConnectionId);
 				await Groups.AddToGroupAsync(Context.ConnectionId, roomName);
-				_logger.LogInformation($"유저 {Context.ConnectionId}가 {roomName}에 입장하였습니다.");
+				_logger.LogInformation($"유저 {Context.ConnectionId}가 Room {roomName}에 입장하였습니다.");
+
+				if (Rooms[roomName].Count == 2)
+				{
+					await Clients.Group(roomName).SendAsync("OnEnabledRTC");
+				}
 
 				await Clients.GroupExcept(roomName, Context.ConnectionId).SendAsync("Welcome");
 
@@ -56,14 +61,17 @@ namespace WebServer.Hubs
 				if (room.Value.Contains(value))
 				{
 					var roomName = room.Key;
-					room.Value.Remove(value);
+
+					await Clients.Group(roomName).SendAsync("OnDisabledRTC");
+
 					await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
-					_logger.LogInformation($"유저 {Context.ConnectionId}가 {roomName}에서 퇴장하였습니다.");
+					room.Value.Remove(value);
+					_logger.LogInformation($"유저 {Context.ConnectionId}가 Room {roomName}에서 퇴장하였습니다.");
 
 					if (room.Value.Count == 0)
 					{
 						Rooms.Remove(roomName);
-						_logger.LogInformation($"{roomName}이 사라졌습니다.");
+						_logger.LogInformation($"Room {roomName}이 사라졌습니다.");
 					}
 				}
 			}
@@ -92,7 +100,7 @@ namespace WebServer.Hubs
 			{
 				var group = Clients.GroupExcept(roomName, senderId);
 				await group.SendAsync("ReceiveIce", ice);
-				_logger.LogInformation($"{roomName}의 유저 {senderId}가 ICE를 전송하였습니다.");
+				_logger.LogInformation($"Room {roomName}의 유저 {senderId}가 ICE를 전송하였습니다.");
 			}
 		}
 	}
