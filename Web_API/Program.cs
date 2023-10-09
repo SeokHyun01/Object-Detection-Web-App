@@ -83,7 +83,7 @@ builder.Services.AddCors(o => o.AddPolicy("Development", builder =>
 	builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
 }));
 
-builder.WebHost.UseUrls("http://*:8094;https://*:8095");
+//builder.WebHost.UseUrls("http://*:8094;https://*:8095");
 
 builder.Services.AddResponseCompression(options =>
 {
