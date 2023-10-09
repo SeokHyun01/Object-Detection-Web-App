@@ -122,6 +122,26 @@ namespace DataAccess.Migrations
                     b.ToTable("EventVideos");
                 });
 
+            modelBuilder.Entity("DataAccess.FCMInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("DeviceNickname")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FCMInfos");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -325,9 +345,6 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("DataAccess.AppUser", b =>
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("longtext");
 
                     b.HasDiscriminator().HasValue("AppUser");
                 });

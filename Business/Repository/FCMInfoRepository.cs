@@ -12,30 +12,30 @@ using System.Threading.Tasks;
 
 namespace Business.Repository
 {
-	public class CameraRepository : ICameraRepository
+	public class FCMInfoRepository : IFCMInfoRepository
 	{
 		private readonly AppDbContext _db;
 		private readonly IMapper _mapper;
 
-		public CameraRepository(AppDbContext db, IMapper mapper)
+		public FCMInfoRepository(AppDbContext db, IMapper mapper)
 		{
 			_db = db;
 			_mapper = mapper;
 		}
 
-		public async ValueTask<CameraDTO> Create(CameraDTO objDTO)
+		public async ValueTask<FCMInfoDTO> Create(FCMInfoDTO objDTO)
 		{
 			try
 			{
-				if (string.IsNullOrEmpty(objDTO.Name))
+				if (string.IsNullOrEmpty(objDTO.DeviceNickname))
 				{
-					objDTO.Name = "untitled";
+					objDTO.DeviceNickname = "untitled";
 				}
-				var obj = _mapper.Map<CameraDTO, Camera>(objDTO);
-				var createdObj = _db.Cameras.Add(obj);
+				var obj = _mapper.Map<FCMInfoDTO, FCMInfo>(objDTO);
+				var createdObj = _db.FCMInfos.Add(obj);
 				await _db.SaveChangesAsync();
 
-				return _mapper.Map<Camera, CameraDTO>(createdObj.Entity);
+				return _mapper.Map<FCMInfo, FCMInfoDTO>(createdObj.Entity);
 
 			}
 			catch (Exception ex)
@@ -51,10 +51,10 @@ namespace Business.Repository
 		{
 			try
 			{
-				var obj = await _db.Cameras.FirstOrDefaultAsync(x => x.Id == id);
+				var obj = await _db.FCMInfos.FirstOrDefaultAsync(x => x.Id == id);
 				if (obj != null)
 				{
-					_db.Cameras.Remove(obj);
+					_db.FCMInfos.Remove(obj);
 
 					return await _db.SaveChangesAsync();
 				}
@@ -70,14 +70,14 @@ namespace Business.Repository
 			}
 		}
 
-		public async ValueTask<CameraDTO?> Get(int id)
+		public async ValueTask<FCMInfoDTO?> Get(int id)
 		{
 			try
 			{
-				var obj = await _db.Cameras.FirstOrDefaultAsync(x => x.Id == id);
+				var obj = await _db.FCMInfos.FirstOrDefaultAsync(x => x.Id == id);
 				if (obj != null)
 				{
-					return _mapper.Map<Camera, CameraDTO>(obj);
+					return _mapper.Map<FCMInfo, FCMInfoDTO>(obj);
 				}
 				return null;
 
@@ -91,32 +91,29 @@ namespace Business.Repository
 			}
 		}
 
-		public async ValueTask<IEnumerable<CameraDTO>> GetAll()
+		public async ValueTask<IEnumerable<FCMInfoDTO>> GetAllByUserId(string userId)
 		{
-			return _mapper.Map<IEnumerable<Camera>, IEnumerable<CameraDTO>>(_db.Cameras);
+			return _mapper.Map<IEnumerable<FCMInfo>, IEnumerable<FCMInfoDTO>>(_db.FCMInfos.Where(x => x.UserId == userId));
 		}
 
-		public async ValueTask<IEnumerable<CameraDTO>> GetAllByUserId(string id)
-		{
-			return _mapper.Map<IEnumerable<Camera>, IEnumerable<CameraDTO>>(_db.Cameras.Where(x => x.UserId == id));
-		}
-
-		public async ValueTask<CameraDTO> Update(CameraDTO objDTO)
+		public async ValueTask<FCMInfoDTO> Update(FCMInfoDTO objDTO)
 		{
 			try
 			{
-				var objFromDb = await _db.Cameras.FirstOrDefaultAsync(x => x.Id == objDTO.Id);
+				var objFromDb = await _db.FCMInfos.FirstOrDefaultAsync(x => x.Id == objDTO.Id);
 				if (objFromDb != null)
 				{
-					objFromDb.Angle = objDTO.Angle;
-					_db.Cameras.Update(objFromDb);
+					objFromDb.DeviceNickname = objDTO.DeviceNickname;
+					objFromDb.Token = objDTO.Token;
+					_db.FCMInfos.Update(objFromDb);
 					await _db.SaveChangesAsync();
 
-					return _mapper.Map<Camera, CameraDTO>(objFromDb);
+					return _mapper.Map<FCMInfo, FCMInfoDTO>(objFromDb);
 				}
 				return objDTO;
 
-			} catch (Exception ex)
+			}
+			catch (Exception ex)
 			{
 				Console.WriteLine(ex.StackTrace);
 				Console.WriteLine(ex.Message);

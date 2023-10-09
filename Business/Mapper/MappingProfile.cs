@@ -17,6 +17,7 @@ namespace Business.Mapper
 			CreateMap<Event, EventDTO>().ReverseMap();
 			CreateMap<BoundingBox, BoundingBoxDTO>().ReverseMap();
 			CreateMap<EventVideo, EventVideoDTO>().ReverseMap();
+			CreateMap<FCMInfo, FCMInfoDTO>().ReverseMap();
 		}
 	}
 }

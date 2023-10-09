@@ -9,6 +9,6 @@ namespace DataAccess
 {
 	public class AppUser : IdentityUser
 	{
-		public string? Name { get; set; }
+
 	}
 }

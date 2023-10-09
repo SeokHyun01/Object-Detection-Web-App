@@ -11,6 +11,9 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Business.Repository;
+using NuGet.Common;
+using DataAccess;
+using System.Net.Http.Headers;
 
 namespace WebServer.Service
 {
@@ -21,12 +24,14 @@ namespace WebServer.Service
 		private IEventRepository? _eventRepositroy = null;
 		private IBoundingBoxRepository? _boundingBoxRepository = null;
 		private IEventVideoRepository? _eventVideoRepository = null;
+		private IFCMInfoRepository? _fCMInfoRepository = null;
 
 		private IMqttClient? MqttClient { get; set; } = null;
 		private IMqttClient? AckSender { get; set; } = null;
 
 		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
 		//private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
+		private static readonly string FCM_SERVER_KEY = "AAAAlAPqkMU:APA91bEpsixt1iwXs5ymw67EvF8urDy9Mi3gVbLEYYlgAit94zctOhQuO12pvsD2tuk5oJtzZ9eGAwblxebKyBM8WEQDhYm2ihhBuud5P7cESyFfAycI--IhY4jJ4m2Yr-lJ27qSGK7w";
 
 		public MqttBackgroundService(IServiceProvider serviceProvider)
 		{
@@ -40,6 +45,7 @@ namespace WebServer.Service
 				_eventRepositroy = scope.ServiceProvider.GetRequiredService<IEventRepository>();
 				_boundingBoxRepository = scope.ServiceProvider.GetRequiredService<IBoundingBoxRepository>();
 				_eventVideoRepository = scope.ServiceProvider.GetRequiredService<IEventVideoRepository>();
+				_fCMInfoRepository = scope.ServiceProvider.GetRequiredService<IFCMInfoRepository>();
 
 				var font = new FontCollection().Add($"{ROOT}/CONSOLA.TTF").CreateFont(11, FontStyle.Bold);
 
@@ -207,10 +213,6 @@ namespace WebServer.Service
 								{
 									var destinationPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", $"{identifier}_{i + 1}.jpeg");
 									File.Copy(imagePaths[i], destinationPath);
-									//if (File.Exists(imagePaths[i]))
-									//{
-									//	File.Delete(imagePaths[i]);
-									//}
 								}
 
 								var videoPath = $"{Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "videos", $"{Guid.NewGuid()}")}.mp4";
@@ -243,12 +245,57 @@ namespace WebServer.Service
 									Path = videoPath
 								});
 
+								var labels = new HashSet<string>();
 								foreach (var eventDTO in eventDTOs)
 								{
 									eventDTO.EventVideoId = createdVideoDTO.Id;
 									await _eventRepositroy.Update(eventDTO);
+
+									foreach (var label in eventDTO.BoundingBoxes.Select(x => x.Label).Distinct())
+									{
+										if (string.IsNullOrEmpty(label)) continue;
+										labels.Add(label);
+									}
 								}
 
+								// FCM
+								var userId = request.UserId;
+								var fcmInfos = await _fCMInfoRepository.GetAllByUserId(userId);
+								if (fcmInfos.Any())
+								{
+									var _title = string.Empty;
+									if (labels.Any())
+									{
+										_title = string.Join(", ", labels);
+									}
+
+									foreach (var fcmInfo in fcmInfos)
+									{
+										var content = new
+										{
+											to = fcmInfo.Token,
+											data = new
+											{
+												title = _title,
+												body = new
+												{
+													cameraId = request.CameraId,
+													task = $"{request.CameraId}번 카메라에서 {_title} 이벤트가 발생하였습니다."
+												}
+											}
+										};
+
+										using (var client = new HttpClient())
+										{
+											client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+											client.DefaultRequestHeaders.TryAddWithoutValidation("Authorization", $"key={FCM_SERVER_KEY}");
+											var response = await client.PostAsJsonAsync(@"https://fcm.googleapis.com/fcm/send", content);
+											Console.WriteLine(await response.Content.ReadAsStringAsync());
+										}
+									}
+								}
+
+								// 이벤트 이미지 사본 삭제
 								for (int i = 0; i < imagePaths.Count; i++)
 								{
 									var filePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", $"{identifier}_{i + 1}.png");
@@ -263,6 +310,7 @@ namespace WebServer.Service
 					catch (Exception ex)
 					{
 						Console.WriteLine(ex.StackTrace);
+						Console.WriteLine(ex.Message);
 					}
 				};
 

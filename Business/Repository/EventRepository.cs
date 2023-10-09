@@ -36,6 +36,7 @@ namespace Business.Repository
 			} catch (Exception ex)
 			{
 				Console.WriteLine(ex.StackTrace);
+				Console.WriteLine(ex.Message);
 
 				throw;
 			}
@@ -45,7 +46,7 @@ namespace Business.Repository
 		{
 			if (ids.Any())
 			{
-				return _mapper.Map<IEnumerable<Event>, IEnumerable<EventDTO>>(_db.Events.Where(x => ids.Contains(x.Id)));
+				return _mapper.Map<IEnumerable<Event>, IEnumerable<EventDTO>>(_db.Events.Include(u => u.BoundingBoxes).Where(x => ids.Contains(x.Id)));
 			}
 			else
 			{

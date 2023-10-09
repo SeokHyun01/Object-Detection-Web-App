@@ -36,6 +36,7 @@ namespace Business.Repository
 			} catch (Exception ex)
 			{
 				Console.WriteLine(ex.StackTrace);
+				Console.WriteLine(ex.Message);
 
 				throw;
 			}
@@ -51,6 +52,7 @@ namespace Business.Repository
 			var path = video.Path;
 			if (!string.IsNullOrEmpty(path) && File.Exists(path))
 			{
+				// 이벤트 영상 삭제
 				File.Delete(path);
 			}
 			_db.EventVideos.Remove(video);
@@ -59,6 +61,12 @@ namespace Business.Repository
 			var objs = await _db.Events.Where(x => x.EventVideoId == id).ToListAsync();
 			foreach (var obj in objs)
 			{
+				if (!string.IsNullOrEmpty(obj.Path) && File.Exists(obj.Path))
+				{
+					// 이벤트 이미지 삭제
+					File.Delete(obj.Path);
+				}
+
 				var boundingBoxes = _db.BoundingBoxes.Where(x => x.EventId == obj.Id);
 				_db.BoundingBoxes.RemoveRange(boundingBoxes);
 				_db.Events.Remove(obj);
@@ -75,6 +83,7 @@ namespace Business.Repository
             } catch (Exception ex)
 			{
 				Console.WriteLine(ex.StackTrace);
+				Console.WriteLine(ex.Message);
 
 				throw;
 			}

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231001135440_DisableMappingBetweenEventAndEventVideo")]
-    partial class DisableMappingBetweenEventAndEventVideo
+    [Migration("20231009144258_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -102,8 +102,6 @@ namespace DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("EventVideoId");
-
                     b.ToTable("Events");
                 });
 
@@ -113,12 +111,38 @@ namespace DataAccess.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
+                    b.Property<int>("CameraId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Path")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
                         .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
                     b.ToTable("EventVideos");
+                });
+
+            modelBuilder.Entity("DataAccess.FCMInfo", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("DeviceNickname")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("longtext");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("FCMInfos");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -325,9 +349,6 @@ namespace DataAccess.Migrations
                 {
                     b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
 
-                    b.Property<string>("Name")
-                        .HasColumnType("longtext");
-
                     b.HasDiscriminator().HasValue("AppUser");
                 });
 
@@ -340,15 +361,6 @@ namespace DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Event");
-                });
-
-            modelBuilder.Entity("DataAccess.Event", b =>
-                {
-                    b.HasOne("DataAccess.EventVideo", null)
-                        .WithMany("Events")
-                        .HasForeignKey("EventVideoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -405,11 +417,6 @@ namespace DataAccess.Migrations
             modelBuilder.Entity("DataAccess.Event", b =>
                 {
                     b.Navigation("BoundingBoxes");
-                });
-
-            modelBuilder.Entity("DataAccess.EventVideo", b =>
-                {
-                    b.Navigation("Events");
                 });
 #pragma warning restore 612, 618
         }

@@ -10,6 +10,8 @@ using WebServer.Data;
 using WebServer.Hubs;
 using WebServer.Service;
 using Microsoft.AspNetCore.Identity;
+using DataAccess;
+using WebServer.Service.IService;
 
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NHaF5cXmVCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdgWXZdcHRRRGhYVkR/WUc=");
 
@@ -23,23 +25,39 @@ builder.Services.AddServerSideBlazor();
 //{
 //    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 //});
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
-builder.Services.AddIdentity<IdentityUser, IdentityRole>().AddDefaultTokenProviders().AddDefaultUI()
+builder.Services.AddIdentity<AppUser, IdentityRole>()
+    .AddDefaultTokenProviders()
+    .AddDefaultUI()
     .AddEntityFrameworkStores<AppDbContext>();
 
 builder.Services.AddSyncfusionBlazor();
 
+builder.Services.AddScoped(sp => new HttpClient());
+builder.Services.AddScoped<IDBInitializer, DBInitializer>();
 builder.Services.AddScoped<ICameraRepository, CameraRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 builder.Services.AddScoped<IBoundingBoxRepository, BoundingBoxRepository>();
 builder.Services.AddScoped<IEventVideoRepository, EventVideoRepository>();
+builder.Services.AddScoped<IFCMInfoRepository, FCMInfoRepository>();
 builder.Services.AddHostedService<MqttBackgroundService>();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.WebHost.UseUrls("http://*:8102;https://*:8103");
+
+builder.Services.AddCors(o => o.AddPolicy("Development", builder =>
+{
+	builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+}));
+
+builder.Services.AddResponseCompression(options =>
+{
+	options.EnableForHttps = true;
+});
 
 var app = builder.Build();
 
@@ -53,16 +71,31 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseResponseCompression();
+
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings[".tflite"] = "application/octet-stream";
 app.UseStaticFiles(new StaticFileOptions { ContentTypeProvider = provider });
 app.UseStaticFiles();
 
 app.UseRouting();
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.MapBlazorHub();
 app.MapHub<RTCHub>("/hub/rtc");
 app.MapFallbackToPage("/_Host");
 
+await SeedDatabase();
+
 app.Run();
+
+async ValueTask SeedDatabase()
+{
+	using (var scope = app.Services.CreateScope())
+	{
+		var dbInitializer = scope.ServiceProvider.GetRequiredService<IDBInitializer>();
+		await dbInitializer.Initialize();
+	}
+}
