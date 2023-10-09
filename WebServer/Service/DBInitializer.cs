@@ -9,13 +9,13 @@ namespace WebServer.Service
 {
 	public class DBInitializer : IDBInitializer
 	{
-		private readonly UserManager<AppUser> _userManager;
+		private readonly UserManager<IdentityUser> _userManager;
 		private readonly RoleManager<IdentityRole> _roleManager;
 		private readonly AppDbContext _db;
 		private readonly ILogger<DBInitializer> _logger;
 
 
-		public DBInitializer(UserManager<AppUser> userManager,
+		public DBInitializer(UserManager<IdentityUser> userManager,
 			RoleManager<IdentityRole> roleManager,
 			AppDbContext db,
 			ILogger<DBInitializer> logger)
