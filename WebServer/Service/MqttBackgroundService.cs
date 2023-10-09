@@ -280,7 +280,7 @@ namespace WebServer.Service
 												body = new
 												{
 													cameraId = request.CameraId,
-													task = $"{request.CameraId}번 카메라에서 {_title} 이벤트가 발생하였습니다."
+													description = $"{request.CameraId}번 카메라에서 {_title} 이벤트가 발생하였습니다."
 												}
 											}
 										};
