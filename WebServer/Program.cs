@@ -12,6 +12,7 @@ using WebServer.Service;
 using Microsoft.AspNetCore.Identity;
 using DataAccess;
 using WebServer.Service.IService;
+using Microsoft.AspNetCore.ResponseCompression;
 
 Syncfusion.Licensing.SyncfusionLicenseProvider.RegisterLicense("Ngo9BigBOggjHTQxAR8/V1NHaF5cXmVCf1FpRmJGdld5fUVHYVZUTXxaS00DNHVRdkdgWXZdcHRRRGhYVkR/WUc=");
 
@@ -57,6 +58,7 @@ builder.Services.AddCors(o => o.AddPolicy("Development", builder =>
 builder.Services.AddResponseCompression(options =>
 {
 	options.EnableForHttps = true;
+	options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat(new[] { "application/octet-stream" });
 });
 
 var app = builder.Build();
