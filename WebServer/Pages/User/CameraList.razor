@@ -34,7 +34,7 @@ else
 				{
 					<tr>
 						<th scope="row">
-							<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/camera/setting/{camera.Id}")><QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText></SfQRCodeGenerator>
+							<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")><QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText></SfQRCodeGenerator>
 						</th>
 						<td>
 							<div style="width: 18rem;">

@@ -1,6 +1,6 @@
-﻿@page "/user/camera/setting/{cameraId:int}"
+﻿@page "/user/{userId:uuid}/camera/{cameraId:int}/setting"
 
-@attribute [Authorize(Roles = SD.ROLE_CLIENT)]
+@*@attribute [Authorize(Roles = SD.ROLE_CLIENT)]*@
 
 @inject IJSRuntime _jsRuntime
 @inject NavigationManager _navigationManager
@@ -35,9 +35,9 @@
 
 
 @code {
-	[CascadingParameter]
-	public Task<AuthenticationState> AuthenticationState { get; set; }
-	private IdentityUser? User { get; set; } = null;
+	//[CascadingParameter]
+	//public Task<AuthenticationState> AuthenticationState { get; set; }
+	//private IdentityUser? User { get; set; } = null;
 
 	private string ConnectionId { get; set; } = string.Empty;
 	private string RoomName { get; set; } = string.Empty;
@@ -47,6 +47,9 @@
 	private bool isEnabledRTC { get; set; } = false;
 
 	[Parameter]
+	public string UserId { get; set; }
+
+	[Parameter]
 	public int CameraId { get; set; }
 
 
@@ -54,8 +57,8 @@
 	{
 		if (firstRender)
 		{
-			var authState = await AuthenticationState;
-			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
+			//var authState = await AuthenticationState;
+			//User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 
 			// SignalR 클라이언트 빌드
 			RTCHubConnection = new HubConnectionBuilder()
@@ -129,7 +132,7 @@
 
 			await _jsRuntime.InvokeVoidAsync("start_video", "video", "none");
 			await _jsRuntime.InvokeVoidAsync("detect");
-			await _jsRuntime.InvokeVoidAsync("mqtt", User.Id, CameraId);
+			await _jsRuntime.InvokeVoidAsync("mqtt", UserId, CameraId);
 
 			RoomName = $"{CameraId.ToString()}";
 			await RTCHubConnection.SendAsync("JoinRoom", RoomName);

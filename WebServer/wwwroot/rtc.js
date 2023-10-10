@@ -85,7 +85,6 @@ async function handle_ice(data) {
 
 function handle_track(event) {
     const peer_video = document.getElementById('peer_video');
-    console.log(peer_video);
     if (peer_video && event.streams && event.streams[0]) {
         peer_video.srcObject = event.streams[0];
     }
