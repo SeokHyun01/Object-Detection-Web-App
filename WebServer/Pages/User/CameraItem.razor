@@ -113,67 +113,67 @@ else
 			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
 			// SignalR 클라이언트 빌드
-			//RTCHubConnection = new HubConnectionBuilder()
-			//.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), (opts) =>
-			//{
-			//	opts.HttpMessageHandlerFactory = (message) =>
-			//	{
-			//		if (message is HttpClientHandler clientHandler)
-			//		{
-			//			// SSL 무시
-			//			clientHandler.ServerCertificateCustomValidationCallback +=
-			//				(sender, certificate, chain, sslPolicyErrors) => { return true; };
-			//		}
-			//		return message;
-			//	};
-			//}).Build();
+			RTCHubConnection = new HubConnectionBuilder()
+			.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), (opts) =>
+			{
+				opts.HttpMessageHandlerFactory = (message) =>
+				{
+					if (message is HttpClientHandler clientHandler)
+					{
+						// SSL 무시
+						clientHandler.ServerCertificateCustomValidationCallback +=
+							(sender, certificate, chain, sslPolicyErrors) => { return true; };
+					}
+					return message;
+				};
+			}).Build();
 
-			//RTCHubConnection.On<string>("OnConnected", async connectionId =>
-			//{
-			//	ConnectionId = connectionId;
-			//});
+			RTCHubConnection.On<string>("OnConnected", async connectionId =>
+			{
+				ConnectionId = connectionId;
+			});
 
-			//RTCHubConnection.On("OnEnabledRTC", async () =>
-			//{
-			//	// RTC Peer Connection 객체 생성
-			//	await _jsRuntime.InvokeVoidAsync("init_rtc", ConnectionId);
-			//});
+			RTCHubConnection.On("OnEnabledRTC", async () =>
+			{
+				// RTC Peer Connection 객체 생성
+				await _jsRuntime.InvokeVoidAsync("init_rtc", ConnectionId);
+			});
 
-			//RTCHubConnection.On("Welcome", async () =>
-			//{
-			//	var offer = await _jsRuntime.InvokeAsync<string>("send_offer");
-			//	await RTCHubConnection.SendAsync("SendOffer", offer, RoomName);
-			//});
+			RTCHubConnection.On("Welcome", async () =>
+			{
+				var offer = await _jsRuntime.InvokeAsync<string>("send_offer");
+				await RTCHubConnection.SendAsync("SendOffer", offer, RoomName);
+			});
 
-			//RTCHubConnection.On<string>("ReceiveOffer", async receivedOffer =>
-			//{
-			//	var answer = await _jsRuntime.InvokeAsync<string>("send_answer", receivedOffer);
-			//	await RTCHubConnection.SendAsync("SendAnswer", answer, RoomName);
-			//});
+			RTCHubConnection.On<string>("ReceiveOffer", async receivedOffer =>
+			{
+				var answer = await _jsRuntime.InvokeAsync<string>("send_answer", receivedOffer);
+				await RTCHubConnection.SendAsync("SendAnswer", answer, RoomName);
+			});
 
-			//RTCHubConnection.On<string>("ReceiveAnswer", async receivedAnswer =>
-			//{
-			//	await _jsRuntime.InvokeVoidAsync("receive_answer", receivedAnswer);
-			//});
+			RTCHubConnection.On<string>("ReceiveAnswer", async receivedAnswer =>
+			{
+				await _jsRuntime.InvokeVoidAsync("receive_answer", receivedAnswer);
+			});
 
-			//RTCHubConnection.On<string>("ReceiveIce", async receivedIce =>
-			//{
-			//	await _jsRuntime.InvokeVoidAsync("receive_ice", receivedIce);
-			//});
+			RTCHubConnection.On<string>("ReceiveIce", async receivedIce =>
+			{
+				await _jsRuntime.InvokeVoidAsync("receive_ice", receivedIce);
+			});
 
-			//RTCHubConnection.On("OnDisabledRTC", async () =>
-			//{
-			//	await _jsRuntime.InvokeVoidAsync("stop_video", "peer_video");
-			//});
+			RTCHubConnection.On("OnDisabledRTC", async () =>
+			{
+				await _jsRuntime.InvokeVoidAsync("stop_video", "peer_video");
+			});
 
-			//await RTCHubConnection.StartAsync();
+			await RTCHubConnection.StartAsync();
 
 			// Etc.
 			await getCamera(CameraId);
 			await _jsRuntime.InvokeVoidAsync("start_video", "video");
 
 			RoomName = $"{CameraId.ToString()}";
-			//await RTCHubConnection.SendAsync("JoinRoom", RoomName);
+			await RTCHubConnection.SendAsync("JoinRoom", RoomName);
 		}
 	}
 
