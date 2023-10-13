@@ -76,3 +76,7 @@ a, .btn-link {
     #components-reconnect-modal.components-reconnect-rejected {
         display: none;
     }
+
+.sidebar {
+    background-image: none;
+}
