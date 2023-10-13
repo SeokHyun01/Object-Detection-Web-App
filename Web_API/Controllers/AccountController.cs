@@ -113,7 +113,16 @@ namespace Web_API.Controllers
 				return Unauthorized(new SignInResponseDTO
 				{
 					IsSucceeded = false,
-					Errors = new List<string> { "Id 또는 비밀번호를 잘못 입력했습니다." },
+					Errors = new List<string> { "해당 사용자를 찾을 수 없습니다." },
+				});
+			}
+
+			if (!(await _userManager.GetRolesAsync(user)).Any(x => x == SD.ROLE_CLIENT))
+			{
+				return Unauthorized(new SignInResponseDTO
+				{
+					IsSucceeded = false,
+					Errors = new List<string> { "인증되지 않은 사용자입니다." },
 				});
 			}
 
