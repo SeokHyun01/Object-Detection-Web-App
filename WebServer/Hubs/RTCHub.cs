@@ -61,11 +61,11 @@ namespace WebServer.Hubs
 				if (room.Value.Contains(value))
 				{
 					var roomName = room.Key;
-
-					await Clients.Group(roomName).SendAsync("OnDisabledRTC");
-
 					await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
 					room.Value.Remove(value);
+
+					await Clients.Group(roomName).SendAsync("OnDisabledRTC");
+					
 					_logger.LogInformation($"유저 {Context.ConnectionId}가 Room {roomName}에서 퇴장하였습니다.");
 
 					if (room.Value.Count == 0)
