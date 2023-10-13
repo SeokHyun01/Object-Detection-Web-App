@@ -109,10 +109,6 @@ namespace WebServer.Areas.Identity.Pages.Account
         public async Task OnGetAsync(string returnUrl = null)
         {
             ReturnUrl = returnUrl;
-            if (!await _roleManager.RoleExistsAsync(SD.ROLE_CLIENT))
-            {
-				await _roleManager.CreateAsync(new IdentityRole(SD.ROLE_CLIENT));
-			}
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
         }
 

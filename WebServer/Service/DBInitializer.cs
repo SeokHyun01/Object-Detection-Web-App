@@ -45,7 +45,7 @@ namespace WebServer.Service
 					return;
 				}
 
-				AppUser user = new()
+				var user = new IdentityUser()
 				{
 					UserName = "admin@admin.com",
 					Email = "admin@admin.com",

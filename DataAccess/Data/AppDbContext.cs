@@ -18,7 +18,6 @@ namespace DataAccess.Data
 		public DbSet<Camera> Cameras { get; set; }
 		public DbSet<Event> Events { get; set; }
 		public DbSet<BoundingBox> BoundingBoxes { get; set; }
-		public DbSet<AppUser> AppUsers { get; set; }
 		public DbSet<EventVideo> EventVideos { get; set; }
 		public DbSet<FCMInfo> FCMInfos { get; set; }
 	}
