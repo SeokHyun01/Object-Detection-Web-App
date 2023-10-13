@@ -57,6 +57,8 @@ function predict() {
             inference(input, model_name).then(output => {
                 // const end = performance.now();
 
+                console.log("running...");
+
                 const outputArray = output.arraySync()[0].flat();
                 if (model_name == "pose") {
                     const boxes_and_kepts = process_output_pose(outputArray, canvas.width, canvas.height);
