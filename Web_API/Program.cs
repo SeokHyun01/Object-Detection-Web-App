@@ -19,7 +19,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-	c.SwaggerDoc("v1", new OpenApiInfo { Title = "Web API", Version = "v1.0.0" });
+	c.SwaggerDoc("v1", new OpenApiInfo { Title = "Web API Yoon", Version = "v1.0.0" });
 	c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
 	{
 		In = ParameterLocation.Header,
@@ -42,9 +42,15 @@ builder.Services.AddSwaggerGen(c =>
 				});
 });
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<AppDbContext>(options =>
-	options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+{
+	options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
+
+//var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+//builder.Services.AddDbContext<AppDbContext>(options =>
+//	options.UseMySql(connectionString, ServerVersion.AutoDetect(connectionString)));
+
 builder.Services.AddIdentity<AppUser, IdentityRole>()
 	.AddDefaultTokenProviders()
 	.AddEntityFrameworkStores<AppDbContext>();
@@ -92,11 +98,11 @@ builder.Services.AddResponseCompression(options =>
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
-{
-	app.UseSwagger();
-	app.UseSwaggerUI();
-}
+app.UseSwagger();
+app.UseSwaggerUI(c => {
+	c.SwaggerEndpoint("/swagger/v1/swagger.json", "Web API Yoon v1");
+	c.RoutePrefix = String.Empty;
+});
 
 app.UseResponseCompression();
 
