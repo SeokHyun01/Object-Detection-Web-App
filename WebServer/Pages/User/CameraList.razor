@@ -24,69 +24,67 @@
 	}
 </style>
 
-<div class="container-fluid">
 	@if (Cameras.Any())
-	{
-		<!-- DataTales Example -->
-		<div class="card shadow mb-4">
-			<div class="card-header py-3">
-				<h6 class="m-0 font-weight-bold text-primary">Cameras</h6>
-			</div>
-			<div class="card-body">
-				<div class="table-responsive">
-					<table class="table table-bordered custom-table" id="dataTable" width="100%" cellspacing="0">
-						<thead>
+{
+	<!-- DataTales Example -->
+	<div class="card shadow mb-4">
+		<div class="card-header py-3">
+			<h6 class="m-0 font-weight-bold text-primary">Cameras</h6>
+		</div>
+		<div class="card-body">
+			<div class="table-responsive">
+				<table class="table table-bordered custom-table" id="dataTable" width="100%" cellspacing="0">
+					<thead>
+						<tr>
+							<th style="width: 25%; text-align: right;">#</th>
+							<th style="width: 25%;">Camera</th>
+							<th style="width: 25%;">Angle</th>
+							<th style="width: 25%;" colspan="2">Action</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var camera in Cameras)
+						{
 							<tr>
-								<th style="width: 25%; text-align: right;">#</th>
-								<th style="width: 25%;">Camera</th>
-								<th style="width: 25%;">Angle</th>
-								<th style="width: 25%;" colspan="2">Action</th>
+								<td>
+									<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")>
+										<QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText>
+									</SfQRCodeGenerator>
+								</td>
+								<td>
+									<div style="width: 18rem;">
+										<img id="@($"img-{camera.Id}")">
+									</div>
+								</td>
+								<td>
+									<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
+								</td>
+								<td style="width: 12.5%;">
+									<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-outline-secondary">Goto</NavLink>
+								</td>
+								<td style="width: 12.5%;">
+									<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
+								</td>
 							</tr>
-						</thead>
-						<tbody>
-							@foreach (var camera in Cameras)
-							{
-								<tr>
-									<td>
-										<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")>
-											<QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText>
-										</SfQRCodeGenerator>
-									</td>
-									<td>
-										<div style="width: 18rem;">
-											<img id="@($"img-{camera.Id}")">
-										</div>
-									</td>
-									<td>
-										<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
-									</td>
-									<td style="width: 12.5%;">
-										<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-outline-secondary">Goto</NavLink>
-									</td>
-									<td style="width: 12.5%;">
-										<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
-									</td>
-								</tr>
-							}
-						</tbody>
-					</table>
-				</div>
+						}
+					</tbody>
+				</table>
 			</div>
 		</div>
-	}
-	else
-	{
-		<p>Not Found</p>
-	}
+	</div>
+}
+else
+{
+	<p>Not Found</p>
+}
 
-	<EditForm Model="@Camera" OnValidSubmit="OnCameraCreated">
-		<DataAnnotationsValidator />
-		<div class="input-group">
-			<InputText @bind-Value="Camera.Name" type="text" class="form-control" placeholder="Set Camera Name" style="margin-right: 1rem;"></InputText>
-			<button class="btn btn-outline-primary">New Camera</button>
-		</div>
-	</EditForm>
-</div>
+<EditForm Model="@Camera" OnValidSubmit="OnCameraCreated">
+	<DataAnnotationsValidator />
+	<div class="input-group">
+		<InputText @bind-Value="Camera.Name" type="text" class="form-control" placeholder="Set Camera Name" style="margin-right: 1rem;"></InputText>
+		<button class="btn btn-outline-primary">New Camera</button>
+	</div>
+</EditForm>
 
 
 @code {
