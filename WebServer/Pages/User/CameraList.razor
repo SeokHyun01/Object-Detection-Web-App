@@ -7,7 +7,7 @@
 @inject NavigationManager _navigationManager
 @inject UserManager<IdentityUser> _userManager
 
-
+@*
 @if (IsLoading)
 {
 	<p class="placeholder-glow">
@@ -68,6 +68,19 @@ else
 		</div>
 	</EditForm>
 }
+ *@
+
+<div class="content-wrapper">
+	<div class="row">
+		<SfGrid DataSource="@Cameras" Height="400" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
+			<GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"></GridEditSettings>
+			<GridColumns>
+				<GridColumn Field="Id" HeaderText="Camera ID" IsPrimaryKey="true" Width="120" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer" TextAlign="TextAlign.Right"></GridColumn>
+				<GridColumn Field="Name" HeaderText="Camera Name" Width="120" ValidationRules="@(new ValidationRules { Required=true})" Type="ColumnType.String"></GridColumn>
+			</GridColumns>
+		</SfGrid>
+	</div>
+</div>
 
 
 @code {
@@ -81,6 +94,8 @@ else
 	private CameraDTO Camera { get; set; } = new CameraDTO();
 
 	private IMqttClient? MqttClient { get; set; } = null;
+
+	private List<string> ToolbarItems = new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel" };
 
 
 	private async ValueTask getCameras(string userId)

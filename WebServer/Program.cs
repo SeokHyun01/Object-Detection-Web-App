@@ -20,6 +20,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+builder.Services.AddSyncfusionBlazor();
 builder.Services.AddServerSideBlazor();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -35,8 +36,6 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddDefaultTokenProviders()
     .AddDefaultUI()
     .AddEntityFrameworkStores<AppDbContext>();
-
-builder.Services.AddSyncfusionBlazor();
 
 builder.Services.AddScoped(sp => new HttpClient());
 builder.Services.AddScoped<IDBInitializer, DBInitializer>();
