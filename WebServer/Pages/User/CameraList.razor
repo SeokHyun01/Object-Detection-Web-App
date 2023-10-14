@@ -19,6 +19,11 @@
 			vertical-align: middle;
 			width: 25%;
 		}
+
+	.action-buttons {
+		display: flex;
+		justify-content: space-around; /* 버튼 간에 공간을 균등하게 분배 */
+	}
 </style>
 
 <div class="container-fluid">
@@ -56,8 +61,8 @@
 										<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
 									</td>
 									<td>
-										<div>
-											<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-primary mx-3">Goto</NavLink>
+										<div class="action-buttons">
+											<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-primary">Goto</NavLink>
 											<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
 										</div>
 									</td>
@@ -68,7 +73,8 @@
 				</div>
 			</div>
 		</div>
-	} else
+	}
+	else
 	{
 		<p>Not Found</p>
 	}
