@@ -62,7 +62,7 @@
 									</td>
 									<td>
 										<div class="action-buttons">
-											<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-primary">Goto</NavLink>
+											<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-outline-secondary">Goto</NavLink>
 											<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
 										</div>
 									</td>
@@ -83,7 +83,7 @@
 		<DataAnnotationsValidator />
 		<div class="input-group">
 			<InputText @bind-Value="Camera.Name" type="text" class="form-control" placeholder="Set Camera Name" style="margin-right: 1rem;"></InputText>
-			<button class="btn btn-outline-secondary">New Camera</button>
+			<button class="btn btn-outline-primary">New Camera</button>
 		</div>
 	</EditForm>
 </div>
