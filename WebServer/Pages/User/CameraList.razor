@@ -39,7 +39,7 @@
 							<tr>
 								<th style="width: 25%; text-align: right;">#</th>
 								<th style="width: 25%;">Camera</th>
-								<th style="width: 25%; text-align: right;">Angle</th>
+								<th style="width: 25%;">Angle</th>
 								<th style="width: 25%;" colspan="2">Action</th>
 							</tr>
 						</thead>
@@ -58,10 +58,10 @@
 									<td>
 										<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
 									</td>
-									<td>
+									<td style="width: 12.5%;">
 										<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-outline-secondary">Goto</NavLink>
 									</td>
-									<td>
+									<td style="width: 12.5%;">
 										<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
 									</td>
 								</tr>
