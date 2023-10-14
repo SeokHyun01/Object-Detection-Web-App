@@ -82,15 +82,3 @@ a, .btn-link {
     background-image: linear-gradient(180deg, #4e73df 10%, #224abe 100%);
     background-size: cover;
 }
-
-.align-right-column {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-}
-
-.align-center-column {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}

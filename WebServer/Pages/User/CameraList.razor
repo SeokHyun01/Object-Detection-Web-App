@@ -21,9 +21,9 @@
 					<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
 						<thead>
 							<tr>
-								<th class="align-right-column">#</th>
+								<th>#</th>
 								<th>Camera</th>
-								<th class="align-right-column">Angle</th>
+								<th>Angle</th>
 								<th>Action</th>
 							</tr>
 						</thead>
@@ -34,15 +34,15 @@
 									<td>
 										<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")><QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText></SfQRCodeGenerator>
 									</td>
-									<td class="align-center-column">
+									<td>
 										<div style="width: 18rem;">
 											<img id="@($"img-{camera.Id}")">
 										</div>
 									</td>
-									<td class="align-center-column">
+									<td>
 										<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
 									</td>
-									<td class="align-center-column">
+									<td>
 										<div>
 											<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-primary mx-3">Goto</NavLink>
 											<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
