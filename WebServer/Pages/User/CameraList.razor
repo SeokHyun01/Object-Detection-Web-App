@@ -41,7 +41,7 @@
 								<th>#</th>
 								<th>Camera</th>
 								<th>Angle</th>
-								<th>Action</th>
+								<th colspan="2">Action</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -60,23 +60,12 @@
 										<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
 									</td>
 									<td>
-										<table>
-											<tbody>
-												<tr>
-													<td>
-														<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-outline-secondary">Goto</NavLink>
-													</td>
-													<td>
-														<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
-													</td>
-												</tr>
-											</tbody>
-										</table>
-
-@* 										<div class="action-buttons">
-											<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-outline-secondary">Goto</NavLink>
-											<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
-										</div> *@
+									<td>
+										<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-outline-secondary">Goto</NavLink>
+									</td>
+									<td>
+										<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
+									</td>
 									</td>
 								</tr>
 							}
