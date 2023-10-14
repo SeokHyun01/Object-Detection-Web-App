@@ -22,8 +22,14 @@
 
 	.action-buttons {
 		display: flex;
-		justify-content: space-around; /* 버튼 간에 공간을 균등하게 분배 */
+		justify-content: space-around;
 	}
+
+		.action-buttons a + button {
+			border-left: 1px solid #ccc;
+			margin-left: 5px;
+			padding-left: 5px;
+		}
 </style>
 
 <div class="container-fluid">
