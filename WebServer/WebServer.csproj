@@ -42,6 +42,7 @@
     <Folder Include="wwwroot\lib\microsoft\signalr\dist\browser\" />
     <Folder Include="wwwroot\models\" />
     <Folder Include="wwwroot\images\" />
+    <Folder Include="wwwroot\demo\" />
     <Folder Include="wwwroot\videos\" />
   </ItemGroup>
 
