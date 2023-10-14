@@ -11,25 +11,35 @@
 <style>
 	.custom-table {
 		width: 100% !important;
+		display: flex;
+		flex-direction: column;
 	}
+
+		.custom-table tbody,
+		.custom-table thead {
+			display: flex;
+			width: 100%;
+		}
+
+		.custom-table tr {
+			display: flex;
+			width: 100%;
+		}
 
 		.custom-table th,
 		.custom-table td {
 			text-align: center;
 			vertical-align: middle;
-			width: 25%;
+			flex: 1;
+			display: flex;
+			align-items: center;
+			justify-content: center;
 		}
 
 	.action-buttons {
 		display: flex;
 		justify-content: space-around;
 	}
-
-		.action-buttons a + button {
-			border-left: 1px solid #ccc;
-			margin-left: 5px;
-			padding-left: 5px;
-		}
 </style>
 
 <div class="container-fluid">
