@@ -7,79 +7,66 @@
 @inject NavigationManager _navigationManager
 @inject UserManager<IdentityUser> _userManager
 
-@*
-@if (IsLoading)
-{
-	<p class="placeholder-glow">
-		<span class="placeholder col-10 bg-primary placeholder-lg"></span>
-		<span class="placeholder col-12 bg-primary placeholder-lg"></span>
-		<span class="placeholder col-6 bg-primary placeholder-lg"></span>
-	</p>
-}
-else
-{
+
+<div class="container-fluid">
 	@if (Cameras.Any())
 	{
-		<table class="table">
-			<thead>
-				<tr>
-					<th scope="col">#</th>
-					<th scope="col">camera</th>
-					<th scope="col">angle</th>
-					<th scope="col">action</th>
-				</tr>
-			</thead>
-			<tbody>
-				@foreach (var camera in Cameras)
-				{
-					<tr>
-						<th scope="row">
-							<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")><QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText></SfQRCodeGenerator>
-						</th>
-						<td>
-							<div style="width: 18rem;">
-								<img id="@($"img-{camera.Id}")">
-							</div>
-						</td>
-						<td>
-							<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
-						</td>
-						<td>
-							<div>
-								<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-primary mx-3">goto</NavLink>
-								<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">delete</button>
-							</div>
-						</td>
-					</tr>
-				}
-			</tbody>
-		</table>
-	}
-	else
+		<!-- DataTales Example -->
+		<div class="card shadow mb-4">
+			<div class="card-header py-3">
+				<h6 class="m-0 font-weight-bold text-primary">DataTables Example</h6>
+			</div>
+			<div class="card-body">
+				<div class="table-responsive">
+					<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+						<thead>
+							<tr>
+								<th>#</th>
+								<th>Camera</th>
+								<th>Angle</th>
+								<th>Action</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var camera in Cameras)
+							{
+								<tr>
+									<td>
+										<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")><QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText></SfQRCodeGenerator>
+									</td>
+									<td>
+										<div style="width: 18rem;">
+											<img id="@($"img-{camera.Id}")">
+										</div>
+									</td>
+									<td>
+										<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
+									</td>
+									<td>
+										<div>
+											<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-primary mx-3">Goto</NavLink>
+											<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
+										</div>
+									</td>
+								</tr>
+							}
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	} else
 	{
-		<p>Not found.</p>
+		<p>Not Found</p>
 	}
 
 	<EditForm Model="@Camera" OnValidSubmit="OnCameraCreated">
 		<DataAnnotationsValidator />
 		<div class="input-group">
-			<InputText @bind-Value="Camera.Name" type="text" class="form-control" placeholder="set camera name" style="margin-right: 1rem;"></InputText>
-			<button class="btn btn-outline-secondary">new camera</button>
+			<InputText @bind-Value="Camera.Name" type="text" class="form-control" placeholder="Set Camera Name" style="margin-right: 1rem;"></InputText>
+			<button class="btn btn-outline-secondary">New Camera</button>
 		</div>
 	</EditForm>
-}
- *@
-
-<div class="content-wrapper">
-	<div class="row">
-		<SfGrid DataSource="@Cameras" Height="400" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
-			<GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"></GridEditSettings>
-			<GridColumns>
-				<GridColumn Field="Id" HeaderText="Camera ID" IsPrimaryKey="true" Width="120" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer" TextAlign="TextAlign.Right"></GridColumn>
-				<GridColumn Field="Name" HeaderText="Camera Name" Width="120" ValidationRules="@(new ValidationRules { Required=true})" Type="ColumnType.String"></GridColumn>
-			</GridColumns>
-		</SfGrid>
-	</div>
 </div>
 
 
@@ -94,8 +81,6 @@ else
 	private CameraDTO Camera { get; set; } = new CameraDTO();
 
 	private IMqttClient? MqttClient { get; set; } = null;
-
-	private List<string> ToolbarItems = new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel" };
 
 
 	private async ValueTask getCameras(string userId)
