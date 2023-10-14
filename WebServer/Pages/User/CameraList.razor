@@ -8,23 +8,7 @@
 @inject UserManager<IdentityUser> _userManager
 
 
-<style>
-	.custom-table {
-		width: 100%;
-	}
-
-		.custom-table td {
-			text-align: center;
-			vertical-align: middle;
-		}
-
-	.table-bordered thead th,
-	.table-bordered thead td {
-		border-bottom-width: 0;
-	}
-</style>
-
-	@if (Cameras.Any())
+@* @if (Cameras.Any())
 {
 	<!-- DataTales Example -->
 	<div class="card shadow mb-4">
@@ -76,6 +60,37 @@
 else
 {
 	<p>Not Found</p>
+} *@
+
+@if (Cameras.Any())
+{
+	<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-3">
+		@foreach (var camera in Cameras)
+		{
+			<div class="col">
+				<div class="card shadow-sm">
+					<img id="@($"img-{camera.Id}")">
+					<div class="card-body" width="100%" height="225">
+						<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")></SfQRCodeGenerator>
+						<p class="card-text">@(camera.Name)</p>
+						<p class="card-text">Angle</p>
+						<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
+						<div class="d-flex justify-content-between align-items-center">
+							<div class="btn-group">
+								<button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+								<button type="button" class="btn btn-sm btn-outline-danger">Remove</button>
+							</div>
+							<small class="text-body-secondary">9 mins</small>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+}
+else
+{
+	<p>Not Found</p>
 }
 
 <EditForm Model="@Camera" OnValidSubmit="OnCameraCreated">
@@ -85,14 +100,6 @@ else
 		<button class="btn btn-outline-primary">New Camera</button>
 	</div>
 </EditForm>
-
-
-<!-- Page level plugins -->
-<script src="/vendor/datatables/jquery.dataTables.min.js"></script>
-<script src="/vendor/datatables/dataTables.bootstrap4.min.js"></script>
-
-<!-- Page level custom scripts -->
-<script src="/demo/datatables-demo.js"></script>
 
 
 @code {
