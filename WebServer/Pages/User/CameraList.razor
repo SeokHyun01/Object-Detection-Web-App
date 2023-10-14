@@ -48,9 +48,11 @@
 							{
 								<tr>
 									<td>
-										<SfQRCodeGenerator style="width:100%;" Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")>
-											<QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText>
-										</SfQRCodeGenerator>
+										<div style="width:100%;">
+											<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")>
+												<QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText>
+											</SfQRCodeGenerator>
+										</div>
 									</td>
 									<td>
 										<div style="width: 18rem;">
