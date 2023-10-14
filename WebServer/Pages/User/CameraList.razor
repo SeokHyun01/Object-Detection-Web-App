@@ -95,7 +95,7 @@ else
 
 <EditForm Model="@Camera" OnValidSubmit="OnCameraCreated">
 	<DataAnnotationsValidator />
-	<div class="input-group mt-3">
+	<div class="input-group mt-3 mb-3">
 		<InputText @bind-Value="Camera.Name" type="text" class="form-control" placeholder="Set Camera Name" style="margin-right: 1rem;"></InputText>
 		<button class="btn btn-outline-primary">New Camera</button>
 	</div>
