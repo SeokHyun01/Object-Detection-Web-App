@@ -13,8 +13,12 @@
 <div class="col">
 	<div class="card shadow-sm">
 		<div class="card-body" width="100%" height="225">
-			<video id="video" style="transform: scaleX(-1);"></video>
-			<video id="peer_video" style="transform: scaleX(-1);" autoplay></video>
+			<div class="col">
+				<p class="card-text">Me</p>
+				<video id="video" style="transform: scaleX(-1);"></video>
+				<p class="card-text mt-3">Caller</p>
+				<video id="peer_video" style="transform: scaleX(-1);" autoplay></video>
+			</div>
 			<p class="card-text mt-3">Angle</p>
 			<input id="input" type="range" class="form-range" value=@(Camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, CameraId)" />
 		</div>
