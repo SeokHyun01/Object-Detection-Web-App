@@ -16,8 +16,11 @@
 			<div class="col" style="text-align: center;">
 				<p class="card-text">Me</p>
 				<video id="video" style="transform: scaleX(-1);"></video>
-				<p class="card-text mt-3">Caller</p>
-				<video id="peer_video" style="transform: scaleX(-1);" autoplay></video>
+				@if (isEnabledRTC)
+				{
+					<p class="card-text mt-3">Caller</p>
+					<video id="peer_video" style="transform: scaleX(-1);" autoplay></video>
+				}
 			</div>
 			<p class="card-text mt-3">Angle</p>
 			<input id="input" type="range" class="form-range" value=@(Camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, CameraId)" />
@@ -41,6 +44,8 @@
 	private HubConnection? RTCHubConnection { get; set; } = null;
 	private string RoomName { get; set; } = string.Empty;
 	private string ConnectionId { get; set; } = string.Empty;
+
+	private bool isEnabledRTC { get; set; } = false;
 
 
 	private async ValueTask getCamera(int id)
@@ -109,8 +114,14 @@
 
 			RTCHubConnection.On("OnEnabledRTC", async () =>
 			{
-				// RTC Peer Connection 객체 생성
-				await _jsRuntime.InvokeVoidAsync("init_rtc", ConnectionId);
+				if (!isEnabledRTC)
+				{
+					isEnabledRTC = true;
+					StateHasChanged();
+
+					// RTC Peer Connection 객체 생성
+					await _jsRuntime.InvokeVoidAsync("init_rtc", ConnectionId);
+				}
 			});
 
 			RTCHubConnection.On("Welcome", async () =>
@@ -137,7 +148,13 @@
 
 			RTCHubConnection.On("OnDisabledRTC", async () =>
 			{
-				await _jsRuntime.InvokeVoidAsync("stop_video", "peer_video");
+				if (isEnabledRTC)
+				{
+					isEnabledRTC = false;
+					StateHasChanged();
+
+					await _jsRuntime.InvokeVoidAsync("stop_video", "peer_video");
+				}
 			});
 
 			await RTCHubConnection.StartAsync();
