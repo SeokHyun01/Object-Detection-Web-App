@@ -60,8 +60,8 @@ else
 				<Template>
 					@{
 						var video = (context as EventVideoDTO);
-						<div style="width: 1rem;">
-							<video controls>
+						<div>
+							<video style="width: 30rem;" controls>
 								<source src=@(Regex.Match(video.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
 							</video>
 						</div>
