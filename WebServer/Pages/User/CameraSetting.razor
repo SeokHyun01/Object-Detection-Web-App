@@ -60,6 +60,9 @@
 			//var authState = await AuthenticationState;
 			//User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 
+			var stopwatch = new Stopwatch();
+			stopwatch.Start();
+
 			// SignalR 클라이언트 빌드
 			RTCHubConnection = new HubConnectionBuilder()
 			.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), (opts) =>
@@ -129,6 +132,9 @@
 			});
 
 			await RTCHubConnection.StartAsync();
+
+			stopwatch.Stop();
+			Console.WriteLine("Elapsed Time: {0} milliseconds", stopwatch.ElapsedMilliseconds);
 
 			await _jsRuntime.InvokeVoidAsync("start_video", "video", "none");
 			await _jsRuntime.InvokeVoidAsync("detect");
