@@ -22,7 +22,7 @@
 					<video id="peer_video" style="transform: scaleX(-1);" autoplay></video>
 				</div>
 				<p class="card-text mt-3">Angle</p>
-				<input id="input" type="range" class="form-range" value=@(Camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, CameraId)" />
+				<input id="input" type="range" class="form-range" style="width: 50%;" value=@(Camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, CameraId)" />
 			</div>
 		</div>
 	</div>
