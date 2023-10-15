@@ -98,6 +98,7 @@
 				if (!isEnabledRTC)
 				{
 					isEnabledRTC = true;
+					await _jsRuntime.InvokeVoidAsync("set_display", "canvas", "none");
 					await _jsRuntime.InvokeVoidAsync("set_display", "caller", "block");
 
 					// SET video.style.display TO '';
@@ -135,6 +136,7 @@
 				{
 					isEnabledRTC = false;
 					await _jsRuntime.InvokeVoidAsync("set_display", "caller", "none");
+					await _jsRuntime.InvokeVoidAsync("set_display", "canvas", "block");
 
 					await _jsRuntime.InvokeVoidAsync("stop_video", "peer_video");
 					// SET video.style.display TO 'none';
