@@ -104,6 +104,7 @@ else
 	private async ValueTask getEventVideos(string userId)
 	{
 		EventVideos = await _eventVideoRepository.GetAllByUserId(userId);
+		StateHasChanged();
 	}
 
 	private async Task OnEventDeleted(EventVideoDTO eventVideo)
