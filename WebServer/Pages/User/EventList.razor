@@ -13,7 +13,13 @@
 	<SfGrid @ref="eventVideoGrid" DataSource="@EventVideos" Height="400" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 		<GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="false"></GridEditSettings>
 		<GridEvents OnActionBegin="ActionHandler" TValue="EventVideoDTO"></GridEvents>
-
+		<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" ></GridFilterSettings>
+		<GridSortSettings AllowUnsort="false">
+			<GridSortColumns>
+				<GridSortColumn Field="Id" Direction="SortDirection.Ascending"></GridSortColumn>
+			</GridSortColumns>
+		</GridSortSettings>
+		<GridPageSettings PageSize="5" PageCount="5" PageSizes="true"></GridPageSettings>
 		<GridColumns>
 			<GridColumn Field="Id" HeaderText="Video ID" Width="100" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer" TextAlign="TextAlign.Right"></GridColumn>
 			<GridColumn Field="Date" HeaderText="Date" Width="100" ValidationRules="@(new ValidationRules{ Required=true})" Format="d" Type="ColumnType.Date"></GridColumn>
