@@ -1,5 +1,4 @@
 ﻿@page "/user/event"
-@using System.Text.RegularExpressions;
 
 @attribute [Authorize(Roles = SD.ROLE_CLIENT)]
 
@@ -60,13 +59,15 @@ else
 {
 <div class="row">
 	<SfGrid DataSource="@EventVideos" Height="400" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
-		<GridEditSettings AllowAdding="true" AllowDeleting="true" AllowEditing="true"></GridEditSettings>
+		<GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="false"></GridEditSettings>
+		<GridEvents OnActionBegin="ActionHandler" TValue="EventVideoDTO"></GridEvents>
+
 		<GridColumns>
-			<GridColumn Field="Id" HeaderText="Video ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer" TextAlign="TextAlign.Right"></GridColumn>
-			<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="d" Type="ColumnType.Date"></GridColumn>
-			<GridColumn Field="CameraId" HeaderText="Camera ID" Width="120" ValidationRules="@(new ValidationRules { Required=true, Number=true})" Type="ColumnType.Integer" TextAlign="TextAlign.Right"></GridColumn>
-			<GridColumn Field="Labels" HeaderText="Labels" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Type="ColumnType.String"></GridColumn>
-			<GridColumn HeaderText="Video" Width="120">
+			<GridColumn Field="Id" HeaderText="Video ID" Width="100" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer" TextAlign="TextAlign.Right"></GridColumn>
+			<GridColumn Field="Date" HeaderText="Date" Width="100" ValidationRules="@(new ValidationRules{ Required=true})" Format="d" Type="ColumnType.Date"></GridColumn>
+			<GridColumn Field="CameraId" HeaderText="Camera ID" Width="100" ValidationRules="@(new ValidationRules { Required=true, Number=true})" Type="ColumnType.Integer" TextAlign="TextAlign.Right"></GridColumn>
+				<GridColumn Field="Labels" HeaderText="Labels" Width="200" ValidationRules="@(new ValidationRules{ Required=true})" Type="ColumnType.String"></GridColumn>
+			<GridColumn HeaderText="Video" Width="200">
 				<Template>
 					@{
 						var video = (context as EventVideoDTO);
@@ -95,7 +96,8 @@ else
 	private IEnumerable<EventDTO> Events { get; set; } = new List<EventDTO>();
 	private IEnumerable<EventVideoDTO> EventVideos { get; set; } = new List<EventVideoDTO>();
 
-	private List<string> ToolbarItems = new List<string>() { "Add", "Edit", "Delete", "Update", "Cancel" };
+	public SfGrid<EventVideoDTO> eventVideoGrid;
+	private List<string> ToolbarItems = new List<string>() { "Delete", "Cancel" };
 
 	private bool IsLoading { get; set; } = true;
 
@@ -112,13 +114,7 @@ else
 
 	private async ValueTask getEventVideos(string userId)
 	{
-		IsLoading = true;
-		StateHasChanged();
-
 		EventVideos = await _eventVideoRepository.GetAllByUserId(userId);
-
-		IsLoading = false;
-		StateHasChanged();
 	}
 
 	private async Task OnEventDeleted(EventVideoDTO eventVideo)
@@ -126,4 +122,13 @@ else
 		await _eventVideoRepository.Delete(eventVideo.Id);
 		await getEventVideos(User.Id);
 	}
+
+	public async void ActionHandler(ActionEventArgs<EventVideoDTO> args)
+    {
+        if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
+        {
+            await _eventVideoRepository.Delete(args.Data.Id);
+            eventVideoGrid.Refresh();
+        }
+    }
 }
