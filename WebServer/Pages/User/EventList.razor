@@ -22,12 +22,12 @@
 		<GridPageSettings PageSize="5" PageCount="5" PageSizes="true"></GridPageSettings>
 		<GridColumns>
 			<GridColumn Field="Id" HeaderText="Video ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
-			<GridColumn HeaderText="Video" Width="240">
+			<GridColumn HeaderText="Video" Width="480">
 				<Template>
 					@{
 						var video = (context as EventVideoDTO);
 						<div>
-							<video style="width: 10rem;" controls>
+							<video style="width: 30rem;" controls>
 								<source src=@(Regex.Match(video.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
 							</video>
 						</div>
