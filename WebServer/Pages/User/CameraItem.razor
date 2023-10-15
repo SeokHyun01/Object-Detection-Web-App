@@ -10,39 +10,16 @@
 @implements IAsyncDisposable
 
 
-@if (IsLoading)
-{
-	<p class="placeholder-glow">
-		<span class="placeholder col-10 bg-primary placeholder-lg"></span>
-		<span class="placeholder col-12 bg-primary placeholder-lg"></span>
-		<span class="placeholder col-6 bg-primary placeholder-lg"></span>
-	</p>
-}
-else
-{
-	<table class="table">
-		<thead>
-			<tr>
-				<th scope="col">camera</th>
-				<th scope="col">angle</th>
-			</tr>
-		</thead>
-		<tbody>
-			<tr>
-				<td>
-					<div style="width: 18rem;">
-						<video id="video" style="transform: scaleX(-1);"></video>
-					</div>
-				</td>
-				<td>
-					<input id="input" type="range" class="form-range" value=@(Camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, CameraId)" />
-				</td>
-			</tr>
-		</tbody>
-	</table>
-
-	<video id="peer_video" style="transform: scaleX(-1);" autoplay></video>
-}
+<div class="col">
+	<div class="card shadow-sm">
+		<div class="card-body" width="100%" height="225">
+			<video id="video" style="transform: scaleX(-1);"></video>
+			<video id="peer_video" style="transform: scaleX(-1);" autoplay></video>
+			<p class="card-text mt-3">Angle</p>
+			<input id="input" type="range" class="form-range" value=@(Camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, CameraId)" />
+		</div>
+	</div>
+</div>
 
 
 @code {
@@ -52,8 +29,6 @@ else
 
 	[Parameter]
 	public int CameraId { get; set; }
-
-	private bool IsLoading { get; set; } = true;
 
 	private CameraDTO Camera { get; set; } = new CameraDTO();
 
@@ -66,12 +41,7 @@ else
 
 	private async ValueTask getCamera(int id)
 	{
-		IsLoading = true;
-		StateHasChanged();
-
 		Camera = await _cameraRepository.Get(id);
-
-		IsLoading = false;
 		StateHasChanged();
 	}
 
