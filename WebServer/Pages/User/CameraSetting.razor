@@ -9,15 +9,15 @@
 
 
 <div style="display: flex; align-items: center;">
-	<h6 style="margin-right: 10px;">Select Object for Detection</h6>
-	<select style="width: 200px;" @onchange="OnSelectedItemChanged">
+	<h6 style="margin-right: 10px;">Select Model</h6>
+	<select class="form-select" @onchange="OnSelectedItemChanged">
 		@foreach (var item in items)
 		{
 			<option value="@item">@item</option>
 		}
 	</select>
 
-	<button style="margin-left: 10px; margin-top: -5px; height: 1.25em;  line-height: 5px;  background-color: yellow;" @onclick="Bluetooth" id="bluetooth">connect bluetooth</button>
+	<button id="bluetooth" type="button" class="btn btn-outline-primary" @onclick="Bluetooth">Connect Bluetooth</button>
 </div>
 
 <div style="display: flex; align-items: center;">
