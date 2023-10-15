@@ -240,6 +240,7 @@ namespace WebServer.Service
 
 								var createdVideoDTO = await _eventVideoRepository.Create(new EventVideoDTO
 								{
+									Date = eventDTOs.FirstOrDefault().Date,
 									UserId = request.UserId,
 									CameraId = request.CameraId,
 									Path = videoPath
@@ -257,6 +258,9 @@ namespace WebServer.Service
 										labels.Add(label);
 									}
 								}
+								var labels_string = string.Join(", ", labels);
+								createdVideoDTO.Labels = labels_string;
+								await _eventVideoRepository.Update(createdVideoDTO);
 
 								// FCM
 								var userId = request.UserId;
@@ -266,7 +270,7 @@ namespace WebServer.Service
 									var _title = string.Empty;
 									if (labels.Any())
 									{
-										_title = string.Join(", ", labels);
+										_title = labels_string;
 									}
 
 									foreach (var fcmInfo in fcmInfos)

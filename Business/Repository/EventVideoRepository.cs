@@ -42,6 +42,19 @@ namespace Business.Repository
 			}
 		}
 
+		public async ValueTask<EventVideoDTO> Update(EventVideoDTO objDTO)
+		{
+			var objFromDb = await _db.EventVideos.FirstOrDefaultAsync(u => u.Id == objDTO.Id);
+			if (objFromDb != null)
+			{
+				objFromDb.Labels = objDTO.Labels;
+				_db.EventVideos.Update(objFromDb);
+				await _db.SaveChangesAsync();
+				return _mapper.Map<EventVideo, EventVideoDTO>(objFromDb);
+			}
+			return objDTO;
+		}
+
 		public async ValueTask Delete(int id)
 		{
 			var video = await _db.EventVideos.FirstOrDefaultAsync(x => x.Id == id);

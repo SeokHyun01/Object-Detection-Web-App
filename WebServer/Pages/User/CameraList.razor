@@ -8,60 +8,6 @@
 @inject UserManager<IdentityUser> _userManager
 
 
-@* @if (Cameras.Any())
-{
-	<!-- DataTales Example -->
-	<div class="card shadow mb-4">
-		<div class="card-header py-3">
-			<h6 class="m-0 font-weight-bold text-primary">Cameras</h6>
-		</div>
-		<div class="card-body">
-			<div class="table-responsive">
-				<table class="table table-bordered custom-table" id="dataTable" width="100%" cellspacing="0">
-					<thead>
-						<tr>
-							<th style="width: 25%; text-align: right;">#</th>
-							<th style="width: 25%;">Camera</th>
-							<th style="width: 25%;">Angle</th>
-							<th style="width: 25%;" colspan="2">Action</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var camera in Cameras)
-						{
-							<tr>
-								<td>
-									<SfQRCodeGenerator Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")>
-										<QRCodeGeneratorDisplayText Text=@(camera.Name)></QRCodeGeneratorDisplayText>
-									</SfQRCodeGenerator>
-								</td>
-								<td>
-									<div style="width: 18rem;">
-										<img id="@($"img-{camera.Id}")">
-									</div>
-								</td>
-								<td>
-									<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
-								</td>
-								<td style="width: 12.5%;">
-									<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-outline-secondary">Goto</NavLink>
-								</td>
-								<td style="width: 12.5%;">
-									<button type="button" class="btn btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-			</div>
-		</div>
-	</div>
-}
-else
-{
-	<p>Not Found</p>
-} *@
-
 @if (Cameras.Any())
 {
 	<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
@@ -78,8 +24,8 @@ else
 						<input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
 						<div class="d-flex justify-content-between align-items-center mt-3">
 							<div class="btn-group">
-								<button type="button" class="btn btn-sm btn-outline-secondary">View</button>
-								<button type="button" class="btn btn-sm btn-outline-danger">Remove</button>
+								<NavLink href=@($"/user/camera/{camera.Id}") class="btn btn-sm btn-outline-secondary">Goto</NavLink>
+								<button type="button" class="btn btn-sm btn-outline-danger" @onclick="()=>OnCameraDeleted(camera)">Remove</button>
 							</div>
 						</div>
 					</div>
