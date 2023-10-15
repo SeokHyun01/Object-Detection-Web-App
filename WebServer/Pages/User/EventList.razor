@@ -37,6 +37,9 @@
 			<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="d" Type="ColumnType.Date"></GridColumn>
 			<GridColumn Field="CameraId" HeaderText="Camera ID" Width="120" ValidationRules="@(new ValidationRules { Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
 			<GridColumn Field="Labels" HeaderText="Labels" Width="240" ValidationRules="@(new ValidationRules{ Required=true})" Type="ColumnType.String"></GridColumn>
+			<GridCommandColumns>
+                <GridCommandColumn Type="CommandButtonType.Delete" ButtonOption="@(new CommandButtonOptions() { IconCss = "e-icons e-delete", CssClass = "e-flat" })"></GridCommandColumn>
+            </GridCommandColumns>
 		</GridColumns>
 	</SfGrid>
 </div>
@@ -56,7 +59,7 @@
 	private IEnumerable<EventVideoDTO> EventVideos { get; set; } = new List<EventVideoDTO>();
 
 	public SfGrid<EventVideoDTO> eventVideoGrid;
-	private List<string> ToolbarItems = new List<string>() { "Delete", "Cancel" };
+	private List<string> ToolbarItems = new List<string>() { "Delete" };
 
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
