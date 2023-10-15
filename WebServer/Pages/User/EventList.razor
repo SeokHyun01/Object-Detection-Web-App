@@ -10,7 +10,7 @@
 @if (EventVideos.Any())
 {
 <div class="row">
-	<SfGrid @ref="eventVideoGrid" DataSource="@EventVideos" Height="400" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
+	<SfGrid @ref="eventVideoGrid" DataSource="@EventVideos" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 		<GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="false"></GridEditSettings>
 		<GridEvents OnActionBegin="ActionHandler" TValue="EventVideoDTO"></GridEvents>
 		<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" ></GridFilterSettings>
