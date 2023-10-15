@@ -7,3 +7,8 @@ function set_input_disabled(id, value) {
     const view = document.getElementById(id);
     view.disabled = value;
 }
+
+function set_display(id, value) {
+    const view = document.getElementById(id);
+    view.style.display = value;
+}

@@ -16,11 +16,10 @@
 			<div class="col" style="text-align: center;">
 				<p class="card-text">Me</p>
 				<video id="video" style="transform: scaleX(-1);"></video>
-				@if (isEnabledRTC)
-				{
+				<div id="caller" style="display: none;">
 					<p class="card-text mt-3">Caller</p>
 					<video id="peer_video" style="transform: scaleX(-1);" autoplay></video>
-				}
+				</div>
 			</div>
 			<p class="card-text mt-3">Angle</p>
 			<input id="input" type="range" class="form-range" value=@(Camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, CameraId)" />
@@ -117,7 +116,7 @@
 				if (!isEnabledRTC)
 				{
 					isEnabledRTC = true;
-					StateHasChanged();
+					_jsRuntime.InvokeVoidAsync("set_display", "block");
 
 					// RTC Peer Connection 객체 생성
 					await _jsRuntime.InvokeVoidAsync("init_rtc", ConnectionId);
@@ -151,7 +150,7 @@
 				if (isEnabledRTC)
 				{
 					isEnabledRTC = false;
-					StateHasChanged();
+					_jsRuntime.InvokeVoidAsync("set_display", "none");
 
 					await _jsRuntime.InvokeVoidAsync("stop_video", "peer_video");
 				}
