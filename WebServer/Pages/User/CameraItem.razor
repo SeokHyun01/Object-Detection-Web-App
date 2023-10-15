@@ -116,7 +116,7 @@
 				if (!isEnabledRTC)
 				{
 					isEnabledRTC = true;
-					_jsRuntime.InvokeVoidAsync("set_display", "block");
+					await _jsRuntime.InvokeVoidAsync("set_display", "caller", "block");
 
 					// RTC Peer Connection 객체 생성
 					await _jsRuntime.InvokeVoidAsync("init_rtc", ConnectionId);
@@ -150,7 +150,7 @@
 				if (isEnabledRTC)
 				{
 					isEnabledRTC = false;
-					_jsRuntime.InvokeVoidAsync("set_display", "none");
+					await _jsRuntime.InvokeVoidAsync("set_display", "caller", "none");
 
 					await _jsRuntime.InvokeVoidAsync("stop_video", "peer_video");
 				}
