@@ -47,7 +47,7 @@ else
 @if (EventVideos.Any())
 {
 <div class="row">
-	<SfGrid DataSource="@EventVideos" Height="400" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
+	<SfGrid @ref="eventVideoGrid" DataSource="@EventVideos" Height="400" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 		<GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="false"></GridEditSettings>
 		<GridEvents OnActionBegin="ActionHandler" TValue="EventVideoDTO"></GridEvents>
 
@@ -87,8 +87,6 @@ else
 
 	public SfGrid<EventVideoDTO> eventVideoGrid;
 	private List<string> ToolbarItems = new List<string>() { "Delete", "Cancel" };
-
-	private bool IsLoading { get; set; } = true;
 
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
