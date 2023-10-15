@@ -7,53 +7,42 @@
 @inject UserManager<IdentityUser> _userManager
 
 
-@* @if (IsLoading)
+@if (EventVideos.Any())
 {
-	<p class="placeholder-glow">
-		<span class="placeholder col-10 bg-primary placeholder-lg"></span>
-		<span class="placeholder col-12 bg-primary placeholder-lg"></span>
-		<span class="placeholder col-6 bg-primary placeholder-lg"></span>
-	</p>
+	<table class="table">
+		<thead>
+			<tr>
+				<th scope="col">#</th>
+				<th scope="col">video</th>
+				<th scope="col">action</th>
+			</tr>
+		</thead>
+		<tbody>
+			@foreach (var eventVideo in EventVideos)
+			{
+				<tr>
+					<th scope="row">
+						@eventVideo.Id
+					</th>
+					<td>
+						<div style="width: 18rem;">
+							<video controls>
+								<source src=@(Regex.Match(eventVideo.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
+							</video>
+						</div>
+					</td>
+					<td>
+						<button type="button" class="btn btn-outline-danger" @onclick="()=>OnEventDeleted(eventVideo)">delete</button>
+					</td>
+				</tr>
+			}
+		</tbody>
+	</table>
 }
 else
 {
-	@if (EventVideos.Any())
-	{
-		<table class="table">
-			<thead>
-				<tr>
-					<th scope="col">#</th>
-					<th scope="col">video</th>
-					<th scope="col">action</th>
-				</tr>
-			</thead>
-			<tbody>
-				@foreach (var eventVideo in EventVideos)
-				{
-					<tr>
-						<th scope="row">
-							@eventVideo.Id
-						</th>
-						<td>
-							<div style="width: 18rem;">
-								<video controls>
-									<source src=@(Regex.Match(eventVideo.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
-								</video>
-							</div>
-						</td>
-						<td>
-							<button type="button" class="btn btn-outline-danger" @onclick="()=>OnEventDeleted(eventVideo)">delete</button>
-						</td>
-					</tr>
-				}
-			</tbody>
-		</table>
-	}
-	else
-	{
-		<p>Not found</p>
-	}
-} *@
+	<p>Not found</p>
+}
 
 @if (EventVideos.Any())
 {
