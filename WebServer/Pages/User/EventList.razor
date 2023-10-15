@@ -41,7 +41,7 @@
 				<Template>
 					@{
 						var video = (context as EventVideoDTO);
-						var camera = await _cameraRepository.Get(video.CameraId);
+						var camera = _cameraRepository.Get(video.CameraId).GetAwaiter().GetResult();
 						var name = camera.Name;
 						<p>@name</p>
 					}
