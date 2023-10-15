@@ -57,7 +57,7 @@ function predict() {
             inference(input, model_name).then(output => {
                 // const end = performance.now();
 
-                console.log("running...");
+                if(output == null) return;
 
                 const outputArray = output.arraySync()[0].flat();
                 if (model_name == "pose") {
