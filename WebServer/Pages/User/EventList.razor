@@ -41,7 +41,7 @@
 				<Template>
 					@{
 						var video = (context as EventVideoDTO);
-						var camera = _cameraRepository.Get(video.CameraId).GetAwaiter().GetResult();
+						var camera = Cameras.FirstOrDefault(x => x.Id == video.CameraId);
 						var name = camera.Name;
 						<p>@name</p>
 					}
@@ -63,7 +63,7 @@
 	public Task<AuthenticationState> AuthenticationState { get; set; }
 	private IdentityUser? User { get; set; } = null;
 
-	private IEnumerable<EventDTO> Events { get; set; } = new List<EventDTO>();
+	private IEnumerable<CameraDTO> Cameras { get; set; } = new List<CameraDTO>();
 	private IEnumerable<EventVideoDTO> EventVideos { get; set; } = new List<EventVideoDTO>();
 
 	public SfGrid<EventVideoDTO> eventVideoGrid;
@@ -82,6 +82,7 @@
 
 	private async ValueTask getEventVideos(string userId)
 	{
+		Cameras = await _cameraRepository.GetAllByUserId(userId);
 		EventVideos = await _eventVideoRepository.GetAllByUserId(userId);
 		StateHasChanged();
 	}
