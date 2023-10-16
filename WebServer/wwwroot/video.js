@@ -8,7 +8,6 @@ async function start_video(src, display = '') {
             } else {
                 video.src = window.URL.createObjectURL(stream);
             }
-
             video.onloadedmetadata = _ => video.play();
             video.style.display = display;
         } catch (err) {

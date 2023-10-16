@@ -10,19 +10,21 @@
 @implements IAsyncDisposable
 
 
-<div class="col mb-3">
-	<div class="card shadow-sm">
-		<div class="card-header">Call</div>
-		<div class="card-body" width="100%" height="225">
-			<div class="col">
-				<p class="card-text">Me</p>
-				<video id="video" style="transform: scaleX(-1);"></video>
-				<div id="caller" style="display: none;">
-					<p class="card-text mt-3">Caller</p>
-					<video id="peer_video" style="transform: scaleX(-1);" autoplay></video>
+<div class="row row-cols-1 row-cols-sm-2 g-3">
+	<div class="col mb-3">
+		<div class="card shadow-sm">
+			<div class="card-header">Call</div>
+			<div class="card-body" width="100%" height="225">
+				<div class="col">
+					<p class="card-text">Me</p>
+					<video id="video" style="transform: scaleX(-1); width:100%;"></video>
+					<div id="caller" style="display: none;">
+						<p class="card-text mt-3">Caller</p>
+						<video id="peer_video" style="transform: scaleX(-1); width:100%;" autoplay></video>
+					</div>
+					<p class="card-text mt-3">Angle</p>
+					<input id="input" type="range" class="form-range" style="width: 50%;" value=@(Camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, CameraId)" />
 				</div>
-				<p class="card-text mt-3">Angle</p>
-				<input id="input" type="range" class="form-range" style="width: 50%;" value=@(Camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, CameraId)" />
 			</div>
 		</div>
 	</div>
