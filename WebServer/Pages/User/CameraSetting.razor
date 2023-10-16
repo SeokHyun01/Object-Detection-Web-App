@@ -10,7 +10,6 @@
 <div class="row row-cols-1 row-cols-sm-2 g-3">
 	<div class="col">
 		<select class="form-select mb-3" @onchange="OnSelectedItemChanged">
-			<option selected>Select Model</option>
 			@foreach (var item in items)
 			{
 				<option value="@item">@item</option>
