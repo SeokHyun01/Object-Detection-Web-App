@@ -8,6 +8,11 @@ async function start_video(src, display = '') {
             } else {
                 video.src = window.URL.createObjectURL(stream);
             }
+
+            // 비디오 너비와 높이 설정
+            video.videoWidth = 640;
+            video.videoHeight = 480;
+            
             video.onloadedmetadata = _ => video.play();
             video.style.display = display;
         } catch (err) {

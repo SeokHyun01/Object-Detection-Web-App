@@ -28,7 +28,7 @@ function predict() {
     flippedCanvas.height = video.videoHeight;
     boxes = [];
     kepts = [];
-    console.log("video width: " + video.videoWidth + ", video height: " + video.videoHeight);
+   
     function renderFrame() {
         const flippedCtx = flippedCanvas.getContext("2d", { willReadFrequently: true });
         flippedCtx.scale(-1, 1);
