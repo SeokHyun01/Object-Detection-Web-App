@@ -104,7 +104,10 @@ async function send_mqtt(message, destinationName) {
     if (client == null) await mqtt(user_id, camera_id);
     const msg = new Paho.MQTT.Message(message);
     msg.destinationName = destinationName;
-    console.log("send_mqtt : " + message + " " + destinationName);
+    
+    if(destinationName == TOPIC_MOTOR_ACK) {
+        console.log("send_mqtt : " + message);
+    }
     client.send(msg);
 }
 
