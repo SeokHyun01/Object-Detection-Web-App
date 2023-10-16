@@ -9,9 +9,9 @@ async function start_video(src, display = '') {
                 video.src = window.URL.createObjectURL(stream);
             }
 
-            // // 비디오 너비와 높이 설정
-            // video.videoWidth = 320;
-            // video.videoHeight = 320;
+            // 비디오 너비와 높이 설정
+            video.videoWidth = 224;
+            video.videoHeight = 224;
 
             video.onloadedmetadata = _ => video.play();
             video.style.display = display;
