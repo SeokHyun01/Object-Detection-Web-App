@@ -28,7 +28,7 @@ function predict() {
     flippedCanvas.height = video.videoHeight;
     boxes = [];
     kepts = [];
-
+    console.log("video width: " + video.videoWidth + ", video height: " + video.videoHeight);
     function renderFrame() {
         const flippedCtx = flippedCanvas.getContext("2d", { willReadFrequently: true });
         flippedCtx.scale(-1, 1);
@@ -98,7 +98,7 @@ function sendImage(canvas) {
     if ((model_name == "fire" || model_name == "coco") && boxes.length > 0) {
         // Id 제거 
         delete data["Id"];
-        
+
         data["Date"] = get_date();
         data["UserId"] = user_id;
         data["CameraId"] = camera_id;
