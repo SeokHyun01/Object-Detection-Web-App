@@ -122,6 +122,8 @@ namespace WebServer.Service
 							var boundingBoxes = new List<BoundingBoxDTO>();
 							foreach (var prediction in predictions)
 							{
+								if (prediction.Score < 0.5) continue;
+
 								var originalImageHeight = input.Height;
 								var originalImageWidth = input.Width;
 								var x = (int)Math.Max(prediction.Rectangle.X, 0);

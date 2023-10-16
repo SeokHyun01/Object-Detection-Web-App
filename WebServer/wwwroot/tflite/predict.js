@@ -88,7 +88,7 @@ function sendImage(canvas) {
     } else {
         return;
     }
-    console.log("send image");
+
     const imgData = canvas.toDataURL("image/jpeg", 0.7);
     const data = {};
     data["Image"] = imgData;
