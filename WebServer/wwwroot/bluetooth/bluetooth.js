@@ -34,6 +34,7 @@ function receive_bluetooth(characteristic) {
             const json = {};
             json["Id"] = camera_id;
             json["Angle"] = Number(value_split[0]);
+            console.log("receive_bluetooth: " + json);
             send_mqtt(JSON.stringify(json), TOPIC_MOTOR_ACK);
         });
     });
