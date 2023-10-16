@@ -91,7 +91,8 @@ function sendImage(canvas) {
 
     // 시간 로그    
     const test = new Date();
-    console.log("send image" + test);
+    console.log("send time : " + test);
+    console.log("send millisecond : " + test.getMilliseconds());
 
     const imgData = canvas.toDataURL("image/jpeg", 0.7);
     const data = {};
