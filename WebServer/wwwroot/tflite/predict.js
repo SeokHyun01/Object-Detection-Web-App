@@ -89,8 +89,8 @@ function sendImage(canvas) {
         return;
     }
 
-    console.log("send image" + (now_time - prev_image_time));
-    
+    console.log("send image" + now_time);
+
     const imgData = canvas.toDataURL("image/jpeg", 0.7);
     const data = {};
     data["Image"] = imgData;
