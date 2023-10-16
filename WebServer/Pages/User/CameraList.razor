@@ -103,9 +103,9 @@ else
 					// 현재 시간을 얻습니다.
 					DateTime currentTime = DateTime.Now;
 					// 로그에 날짜 및 시간을 기록합니다.
-					string logMessage = $"현재 시간: {currentTime}";
+					string logMessage = $"now time: {currentTime}";
 					Console.WriteLine(logMessage);
-					Debug.WriteLine(logMessage);
+					Console.WriteLine("test!");
 				}
 				else if (e.ApplicationMessage.Topic == "camera/update/angle/ack")
 				{
