@@ -15,7 +15,7 @@
 		{
 			<div class="col">
 				<div class="card shadow-sm">
-					<div class="card-header">
+					<div class="card-header" style="text-align: center;">
 						<SfQRCodeGenerator BackgroundColor="#f8f9fc" Width="50%" Height="50%" Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")>
 							<QRCodeGeneratorDisplayText Text="@camera.Name"></QRCodeGeneratorDisplayText>
 						</SfQRCodeGenerator>
