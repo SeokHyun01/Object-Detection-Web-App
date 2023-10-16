@@ -88,7 +88,9 @@ function sendImage(canvas) {
     } else {
         return;
     }
-
+    // 캔버스의 크기 확인 
+    console.log("canvas size: " + canvas.width + "x" + canvas.height);
+    
     const imgData = canvas.toDataURL("image/jpeg", 0.7);
     const data = {};
     data["Image"] = imgData;
