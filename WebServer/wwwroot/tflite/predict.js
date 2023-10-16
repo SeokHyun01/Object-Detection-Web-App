@@ -92,18 +92,24 @@ function sendImage(canvas) {
     const imgData = canvas.toDataURL("image/jpeg", 0.7);
     const data = {};
     data["Image"] = imgData;
+    data["Id"] = camera_id;
+    send_mqtt(JSON.stringify(data), TOPIC_IMAGE);
 
     if ((model_name == "fire" || model_name == "coco") && boxes.length > 0) {
+        // Id 제거 
+        delete data["Id"];
+        
         data["Date"] = get_date();
         data["UserId"] = user_id;
         data["CameraId"] = camera_id;
         data["Model"] = model_name;
 
         send_mqtt(JSON.stringify(data), TOPIC_EVENT);
-    } else {
-        data["Id"] = camera_id;
-        send_mqtt(JSON.stringify(data), TOPIC_IMAGE);
     }
+    // } else {
+    //     data["Id"] = camera_id;
+    //     send_mqtt(JSON.stringify(data), TOPIC_IMAGE);
+    // }
 }
 
 function unload() {
