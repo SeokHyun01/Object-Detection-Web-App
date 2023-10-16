@@ -30,10 +30,14 @@ function receive_bluetooth(characteristic) {
         characteristic.addEventListener('characteristicvaluechanged', (event) => {
             const value = new TextDecoder().decode(event.target.value);
             // value = "degree/ack"의 형태 
-            const value_split = value.split("/");
+            const matches = value.match(/\d+\/ack/g);
+            if (!matches) return;
+
+            const value_split = matches[0].split("/");
             const json = {};
             json["Id"] = camera_id;
             json["Angle"] = Number(value_split[0]);
+
             send_mqtt(JSON.stringify(json), TOPIC_MOTOR_ACK);
         });
     });
