@@ -11,7 +11,7 @@ let boxes = [];
 let kepts = [];
 
 let prev_image_time;
-let send_interval = 100;
+let send_interval = 500;
 
 // 좌우 반전 추가한 detect
 function detect() {
@@ -88,11 +88,6 @@ function sendImage(canvas) {
     } else {
         return;
     }
-
-    // 시간 로그    
-    const test = new Date();
-    console.log("send time : " + test);
-    console.log("send millisecond : " + test.getMilliseconds());
 
     const imgData = canvas.toDataURL("image/jpeg", 0.7);
     const data = {};
