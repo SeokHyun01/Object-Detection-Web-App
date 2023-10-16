@@ -11,7 +11,7 @@ let boxes = [];
 let kepts = [];
 
 let prev_image_time;
-let send_interval = 500;
+let send_interval = 100;
 
 // 좌우 반전 추가한 detect
 function detect() {
