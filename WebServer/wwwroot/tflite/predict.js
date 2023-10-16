@@ -36,7 +36,7 @@ function predict() {
 
         const ctx = canvas.getContext("2d", { willReadFrequently: true });
         ctx.drawImage(flippedCanvas, 0, 0, canvas.width, canvas.height);
-       
+
         if (model_name == "face" && boxes.length > 0) draw_blur(ctx, boxes);
 
         if (client != null && client.isConnected()) sendImage(canvas);
@@ -57,7 +57,7 @@ function predict() {
             inference(input, model_name).then(output => {
                 // const end = performance.now();
 
-                if(output == null) return;
+                if (output == null) return;
 
                 const outputArray = output.arraySync()[0].flat();
                 if (model_name == "pose") {
@@ -92,13 +92,13 @@ function sendImage(canvas) {
     const imgData = canvas.toDataURL("image/jpeg", 0.7);
     const data = {};
     data["Image"] = imgData;
-  
+
     if ((model_name == "fire" || model_name == "coco") && boxes.length > 0) {
         data["Date"] = get_date();
         data["UserId"] = user_id;
         data["CameraId"] = camera_id;
         data["Model"] = model_name;
-      
+
         send_mqtt(JSON.stringify(data), TOPIC_EVENT);
     } else {
         data["Id"] = camera_id;
@@ -114,18 +114,20 @@ function unload() {
 }
 
 function change_model(name) {
-    stop_detect();
+    stop_detect(true);
 
     model_name = name;
     start_video("video", 'none');
     detect();
-    mqtt(user_id, camera_id);
+    // mqtt(user_id, camera_id);
 }
 
-function stop_detect() {
+function stop_detect(isChangeModel = false) {
     stop_video("video");
     video.removeEventListener("play", predict);
-    unload();
+    if (isChangeModel && intervalId) clearTimeout(intervalId); 
+    else unload();
+    
     tf.disposeVariables();
 
     // 캔버스는 내용을 지우고 flipped 캔버스는 삭제
@@ -134,7 +136,7 @@ function stop_detect() {
     flippedCanvas.remove();
 }
 
-function get_date(){
+function get_date() {
     //yyyy-MM-dd HH:mm:ss 
     const date = new Date();
     const year = date.getFullYear().toString();
@@ -143,11 +145,11 @@ function get_date(){
     let hour = date.getHours().toString();
     let minute = date.getMinutes().toString();
     let second = date.getSeconds().toString();
-    if(month.length == 1) month = "0" + month;
-    if(day.length == 1) day = "0" + day;
-    if(hour.length == 1) hour = "0" + hour;
-    if(minute.length == 1) minute = "0" + minute;
-    if(second.length == 1) second = "0" + second;
+    if (month.length == 1) month = "0" + month;
+    if (day.length == 1) day = "0" + day;
+    if (hour.length == 1) hour = "0" + hour;
+    if (minute.length == 1) minute = "0" + minute;
+    if (second.length == 1) second = "0" + second;
 
     return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
 }
