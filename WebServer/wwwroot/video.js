@@ -10,9 +10,9 @@ async function start_video(src, display = '') {
             }
 
             // 비디오 너비와 높이 설정
-            video.videoWidth = 640;
-            video.videoHeight = 480;
-            
+            video.videoWidth = 320;
+            video.videoHeight = 320;
+
             video.onloadedmetadata = _ => video.play();
             video.style.display = display;
         } catch (err) {
