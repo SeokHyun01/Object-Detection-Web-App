@@ -22,11 +22,9 @@
 				<Template>
 					@{
 						var video = (context as EventVideoDTO);
-						<div>
-							<video style="width: 30rem;" controls>
-								<source src=@(Regex.Match(video.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
-							</video>
-						</div>
+						<video style="width: 30rem;" controls>
+							<source src=@(Regex.Match(video.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
+						</video>
 					}
 				</Template>
 			</GridColumn>
