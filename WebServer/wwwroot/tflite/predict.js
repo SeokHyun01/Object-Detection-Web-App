@@ -82,7 +82,8 @@ function sendImage(canvas) {
     if (prev_image_time == null) prev_image_time = new Date().getTime();
 
     const now_time = new Date().getTime();
-
+    console.log(now_time);
+    
     if (now_time - prev_image_time > send_interval) {
         prev_image_time = now_time;
     } else {
