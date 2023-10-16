@@ -89,7 +89,9 @@ function sendImage(canvas) {
         return;
     }
 
-    console.log("send image" + now_time);
+    // 시간 로그    
+    const test = new Date().getSeconds();
+    console.log("send image" + test);
 
     const imgData = canvas.toDataURL("image/jpeg", 0.7);
     const data = {};
