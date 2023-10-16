@@ -172,4 +172,5 @@ function stop_rtc() {
     stop_video('video');
     start_video('video', 'none');
     detect();
+    mqtt(user_id, camera_id);
 }
