@@ -7,15 +7,15 @@
 @inject IEventVideoRepository _eventVideoRepository
 @inject UserManager<IdentityUser> _userManager
 
-<div class="row">
-	@if (IsLoading)
-	{
-		<span class="placeholder w-50"></span>
-		<span class="placeholder w-75"></span>
-		<span class="placeholder w-25"></span>
-	}
-	else
-	{
+@if (IsLoading)
+{
+	<span class="placeholder-glow w-50 bg-primary"></span>
+	<span class="placeholder-glow w-75 bg-primary"></span>
+	<span class="placeholder-glow w-25 bg-primary"></span>
+}
+else
+{
+	<div class="row">
 		@if (EventVideos.Any())
 		{
 
@@ -55,8 +55,8 @@
 		{
 			<p>Not found</p>
 		}
-	}
-</div>
+	</div>
+}
 
 
 @code {
@@ -106,5 +106,5 @@
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
 		}
-    }
+	}
 }
