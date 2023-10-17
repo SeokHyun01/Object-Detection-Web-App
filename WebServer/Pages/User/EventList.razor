@@ -28,7 +28,7 @@
 					}
 				</Template>
 			</GridColumn>
-				<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="yyyy-MM-dd HH:mm:ss" Type="ColumnType.Date"></GridColumn>
+				<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="YYYY-MM-DDTHH:MM:SS" Type="ColumnType.Date"></GridColumn>
 			<GridColumn Field="CameraId" HeaderText="Camera ID" Width="120" ValidationRules="@(new ValidationRules { Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
 			<GridColumn HeaderText="Camera Name" Width="120" Type="ColumnType.String">
 				<Template>
