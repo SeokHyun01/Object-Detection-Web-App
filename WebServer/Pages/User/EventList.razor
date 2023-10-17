@@ -103,6 +103,9 @@ else
 	{
 		if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
 		{
+			IsLoading = true;
+			StateHasChanged();
+
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
 		}
