@@ -143,7 +143,7 @@ function stop_detect(isChangeModel = false) {
 }
 
 function get_date() {
-    //yyyy-MM-dd HH:mm:ss 
+    //yyyy-MM-ddTHH:MM:ss 
     const date = new Date();
     const year = date.getFullYear().toString();
     let month = (date.getMonth() + 1).toString();
