@@ -8,45 +8,50 @@
 @inject UserManager<IdentityUser> _userManager
 
 
-@if (EventVideos.Any())
-{
-<div class="row">
-	<SfGrid @ref="eventVideoGrid" DataSource="@EventVideos" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
-		<GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="false"></GridEditSettings>
-		<GridEvents OnActionBegin="ActionHandler" TValue="EventVideoDTO"></GridEvents>
-		<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" ></GridFilterSettings>
-		<GridColumns>
-			<GridColumn Field="Id" HeaderText="Video ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
-			<GridColumn HeaderText="Video" Width="480">
-				<Template>
-					@{
-						var video = (context as EventVideoDTO);
-						<video style="width: 30rem;" controls>
-							<source src=@(Regex.Match(video.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
-						</video>
-					}
-				</Template>
-			</GridColumn>
-				<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="yyyy-MM-ddTHH:MM:ss" Type="ColumnType.Date"></GridColumn>
-			<GridColumn Field="CameraId" HeaderText="Camera ID" Width="120" ValidationRules="@(new ValidationRules { Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
-			<GridColumn HeaderText="Camera Name" Width="120" Type="ColumnType.String">
-				<Template>
-					@{
-						var video = (context as EventVideoDTO);
-						var camera = Cameras.FirstOrDefault(x => x.Id == video.CameraId);
-						var name = camera.Name;
-						<p>@name</p>
-					}
-				</Template>
-			</GridColumn>
-			<GridColumn Field="Labels" HeaderText="Labels" Width="240" ValidationRules="@(new ValidationRules{ Required=true})" Type="ColumnType.String"></GridColumn>
-		</GridColumns>
-	</SfGrid>
-</div>
+@if (IsLoading) {
 
-} else
-{
-	<p>Not found</p>
+} else {
+	@if (EventVideos.Any())
+	{
+		<div class="row">
+			<SfGrid @ref="eventVideoGrid" DataSource="@EventVideos" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
+				<GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="false"></GridEditSettings>
+				<GridEvents OnActionBegin="ActionHandler" TValue="EventVideoDTO"></GridEvents>
+				<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+				<GridColumns>
+					<GridColumn Field="Id" HeaderText="Video ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
+					<GridColumn HeaderText="Video" Width="480">
+						<Template>
+							@{
+								var video = (context as EventVideoDTO);
+								<video style="width: 30rem;" controls>
+									<source src=@(Regex.Match(video.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
+								</video>
+							}
+						</Template>
+					</GridColumn>
+					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="yyyy-MM-ddTHH:MM:ss" Type="ColumnType.Date"></GridColumn>
+					<GridColumn Field="CameraId" HeaderText="Camera ID" Width="120" ValidationRules="@(new ValidationRules { Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
+					<GridColumn HeaderText="Camera Name" Width="120" Type="ColumnType.String">
+						<Template>
+							@{
+								var video = (context as EventVideoDTO);
+								var camera = Cameras.FirstOrDefault(x => x.Id == video.CameraId);
+								var name = camera.Name;
+								<p>@name</p>
+							}
+						</Template>
+					</GridColumn>
+					<GridColumn Field="Labels" HeaderText="Labels" Width="240" ValidationRules="@(new ValidationRules{ Required=true})" Type="ColumnType.String"></GridColumn>
+				</GridColumns>
+			</SfGrid>
+		</div>
+
+	}
+	else
+	{
+		<p>Not found</p>
+	}
 }
 
 
@@ -61,6 +66,8 @@
 	public SfGrid<EventVideoDTO> eventVideoGrid;
 	private List<string> ToolbarItems = new List<string>() { "Delete" };
 
+	private bool IsLoading { get; set; } = true;
+
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -74,8 +81,17 @@
 
 	private async ValueTask getEventVideos(string userId)
 	{
+		if (!IsLoading)
+		{
+			IsLoading = true;
+			StateHasChanged();
+		}
+
 		Cameras = await _cameraRepository.GetAllByUserId(userId);
 		EventVideos = await _eventVideoRepository.GetAllByUserId(userId);
+		// await eventVideoGrid.Refresh();
+
+		IsLoading = false;
 		StateHasChanged();
 	}
 
@@ -85,7 +101,6 @@
 		{
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
-			await eventVideoGrid.Refresh();
 		}
     }
 }
