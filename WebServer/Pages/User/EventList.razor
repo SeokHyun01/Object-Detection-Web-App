@@ -7,13 +7,18 @@
 @inject IEventVideoRepository _eventVideoRepository
 @inject UserManager<IdentityUser> _userManager
 
-
-@if (IsLoading) {
-
-} else {
-	@if (EventVideos.Any())
+<div class="row">
+	@if (IsLoading)
 	{
-		<div class="row">
+		<span class="placeholder w-50"></span>
+		<span class="placeholder w-75"></span>
+		<span class="placeholder w-25"></span>
+	}
+	else
+	{
+		@if (EventVideos.Any())
+		{
+
 			<SfGrid @ref="eventVideoGrid" DataSource="@EventVideos" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 				<GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="false"></GridEditSettings>
 				<GridEvents OnActionBegin="ActionHandler" TValue="EventVideoDTO"></GridEvents>
@@ -45,14 +50,13 @@
 					<GridColumn Field="Labels" HeaderText="Labels" Width="240" ValidationRules="@(new ValidationRules{ Required=true})" Type="ColumnType.String"></GridColumn>
 				</GridColumns>
 			</SfGrid>
-		</div>
-
+		}
+		else
+		{
+			<p>Not found</p>
+		}
 	}
-	else
-	{
-		<p>Not found</p>
-	}
-}
+</div>
 
 
 @code {
