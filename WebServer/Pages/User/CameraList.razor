@@ -16,10 +16,10 @@
 			<div class="col">
 				<div class="card shadow-sm">
 					<div class="card-header" style="text-align: center;">
+						<span class="card-text">@camera.Name</span>
 						<SfQRCodeGenerator BackgroundColor="#f8f9fc" Width="50%" Height="50%" Value=@($"{_navigationManager.BaseUri}user/{camera.UserId}/camera/{camera.Id}/setting")>
 							<QRCodeGeneratorDisplayText Visibility="false"></QRCodeGeneratorDisplayText>
 						</SfQRCodeGenerator>
-						<span class="card-text">@camera.Name</span>
 					</div>
 					<div class="card-body" width="100%" height="225">
 						<img id="@($"img-{camera.Id}")" style="width: 100%;" class="mt-3">
