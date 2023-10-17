@@ -79,19 +79,13 @@
 		StateHasChanged();
 	}
 
-	private async Task OnEventDeleted(EventVideoDTO eventVideo)
-	{
-		await _eventVideoRepository.Delete(eventVideo.Id);
-		await getEventVideos(User.Id);
-	}
-
 	public async void ActionHandler(ActionEventArgs<EventVideoDTO> args)
 	{
 		if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
 		{
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
-			eventVideoGrid.Refresh();
+			await eventVideoGrid.Refresh();
 		}
     }
 }
