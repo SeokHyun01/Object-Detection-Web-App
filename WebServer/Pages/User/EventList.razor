@@ -15,7 +15,6 @@
 		<GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="false"></GridEditSettings>
 		<GridEvents OnActionBegin="ActionHandler" TValue="EventVideoDTO"></GridEvents>
 		<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu" ></GridFilterSettings>
-		<GridPageSettings PageSize="5" PageCount="5" PageSizes="true"></GridPageSettings>
 		<GridColumns>
 			<GridColumn Field="Id" HeaderText="Video ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
 			<GridColumn HeaderText="Video" Width="480">
