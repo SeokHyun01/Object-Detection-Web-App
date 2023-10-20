@@ -136,12 +136,14 @@ else
 				};
 			}).Build();
 
+			RTCHubConnection.On("OnConnected", async () =>
+			{
+				await RTCHubConnection.SendAsync("AddUser", User.Id);				
+			});
+
 			RTCHubConnection.On("OnEnabledRTC", async () =>
 			{
-				if (RTCHubConnection != null && RTCHubConnection.State == HubConnectionState.Connected)
-				{
-					await RTCHubConnection.SendAsync("GetAllEnabledRTCs", Cameras.Select(x => x.Id.ToString()));
-				}
+				await RTCHubConnection.SendAsync("GetAllEnabledRTCs", Cameras.Select(x => x.Id.ToString()));
 			});
 
 			RTCHubConnection.On<IEnumerable<string>>("EnabledRTCs", async enabledRTCs =>
@@ -198,7 +200,7 @@ else
 			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
 			await getCameras(User.Id);
-			if (RTCHubConnection != null && RTCHubConnection.State == HubConnectionState.Connected)
+			if (RTCHubConnection.State == HubConnectionState.Connected)
 			{
 				await RTCHubConnection.SendAsync("GetAllEnabledRTCs", Cameras.Select(x => x.Id.ToString()));
 			}

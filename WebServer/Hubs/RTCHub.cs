@@ -50,11 +50,11 @@ namespace WebServer.Hubs
 			await base.OnDisconnectedAsync(exception);
 		}
 
-		public async ValueTask AddUser(string userId, string connectionId)
+		public async ValueTask AddUser(string userId)
 		{
 			if (!ConnectedUsers.ContainsKey(userId))
 			{
-				ConnectedUsers[userId] = connectionId;
+				ConnectedUsers[userId] = Context.ConnectionId;
 			}
 			await Groups.AddToGroupAsync(Context.ConnectionId, userId);
 			_logger.LogInformation($"User {userId}가 접속하였습니다.");
@@ -79,6 +79,7 @@ namespace WebServer.Hubs
 				if (Rooms[roomName].Count == 2)
 				{
 					await Clients.Group(roomName).SendAsync("OnEnabledRTC");
+
 					await Clients.Group(userId).SendAsync("OnEnabledRTC");
 				}
 

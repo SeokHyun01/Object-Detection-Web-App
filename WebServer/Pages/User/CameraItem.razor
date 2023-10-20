@@ -116,11 +116,6 @@
 			RTCHubConnection.On<string>("OnConnected", async connectionId =>
 			{
 				ConnectionId = connectionId;
-
-				if (RTCHubConnection != null && RTCHubConnection.State == HubConnectionState.Connected)
-				{
-					await RTCHubConnection.SendAsync("AddUser", User.Id, connectionId);
-				}
 			});
 
 			RTCHubConnection.On("OnEnabledRTC", async () =>
