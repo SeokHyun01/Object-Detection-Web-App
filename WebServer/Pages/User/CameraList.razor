@@ -102,8 +102,11 @@ else
 
 	private async ValueTask getCameras(string userId)
 	{
-		IsLoading = true;
-		StateHasChanged();
+		if (!IsLoading)
+		{
+			IsLoading = true;
+			StateHasChanged();
+		}
 
 		Cameras = await _cameraRepository.GetAllByUserId(User.Id);
 
@@ -117,7 +120,6 @@ else
 		{
 			var authState = await AuthenticationState;
 			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
-			await getCameras(User.Id);
 
 			RTCHubConnection = new HubConnectionBuilder()
 			.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), (opts) =>
@@ -184,6 +186,9 @@ else
 			.WithTopicFilter(f => { f.WithTopic("camera/update/angle/ack"); })
 			.Build();
 			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
+
+			await getCameras(User.Id);
+			await RTCHubConnection.SendAsync("GetAllEnabledRTCs", Cameras.Select(x => x.Id.ToString()));
 		}
 	}
 
