@@ -164,7 +164,10 @@
 			await _jsRuntime.InvokeVoidAsync("mqtt", UserId.ToString(), CameraId);
 
 			RoomName = $"{CameraId.ToString()}";
-			await RTCHubConnection.SendAsync("JoinRoom", RoomName, UserId);
+			if (RTCHubConnection != null && RTCHubConnection.State == HubConnectionState.Connected)
+			{
+				await RTCHubConnection.SendAsync("JoinRoom", RoomName, UserId);
+			}
 		}
 	}
 

@@ -172,7 +172,10 @@
 			await _jsRuntime.InvokeVoidAsync("start_video", "video");
 
 			RoomName = $"{CameraId.ToString()}";
-			await RTCHubConnection.SendAsync("JoinRoom", RoomName, User.Id);
+			if (RTCHubConnection != null && RTCHubConnection.State == HubConnectionState.Connected)
+			{
+				await RTCHubConnection.SendAsync("JoinRoom", RoomName, User.Id);
+			}
 		}
 	}
 
