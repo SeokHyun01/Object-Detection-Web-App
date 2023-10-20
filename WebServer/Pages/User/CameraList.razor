@@ -48,6 +48,7 @@ else
 								</div>
 								<div class="form-check form-switch">
 									<input id=@($"rtc-{camera.Id}") value="false" class="form-check-input" type="checkbox" role="switch" @onchange="(args)=>StopRTC(args, camera.Id)" disabled>
+									<label class="form-check-label" for=@($"rtc-{camera.Id}")>Enabled RTC</label>
 								</div>
 							</div>
 						</div>
