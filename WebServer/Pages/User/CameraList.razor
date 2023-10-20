@@ -46,6 +46,11 @@ else
 										Remove
 									</button>
 								</div>
+								<small class="text-body-secondary">
+									<div class="form-check form-switch">
+										<input class="form-check-input" type="checkbox" role="switch" @onchange="(args)=>StopRTC(args)">
+									</div>
+								</small>
 							</div>
 						</div>
 					</div>
@@ -81,6 +86,13 @@ else
 
 	private IMqttClient? MqttClient { get; set; } = null;
 
+	private HubConnection? RTCHubConnection { get; set; } = null;
+
+
+	private async Task StopRTC(ChangeEventArgs args)
+	{
+		Console.WriteLine(args.Value);
+	}
 
 	private async ValueTask getCameras(string userId)
 	{
@@ -100,6 +112,23 @@ else
 			var authState = await AuthenticationState;
 			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 			await getCameras(User.Id);
+
+			RTCHubConnection = new HubConnectionBuilder()
+			.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), (opts) =>
+			{
+				opts.HttpMessageHandlerFactory = (message) =>
+				{
+					if (message is HttpClientHandler clientHandler)
+					{
+						// SSL 무시
+						clientHandler.ServerCertificateCustomValidationCallback +=
+							(sender, certificate, chain, sslPolicyErrors) => { return true; };
+					}
+					return message;
+				};
+			}).Build();
+
+			await RTCHubConnection.StartAsync();
 
 			var mqttFactory = new MqttFactory();
 			MqttClient = mqttFactory.CreateMqttClient();
