@@ -136,7 +136,7 @@ else
 				};
 			}).Build();
 
-			RTCHubConnection.On("OnConnected", async () =>
+			RTCHubConnection.On<string>("OnConnected", async connectionId =>
 			{
 				await RTCHubConnection.SendAsync("AddUser", User.Id);				
 			});
