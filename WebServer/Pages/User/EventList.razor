@@ -44,7 +44,7 @@ else
 							@{
 								var video = (context as EventVideoDTO);
 								var camera = Cameras.FirstOrDefault(x => x.Id == video.CameraId);
-								if (!string.IsNullOrEmpty(camera.Name))
+								if (camera != null)
 								{
 									var name = camera.Name;
 									<p>@name</p>
