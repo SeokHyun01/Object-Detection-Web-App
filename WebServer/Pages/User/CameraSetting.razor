@@ -78,6 +78,7 @@
 			var isCameraExist = (await _cameraRepository.GetAllByUserId(UserId.ToString())).Any();
 			if (!isCameraExist)
 			{
+				Console.WriteLine("해당 카메라를 찾을 수 없습니다.");
 				_navigationManager.NavigateTo("/Error");
 			}
 
