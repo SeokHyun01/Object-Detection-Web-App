@@ -44,8 +44,11 @@ else
 							@{
 								var video = (context as EventVideoDTO);
 								var camera = Cameras.FirstOrDefault(x => x.Id == video.CameraId);
-								var name = camera.Name;
-								<p>@name</p>
+								if (!string.IsNullOrEmpty(camera.Name))
+								{
+									var name = camera.Name;
+									<p>@name</p>
+								}
 							}
 						</Template>
 					</GridColumn>
