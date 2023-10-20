@@ -91,7 +91,10 @@ else
 
 	private async Task StopRTC(ChangeEventArgs args)
 	{
-		Console.WriteLine(args.Value);
+		if (!Convert.ToBoolean(args.Value))
+		{
+			Console.WriteLine(args.Value);
+		}
 	}
 
 	private async ValueTask getCameras(string userId)
