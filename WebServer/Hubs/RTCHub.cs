@@ -57,7 +57,7 @@ namespace WebServer.Hubs
 				ConnectedUsers[userId] = connectionId;
 			}
 			await Groups.AddToGroupAsync(Context.ConnectionId, userId);
-			_logger.LogInformation($"User {userId}가 접속하였습니다.")
+			_logger.LogInformation($"User {userId}가 접속하였습니다.");
 		}
 
 		public async ValueTask JoinRoom(string roomName, string userId)
