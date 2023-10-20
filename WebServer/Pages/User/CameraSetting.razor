@@ -5,6 +5,8 @@
 @inject IJSRuntime _jsRuntime
 @inject NavigationManager _navigationManager
 @inject UserManager<IdentityUser> _userManager
+@inject ICameraRepository _cameraRepository
+
 @implements IAsyncDisposable
 
 <div class="row row-cols-1 row-cols-sm-2 g-3">
@@ -73,6 +75,12 @@
 	{
 		if (firstRender)
 		{
+			var isCameraExist = (await _cameraRepository.GetAllByUserId(UserId.ToString())).Any();
+			if (!isCameraExist)
+			{
+				_navigationManager.NavigateTo("/Error");
+			}
+
 			//var authState = await AuthenticationState;
 			//User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 
