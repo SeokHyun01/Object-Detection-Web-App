@@ -198,6 +198,10 @@ else
 			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
 			await getCameras(User.Id);
+			if (RTCHubConnection != null && RTCHubConnection.State == HubConnectionState.Connected)
+			{
+				await RTCHubConnection.SendAsync("GetAllEnabledRTCs", Cameras.Select(x => x.Id.ToString()));
+			}
 		}
 	}
 
