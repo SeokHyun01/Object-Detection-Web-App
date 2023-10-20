@@ -7,6 +7,7 @@ namespace WebServer.Hubs
 	{
 		private readonly ILogger<RTCHub> _logger;
 		private static Dictionary<string, List<string>> Rooms = new();
+		private static Dictionary<string, string> ConnectedUsers = new();
 
 
 		public RTCHub(ILogger<RTCHub> logger)
@@ -22,7 +23,43 @@ namespace WebServer.Hubs
 			await base.OnConnectedAsync();
 		}
 
-		public async ValueTask JoinRoom(string roomName)
+		public override async Task OnDisconnectedAsync(Exception? exception)
+		{
+			var value = Context.ConnectionId;
+
+			foreach (var room in Rooms)
+			{
+				if (room.Value.Contains(value))
+				{
+					var roomName = room.Key;
+					await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
+					room.Value.Remove(value);
+
+					await Clients.Group(roomName).SendAsync("OnDisabledRTC");
+
+					_logger.LogInformation($"유저 {Context.ConnectionId}가 Room {roomName}에서 퇴장하였습니다.");
+
+					if (room.Value.Count == 0)
+					{
+						Rooms.Remove(roomName);
+						_logger.LogInformation($"Room {roomName}이 사라졌습니다.");
+					}
+				}
+			}
+
+			await base.OnDisconnectedAsync(exception);
+		}
+
+		public async ValueTask AddUser(string userId, string connectionId)
+		{
+			if (!ConnectedUsers.ContainsKey(userId))
+			{
+				ConnectedUsers[userId] = connectionId;
+			}
+			await Groups.AddToGroupAsync(Context.ConnectionId, userId);
+		}
+
+		public async ValueTask JoinRoom(string roomName, string userId)
 		{
 			try
 			{
@@ -41,6 +78,7 @@ namespace WebServer.Hubs
 				if (Rooms[roomName].Count == 2)
 				{
 					await Clients.Group(roomName).SendAsync("OnEnabledRTC");
+					await Clients.Group(userId).SendAsync("OnEnabledRTC");
 				}
 
 				await Clients.GroupExcept(roomName, Context.ConnectionId).SendAsync("Welcome");
@@ -53,31 +91,17 @@ namespace WebServer.Hubs
 			}
 		}
 
-		public override async Task OnDisconnectedAsync(Exception? exception)
+		public async ValueTask GetAllEnabledRTCs(IEnumerable<string> roomNames)
 		{
-			var value = Context.ConnectionId;
-
-			foreach (var room in Rooms)
+			var enabledRTCs = new List<string>();
+			foreach (var roomName in roomNames)
 			{
-				if (room.Value.Contains(value))
+				if (Rooms.ContainsKey(roomName))
 				{
-					var roomName = room.Key;
-					await Groups.RemoveFromGroupAsync(Context.ConnectionId, roomName);
-					room.Value.Remove(value);
-
-					await Clients.Group(roomName).SendAsync("OnDisabledRTC");
-					
-					_logger.LogInformation($"유저 {Context.ConnectionId}가 Room {roomName}에서 퇴장하였습니다.");
-
-					if (room.Value.Count == 0)
-					{
-						Rooms.Remove(roomName);
-						_logger.LogInformation($"Room {roomName}이 사라졌습니다.");
-					}
+					enabledRTCs.Add(roomName);
 				}
 			}
-
-			await base.OnDisconnectedAsync(exception);
+			await Clients.Caller.SendAsync("EnabledRTCs", enabledRTCs);
 		}
 
 		public async ValueTask SendOffer(string offer, string roomName)
@@ -117,19 +141,6 @@ namespace WebServer.Hubs
 
 			Rooms.Remove(roomName);
 			_logger.LogInformation($"Room {roomName}이 사라졌습니다.");
-		}
-
-		public async ValueTask GetAllEnabledRTCs(IEnumerable<string> roomNames)
-		{
-			var enabledRTCs = new List<string>();
-			foreach (var roomName in roomNames)
-			{
-				if (Rooms.ContainsKey(roomName))
-				{
-					enabledRTCs.Add(roomName);
-				}
-			}
-			await Clients.Caller.SendAsync("OnEnabledRTCs", enabledRTCs);
 		}
 	}
 }

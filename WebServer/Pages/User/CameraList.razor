@@ -92,7 +92,7 @@ else
 		if (!Convert.ToBoolean(args.Value))
 		{
 			var roomName = cameraId.ToString();
-			if (RTCHubConnection != null)
+			if (RTCHubConnection != null && RTCHubConnection.State == HubConnectionState.Connected)
 			{
 				await RTCHubConnection.SendAsync("StopRTC", roomName);
 				await _jsRuntime.InvokeVoidAsync("set_input_disabled", $"rtc-{cameraId}", true);
@@ -136,7 +136,15 @@ else
 				};
 			}).Build();
 
-			RTCHubConnection.On<IEnumerable<string>>("OnEnabledRTCs", async enabledRTCs =>
+			RTCHubConnection.On("OnEnabledRTC", async () =>
+			{
+				if (RTCHubConnection != null && RTCHubConnection.State == HubConnectionState.Connected)
+				{
+					await RTCHubConnection.SendAsync("GetAllEnabledRTCs", Cameras.Select(x => x.Id.ToString()));
+				}
+			});
+
+			RTCHubConnection.On<IEnumerable<string>>("EnabledRTCs", async enabledRTCs =>
 			{
 				foreach (var roomName in enabledRTCs)
 				{
@@ -190,7 +198,6 @@ else
 			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
 			await getCameras(User.Id);
-			await RTCHubConnection.SendAsync("GetAllEnabledRTCs", Cameras.Select(x => x.Id.ToString()));
 		}
 	}
 

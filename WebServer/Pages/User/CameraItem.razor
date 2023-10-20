@@ -116,6 +116,11 @@
 			RTCHubConnection.On<string>("OnConnected", async connectionId =>
 			{
 				ConnectionId = connectionId;
+
+				if (RTCHubConnection != null && RTCHubConnection.State == HubConnectionState.Connected)
+				{
+					await RTCHubConnection.SendAsync("AddUser", User.Id, connectionId);
+				}
 			});
 
 			RTCHubConnection.On("OnEnabledRTC", async () =>
@@ -170,7 +175,7 @@
 			await _jsRuntime.InvokeVoidAsync("start_video", "video");
 
 			RoomName = $"{CameraId.ToString()}";
-			await RTCHubConnection.SendAsync("JoinRoom", RoomName);
+			await RTCHubConnection.SendAsync("JoinRoom", RoomName, User.Id);
 		}
 	}
 
