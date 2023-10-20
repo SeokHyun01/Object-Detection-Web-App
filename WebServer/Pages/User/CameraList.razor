@@ -140,7 +140,9 @@ else
 			{
 				foreach (var roomName in enabledRTCs)
 				{
-					await _jsRuntime.InvokeVoidAsync("set_checkbox_value", $"rtc-{roomName}", true);
+					var id = $"rtc-{roomName}";
+					await _jsRuntime.InvokeVoidAsync("set_checkbox_value", id, true);
+					await _jsRuntime.InvokeVoidAsync("set_input_disabled", id, false);
 				}
 			});
 
