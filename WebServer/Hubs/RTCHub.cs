@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.SignalR;
+using Newtonsoft.Json.Linq;
 
 namespace WebServer.Hubs
 {
@@ -102,6 +103,33 @@ namespace WebServer.Hubs
 				await group.SendAsync("ReceiveIce", ice);
 				_logger.LogInformation($"Room {roomName}의 유저 {senderId}가 ICE를 전송하였습니다.");
 			}
+		}
+
+		public async ValueTask StopRTC(string roomName)
+		{
+			await Clients.Group(roomName).SendAsync("OnDisabledRTC");
+
+			foreach(var user in Rooms[roomName])
+			{
+				await Groups.RemoveFromGroupAsync(user, roomName);
+				_logger.LogInformation($"유저 {user}가 Room {roomName}에서 퇴장하였습니다.");
+			}
+
+			Rooms.Remove(roomName);
+			_logger.LogInformation($"Room {roomName}이 사라졌습니다.");
+		}
+
+		public async ValueTask GetAllEnabledRTCs(IEnumerable<string> roomNames)
+		{
+			var enabledRTCs = new List<string>();
+			foreach (var roomName in roomNames)
+			{
+				if (Rooms.ContainsKey(roomName))
+				{
+					enabledRTCs.Add(roomName);
+				}
+			}
+			await Clients.Caller.SendAsync("OnEnabledRTCs", enabledRTCs);
 		}
 	}
 }

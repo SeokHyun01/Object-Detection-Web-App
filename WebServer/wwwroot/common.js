@@ -12,3 +12,8 @@ function set_display(id, value) {
     const view = document.getElementById(id);
     view.style.display = value;
 }
+
+function set_checkbox_value(id, value) {
+    const view = document.getElementById(id);
+    view.checked = value;
+}
