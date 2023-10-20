@@ -46,7 +46,7 @@ else
 										Remove
 									</button>
 								</div>
-								<div class="form-check form-switch">
+								<div class="d-flex justify-content-end align-items-center form-check form-switch">
 									<input id=@($"rtc-{camera.Id}") value="false" class="form-check-input" type="checkbox" role="switch" @onchange="(args)=>StopRTC(args, camera.Id)" disabled>
 									<label class="form-check-label d-none d-md-block" for=@($"rtc-{camera.Id}")>Disable RTC</label>
 								</div>

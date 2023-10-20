@@ -20,7 +20,6 @@ else
 	<div class="row">
 		@if (EventVideos.Any())
 		{
-
 			<SfGrid @ref="eventVideoGrid" DataSource="@EventVideos" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 				<GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="false"></GridEditSettings>
 				<GridEvents OnActionBegin="ActionHandler" TValue="EventVideoDTO"></GridEvents>
