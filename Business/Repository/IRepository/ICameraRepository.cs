@@ -13,7 +13,6 @@ namespace Business.Repository.IRepository
 		ValueTask<CameraDTO> Update(CameraDTO objDTO);
 		ValueTask<int> Delete(int id);
 		ValueTask<CameraDTO?> Get(int id);
-		ValueTask<IEnumerable<CameraDTO>> GetAll();
 		ValueTask<IEnumerable<CameraDTO>> GetAllByUserId(string userId);
 	}
 }

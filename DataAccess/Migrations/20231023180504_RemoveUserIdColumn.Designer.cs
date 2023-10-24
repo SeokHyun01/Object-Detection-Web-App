@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231013093335_Init")]
-    partial class Init
+    [Migration("20231023180504_RemoveUserIdColumn")]
+    partial class RemoveUserIdColumn
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -100,16 +100,17 @@ namespace DataAccess.Migrations
                     b.Property<string>("Date")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("EventVideoId")
+                    b.Property<int?>("EventVideoId")
                         .HasColumnType("int");
 
                     b.Property<string>("Path")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
-
                     b.HasKey("Id");
+
+                    b.HasIndex("CameraId");
+
+                    b.HasIndex("EventVideoId");
 
                     b.ToTable("Events");
                 });
@@ -121,9 +122,6 @@ namespace DataAccess.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CameraId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Path")
                         .HasColumnType("nvarchar(max)");
@@ -222,10 +220,6 @@ namespace DataAccess.Migrations
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Discriminator")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Email")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -277,10 +271,6 @@ namespace DataAccess.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
-
-                    b.HasDiscriminator<string>("Discriminator").HasValue("IdentityUser");
-
-                    b.UseTphMappingStrategy();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
@@ -364,13 +354,6 @@ namespace DataAccess.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("DataAccess.AppUser", b =>
-                {
-                    b.HasBaseType("Microsoft.AspNetCore.Identity.IdentityUser");
-
-                    b.HasDiscriminator().HasValue("AppUser");
-                });
-
             modelBuilder.Entity("DataAccess.BoundingBox", b =>
                 {
                     b.HasOne("DataAccess.Event", "Event")
@@ -380,6 +363,23 @@ namespace DataAccess.Migrations
                         .IsRequired();
 
                     b.Navigation("Event");
+                });
+
+            modelBuilder.Entity("DataAccess.Event", b =>
+                {
+                    b.HasOne("DataAccess.Camera", "Camera")
+                        .WithMany("Events")
+                        .HasForeignKey("CameraId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.EventVideo", "EventVideo")
+                        .WithMany("Events")
+                        .HasForeignKey("EventVideoId");
+
+                    b.Navigation("Camera");
+
+                    b.Navigation("EventVideo");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -433,9 +433,19 @@ namespace DataAccess.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("DataAccess.Camera", b =>
+                {
+                    b.Navigation("Events");
+                });
+
             modelBuilder.Entity("DataAccess.Event", b =>
                 {
                     b.Navigation("BoundingBoxes");
+                });
+
+            modelBuilder.Entity("DataAccess.EventVideo", b =>
+                {
+                    b.Navigation("Events");
                 });
 #pragma warning restore 612, 618
         }

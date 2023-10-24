@@ -14,10 +14,13 @@ namespace DataAccess
 		[Key]
 		public int Id { get; set; }
 		public string? Date { get; set; }
-		public string? UserId { get; set; }
 		public int CameraId { get; set; }
-		public string? Path { get; set; }
+		[ForeignKey(nameof(CameraId))]
+		public Camera Camera { get; set; }
 		public IEnumerable<BoundingBox> BoundingBoxes { get; set; }
-		public int EventVideoId { get; set; }
-	}
+		public string? Path { get; set; }
+		public int? EventVideoId { get; set; }
+		[ForeignKey(nameof(EventVideoId))]
+        public EventVideo? EventVideo { get; set; }
+    }
 }

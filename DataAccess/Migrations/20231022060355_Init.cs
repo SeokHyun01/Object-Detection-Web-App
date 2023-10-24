@@ -30,7 +30,6 @@ namespace DataAccess.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Discriminator = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -68,30 +67,12 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Events",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Date = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CameraId = table.Column<int>(type: "int", nullable: false),
-                    Path = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EventVideoId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Events", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "EventVideos",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    CameraId = table.Column<int>(type: "int", nullable: false),
                     Path = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
@@ -221,11 +202,40 @@ namespace DataAccess.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Events",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    Date = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    CameraId = table.Column<int>(type: "int", nullable: false),
+                    Path = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    EventVideoId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Events", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Events_Cameras_CameraId",
+                        column: x => x.CameraId,
+                        principalTable: "Cameras",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Events_EventVideos_EventVideoId",
+                        column: x => x.EventVideoId,
+                        principalTable: "EventVideos",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "BoundingBoxes",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    UserId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     EventId = table.Column<int>(type: "int", nullable: false),
                     X = table.Column<float>(type: "real", nullable: false),
                     Y = table.Column<float>(type: "real", nullable: false),
@@ -288,6 +298,16 @@ namespace DataAccess.Migrations
                 name: "IX_BoundingBoxes_EventId",
                 table: "BoundingBoxes",
                 column: "EventId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Events_CameraId",
+                table: "Events",
+                column: "CameraId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Events_EventVideoId",
+                table: "Events",
+                column: "EventVideoId");
         }
 
         /// <inheritdoc />
@@ -312,12 +332,6 @@ namespace DataAccess.Migrations
                 name: "BoundingBoxes");
 
             migrationBuilder.DropTable(
-                name: "Cameras");
-
-            migrationBuilder.DropTable(
-                name: "EventVideos");
-
-            migrationBuilder.DropTable(
                 name: "FCMInfos");
 
             migrationBuilder.DropTable(
@@ -328,6 +342,12 @@ namespace DataAccess.Migrations
 
             migrationBuilder.DropTable(
                 name: "Events");
+
+            migrationBuilder.DropTable(
+                name: "Cameras");
+
+            migrationBuilder.DropTable(
+                name: "EventVideos");
         }
     }
 }

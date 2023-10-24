@@ -12,9 +12,9 @@ namespace DataAccess
 	{
 		[Key]
 		public int Id { get; set; }
-		public int EventId { get; set; }
+        public int EventId { get; set; }
 		[ForeignKey(nameof(EventId))]
-		public Event? Event { get; set; }
+		public Event Event { get; set; }
 		public float X { get; set; }
 		public float Y { get; set; }
 		public float Width { get; set; }

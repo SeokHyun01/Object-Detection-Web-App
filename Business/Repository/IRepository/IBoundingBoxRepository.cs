@@ -11,6 +11,5 @@ namespace Business.Repository.IRepository
 	{
 		ValueTask<int> Create(IEnumerable<BoundingBoxDTO> objDTOs);
 		ValueTask<int> Delete(int id);
-		ValueTask<IEnumerable<BoundingBoxDTO>> GetAll(int eventId);
 	}
 }

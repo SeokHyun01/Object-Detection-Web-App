@@ -15,5 +15,6 @@ namespace DataAccess
 		public string? Name { get; set; }
 		public int Angle { get; set; }
 		public string? Image { get; set; }
-	}
+        public IEnumerable<Event> Events { get; set; }
+    }
 }

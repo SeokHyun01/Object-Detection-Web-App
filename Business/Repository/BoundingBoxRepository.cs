@@ -45,10 +45,5 @@ namespace Business.Repository
 		{
 			throw new NotImplementedException();
 		}
-
-		public async ValueTask<IEnumerable<BoundingBoxDTO>> GetAll(int eventId)
-		{
-			return _mapper.Map<IEnumerable<BoundingBox>, IEnumerable<BoundingBoxDTO>>(_db.BoundingBoxes.Where(x => x.EventId == eventId));
-		}
 	}
 }

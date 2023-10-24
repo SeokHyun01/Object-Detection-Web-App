@@ -1,11 +1,17 @@
 ﻿@page "/user/event"
 
+@using Syncfusion.Blazor.Navigations;
+@using Syncfusion.Blazor.Data;
+
 @attribute [Authorize(Roles = SD.ROLE_CLIENT)]
+
+@inject UserManager<IdentityUser> _userManager
 
 @inject ICameraRepository _cameraRepository
 @inject IEventRepository _eventRepository
+@inject IBoundingBoxRepository _boundingBoxRepository
 @inject IEventVideoRepository _eventVideoRepository
-@inject UserManager<IdentityUser> _userManager
+
 
 @if (IsLoading)
 {
@@ -17,49 +23,97 @@
 }
 else
 {
-	<div class="row">
-		@if (EventVideos.Any())
-		{
-			<SfGrid @ref="eventVideoGrid" DataSource="@EventVideos" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
-				<GridEditSettings AllowAdding="false" AllowDeleting="true" AllowEditing="false"></GridEditSettings>
-				<GridEvents OnActionBegin="ActionHandler" TValue="EventVideoDTO"></GridEvents>
-				<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+	@if (EventVideos.Any())
+	{
+		<div class="row">
+			<SfButton class="mb-1" @onclick="ToggleExpandCollapse">@if (AllRowsExpanded)
+				{
+					<span>Collapse All</span>
+				}
+				else
+				{
+					<span>Expand All</span>
+				}</SfButton>
+			<SfGrid @ref="eventGrid" DataSource="@EventViewModel" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
+				<GridEvents OnActionBegin="EventActionHandler" TValue="EventViewModel"></GridEvents>
+				<GridEditSettings ShowDeleteConfirmDialog="true" AllowDeleting="true"></GridEditSettings>
+				<GridSelectionSettings CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
+				<GridPageSettings PageSizes="true" PageSize="5" PageCount="5"></GridPageSettings>
+				<GridTemplates>
+					<DetailTemplate>
+						@{
+							var currentEvent = (context as EventViewModel);
+						}
+						<div style="padding:20px">
+							<SfTab>
+								<TabItems>
+									<TabItem>
+										<ChildContent>
+											<TabHeader Text="Video"></TabHeader>
+										</ChildContent>
+										<ContentTemplate>
+											<video style="width: 30rem;" controls autoplay>
+												<source src=@(Regex.Match(currentEvent.Path.Replace('\\', '/'), @"videos/[\w-]+\.mp4").Value) type="video/mp4">
+											</video>
+										</ContentTemplate>
+									</TabItem>
+									<TabItem>
+										<ChildContent>
+											<TabHeader Text="Details"></TabHeader>
+										</ChildContent>
+										<ContentTemplate>
+											<div style="padding:25px">
+												<SfGrid DataSource="@BoundingBoxes" AllowPaging="true" Query="@(new Query().Where("Event.EventVideoId", "equal", currentEvent.Id))">
+													<GridPageSettings PageSizes="true" PageSize="5" PageCount="5"></GridPageSettings>
+													<GridColumns>
+														<GridColumn HeaderText="Image" Width="240">
+															<Template Context="boundingBoxContext">
+																@{
+																	var boundingBox = (boundingBoxContext as BoundingBoxDTO);
+																	if (boundingBox == null)
+																	{
+																		return;
+																	}
+																	var imagePath = boundingBox.Event.Path;
+																	if (string.IsNullOrEmpty(imagePath))
+																	{
+																		return;
+																	}
+																	var x = boundingBox.X;
+																	var y = boundingBox.Y;
+																	var width = boundingBox.Width;
+																	var height = boundingBox.Height;
+																	var boundingBoxImagePath = CropAndEncodeImage(imagePath, x, y, width, height);
+																}
+																<img style="width: 15rem;" src="@boundingBoxImagePath" alt="BoundingBox Image" />
+															</Template>
+														</GridColumn>
+														<GridColumn Field="Confidence" HeaderText="Confidence" ValidationRules="@(new ValidationRules{ Required=true, Number=true })" Width="120" Type="ColumnType.Long"></GridColumn>
+														<GridColumn Field="Label" HeaderText="Label" ValidationRules="@(new ValidationRules{ Required=true })" Width="120" Type="ColumnType.String"></GridColumn>
+													</GridColumns>
+												</SfGrid>
+											</div>
+										</ContentTemplate>
+									</TabItem>
+								</TabItems>
+							</SfTab>
+						</div>
+					</DetailTemplate>
+				</GridTemplates>
+
 				<GridColumns>
-					<GridColumn Field="Id" HeaderText="Video ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
-					<GridColumn HeaderText="Video" Width="480">
-						<Template>
-							@{
-								var video = (context as EventVideoDTO);
-								<video style="width: 30rem;" controls>
-									<source src=@(Regex.Match(video.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
-								</video>
-							}
-						</Template>
-					</GridColumn>
+					<GridColumn Field="Id" HeaderText="ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
 					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="yyyy-MM-ddTHH:MM:ss" Type="ColumnType.Date"></GridColumn>
-					<GridColumn Field="CameraId" HeaderText="Camera ID" Width="120" ValidationRules="@(new ValidationRules { Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
-					<GridColumn HeaderText="Camera Name" Width="120" Type="ColumnType.String">
-						<Template>
-							@{
-								var video = (context as EventVideoDTO);
-								var camera = Cameras.FirstOrDefault(x => x.Id == video.CameraId);
-								if (camera != null)
-								{
-									var name = camera.Name;
-									<p>@name</p>
-								}
-							}
-						</Template>
-					</GridColumn>
-					<GridColumn Field="Labels" HeaderText="Labels" Width="240" ValidationRules="@(new ValidationRules{ Required=true})" Type="ColumnType.String"></GridColumn>
+					<GridColumn Field="CameraName" HeaderText="Camera Name" ValidationRules="@(new ValidationRules{ Required=true })" Width="120" Type="ColumnType.String"></GridColumn>
+					<GridColumn Field="Labels" HeaderText="Labels" ValidationRules="@(new ValidationRules{ Required=true })" Width="240" Type="ColumnType.String"></GridColumn>
 				</GridColumns>
 			</SfGrid>
-		}
-		else
-		{
-			<p>Not found.</p>
-		}
-	</div>
+		</div>
+	}
+	else
+	{
+		<p>Not found.</p>
+	}
 }
 
 
@@ -68,13 +122,16 @@ else
 	public Task<AuthenticationState> AuthenticationState { get; set; }
 	private IdentityUser? User { get; set; } = null;
 
-	private IEnumerable<CameraDTO> Cameras { get; set; } = new List<CameraDTO>();
-	private IEnumerable<EventVideoDTO> EventVideos { get; set; } = new List<EventVideoDTO>();
-
-	public SfGrid<EventVideoDTO> eventVideoGrid;
-	private List<string> ToolbarItems = new List<string>() { "Delete" };
-
 	private bool IsLoading { get; set; } = true;
+
+	private List<EventViewModel> EventViewModel { get; set; } = new();
+
+	private IEnumerable<EventVideoDTO> EventVideos { get; set; } = new List<EventVideoDTO>();
+	private IEnumerable<BoundingBoxDTO> BoundingBoxes { get; set; } = new List<BoundingBoxDTO>();
+
+	private IEnumerable<string> ToolbarItems = new List<string>() { "Delete" };
+	private SfGrid<EventViewModel> eventGrid;
+	private bool AllRowsExpanded { get; set; } = false;
 
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -95,15 +152,40 @@ else
 			StateHasChanged();
 		}
 
-		Cameras = await _cameraRepository.GetAllByUserId(userId);
 		EventVideos = await _eventVideoRepository.GetAllByUserId(userId);
-		// await eventVideoGrid.Refresh();
+		BoundingBoxes = EventVideos.SelectMany(x => x.Events.SelectMany(e => e.BoundingBoxes)).ToList();
+		foreach (var video in EventVideos)
+		{
+			var first = video.Events.FirstOrDefault();
+			var date = first.Date;
+			var cameraName = first.Camera.Name;
+			var labels = new HashSet<string>();
+			foreach (var boundingBox in BoundingBoxes)
+			{
+				if (boundingBox.Event.EventVideoId == video.Id)
+				{
+					if (!string.IsNullOrEmpty(boundingBox.Label))
+					{
+						labels.Add(boundingBox.Label);
+					}
+				}
+			}
+			var path = video.Path;
+			EventViewModel.Add(new EventViewModel()
+				{
+					Id = video.Id,
+					Date = date,
+					CameraName = cameraName,
+					Labels = string.Join(", ", labels),
+					Path = path,
+				});
+		}
 
 		IsLoading = false;
 		StateHasChanged();
 	}
 
-	public async void ActionHandler(ActionEventArgs<EventVideoDTO> args)
+	private async void EventActionHandler(ActionEventArgs<EventViewModel> args)
 	{
 		if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
 		{
@@ -112,6 +194,53 @@ else
 
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
+		}
+	}
+
+	private async Task ToggleExpandCollapse()
+	{
+		if (AllRowsExpanded)
+		{
+			await CollapseAll();
+			AllRowsExpanded = false;
+			StateHasChanged();
+		}
+		else
+		{
+			await ExpandAll();
+			AllRowsExpanded = true;
+			StateHasChanged();
+		}
+	}
+
+	private async Task ExpandAll()
+	{
+		await eventGrid.ExpandAllDetailRowAsync();
+	}
+
+	private async Task CollapseAll()
+	{
+		await eventGrid.CollapseAllDetailRowAsync();
+	}
+
+	private string CropAndEncodeImage(string imagePath, float x, float y, float width, float height)
+	{
+		using (Image image = Image.FromFile(imagePath))
+		{
+			using (Bitmap bmp = new Bitmap((int)width, (int)height))
+			{
+				using (Graphics g = Graphics.FromImage(bmp))
+				{
+					g.DrawImage(image, new Rectangle(0, 0, (int)width, (int)height), new Rectangle((int)x, (int)y, (int)width, (int)height), GraphicsUnit.Pixel);
+				}
+
+				using (MemoryStream memory = new MemoryStream())
+				{
+					bmp.Save(memory, ImageFormat.Jpeg);
+					byte[] bytes = memory.ToArray();
+					return "data:image/jpeg;base64," + Convert.ToBase64String(bytes);
+				}
+			}
 		}
 	}
 }

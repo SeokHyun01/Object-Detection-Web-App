@@ -91,11 +91,6 @@ namespace Business.Repository
 			}
 		}
 
-		public async ValueTask<IEnumerable<CameraDTO>> GetAll()
-		{
-			return _mapper.Map<IEnumerable<Camera>, IEnumerable<CameraDTO>>(_db.Cameras);
-		}
-
 		public async ValueTask<IEnumerable<CameraDTO>> GetAllByUserId(string id)
 		{
 			return _mapper.Map<IEnumerable<Camera>, IEnumerable<CameraDTO>>(_db.Cameras.Where(x => x.UserId == id));

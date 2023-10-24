@@ -12,7 +12,6 @@ namespace Business.Repository.IRepository
 	{
 		ValueTask<EventVideoDTO> Create(EventVideoDTO objDTO);
 		ValueTask<IEnumerable<EventVideoDTO>> GetAllByUserId(string userId);
-		ValueTask<EventVideoDTO> Update(EventVideoDTO objDTO);
 		ValueTask Delete(int id);
 	}
 }

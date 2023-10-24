@@ -42,19 +42,6 @@ namespace Business.Repository
 			}
 		}
 
-		public async ValueTask<EventVideoDTO> Update(EventVideoDTO objDTO)
-		{
-			var objFromDb = await _db.EventVideos.FirstOrDefaultAsync(u => u.Id == objDTO.Id);
-			if (objFromDb != null)
-			{
-				objFromDb.Labels = objDTO.Labels;
-				_db.EventVideos.Update(objFromDb);
-				await _db.SaveChangesAsync();
-				return _mapper.Map<EventVideo, EventVideoDTO>(objFromDb);
-			}
-			return objDTO;
-		}
-
 		public async ValueTask Delete(int id)
 		{
 			var video = await _db.EventVideos.FirstOrDefaultAsync(x => x.Id == id);
@@ -91,7 +78,12 @@ namespace Business.Repository
 		{
 			try
 			{
-                return _mapper.Map<IEnumerable<EventVideo>, IEnumerable<EventVideoDTO>>(_db.EventVideos.Where(x => x.UserId == userId));
+                return _mapper.Map<IEnumerable<EventVideo>, IEnumerable<EventVideoDTO>>(_db.EventVideos
+					.Include(ev => ev.Events)
+					.ThenInclude(e => e.Camera)
+					.Include(ev => ev.Events)
+					.ThenInclude(e => e.BoundingBoxes)
+					.Where(x => x.UserId == userId));
 
             } catch (Exception ex)
 			{

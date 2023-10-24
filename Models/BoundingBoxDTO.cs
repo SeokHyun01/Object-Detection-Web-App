@@ -9,8 +9,9 @@ namespace Models
 	public class BoundingBoxDTO
 	{
 		public int Id { get; set; }
-		public int EventId { get; set; }
-		public float X { get; set; }
+        public int EventId { get; set; }
+        public EventDTO Event { get; set; }
+        public float X { get; set; }
 		public float Y { get; set; }
 		public float Width { get; set; }
 		public float Height { get; set; }

@@ -54,11 +54,6 @@ namespace Business.Repository
 			}
 		}
 
-		public async ValueTask<IEnumerable<EventDTO>> GetAllByUserId(string userId)
-		{
-			return _mapper.Map<IEnumerable<Event>, IEnumerable<EventDTO>>(_db.Events.Include(u => u.BoundingBoxes).Where(x => x.UserId == userId));
-		}
-
 		public async ValueTask<EventDTO> Update(EventDTO objDTO)
 		{
 			var objFromDb = await _db.Events.FirstOrDefaultAsync(u => u.Id == objDTO.Id);

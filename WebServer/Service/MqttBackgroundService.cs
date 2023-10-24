@@ -29,8 +29,8 @@ namespace WebServer.Service
 		private IMqttClient? MqttClient { get; set; } = null;
 		private IMqttClient? AckSender { get; set; } = null;
 
-		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
-		//private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
+		//private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
+		private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
 		private static readonly string FCM_SERVER_KEY = "AAAAlAPqkMU:APA91bEpsixt1iwXs5ymw67EvF8urDy9Mi3gVbLEYYlgAit94zctOhQuO12pvsD2tuk5oJtzZ9eGAwblxebKyBM8WEQDhYm2ihhBuud5P7cESyFfAycI--IhY4jJ4m2Yr-lJ27qSGK7w";
 
 		public MqttBackgroundService(IServiceProvider serviceProvider)
@@ -49,11 +49,11 @@ namespace WebServer.Service
 
 				var font = new FontCollection().Add($"{ROOT}/CONSOLA.TTF").CreateFont(11, FontStyle.Bold);
 
-				using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx", useCuda: true);
-				using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" }, useCuda: true);
+				//using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx", useCuda: true);
+				//using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" }, useCuda: true);
 
-				//using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx");
-				//using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" });
+				using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx");
+				using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" });
 
 				var mqttFactory = new MqttFactory();
 				AckSender = mqttFactory.CreateMqttClient();
@@ -141,7 +141,7 @@ namespace WebServer.Service
 									Width = width,
 									Height = height,
 									Label = prediction.Label.Name,
-									Confidence = prediction.Score
+									Confidence = prediction.Score,
 								};
 								boundingBoxes.Add(boundingBox);
 							}
@@ -151,9 +151,9 @@ namespace WebServer.Service
 							var eventDTO = new EventDTO
 							{
 								Date = request.Date,
-								UserId = request.UserId,
 								CameraId = request.CameraId,
-								Path = eventImagePath
+								Path = eventImagePath,
+								EventVideoId = null,
 							};
 
 							var createdEventDTO = await _eventRepositroy.Create(eventDTO);
@@ -242,12 +242,11 @@ namespace WebServer.Service
 
 								var createdVideoDTO = await _eventVideoRepository.Create(new EventVideoDTO
 								{
-									Date = eventDTOs.FirstOrDefault().Date,
 									UserId = request.UserId,
-									CameraId = request.CameraId,
 									Path = videoPath
 								});
 
+								// FCM
 								var labels = new HashSet<string>();
 								foreach (var eventDTO in eventDTOs)
 								{
@@ -261,12 +260,7 @@ namespace WebServer.Service
 									}
 								}
 								var labels_string = string.Join(", ", labels);
-								createdVideoDTO.Labels = labels_string;
-								await _eventVideoRepository.Update(createdVideoDTO);
-
-								// FCM
-								var userId = request.UserId;
-								var fcmInfos = await _fCMInfoRepository.GetAllByUserId(userId);
+								var fcmInfos = await _fCMInfoRepository.GetAllByUserId(request.UserId);
 								if (fcmInfos.Any())
 								{
 									var _title = string.Empty;

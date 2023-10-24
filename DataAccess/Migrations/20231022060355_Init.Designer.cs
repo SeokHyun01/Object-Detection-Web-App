@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace DataAccess.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231015132649_AddDateAndLabelsColumn2EventVideoTable")]
-    partial class AddDateAndLabelsColumn2EventVideoTable
+    [Migration("20231022060355_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -43,6 +43,9 @@ namespace DataAccess.Migrations
                         .HasColumnType("real");
 
                     b.Property<string>("Label")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<float>("Width")
@@ -100,7 +103,7 @@ namespace DataAccess.Migrations
                     b.Property<string>("Date")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("EventVideoId")
+                    b.Property<int?>("EventVideoId")
                         .HasColumnType("int");
 
                     b.Property<string>("Path")
@@ -110,6 +113,10 @@ namespace DataAccess.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CameraId");
+
+                    b.HasIndex("EventVideoId");
 
                     b.ToTable("Events");
                 });
@@ -121,15 +128,6 @@ namespace DataAccess.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("CameraId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Date")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Labels")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Path")
                         .HasColumnType("nvarchar(max)");
@@ -373,6 +371,23 @@ namespace DataAccess.Migrations
                     b.Navigation("Event");
                 });
 
+            modelBuilder.Entity("DataAccess.Event", b =>
+                {
+                    b.HasOne("DataAccess.Camera", "Camera")
+                        .WithMany("Events")
+                        .HasForeignKey("CameraId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("DataAccess.EventVideo", "EventVideo")
+                        .WithMany("Events")
+                        .HasForeignKey("EventVideoId");
+
+                    b.Navigation("Camera");
+
+                    b.Navigation("EventVideo");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -424,9 +439,19 @@ namespace DataAccess.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("DataAccess.Camera", b =>
+                {
+                    b.Navigation("Events");
+                });
+
             modelBuilder.Entity("DataAccess.Event", b =>
                 {
                     b.Navigation("BoundingBoxes");
+                });
+
+            modelBuilder.Entity("DataAccess.EventVideo", b =>
+                {
+                    b.Navigation("Events");
                 });
 #pragma warning restore 612, 618
         }
