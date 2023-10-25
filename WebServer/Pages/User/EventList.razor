@@ -37,7 +37,6 @@ else
 			<SfGrid @ref="eventGrid" DataSource="@EventViewModel" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 				<GridEvents OnActionBegin="EventActionHandler" TValue="EventViewModel"></GridEvents>
 				<GridEditSettings ShowDeleteConfirmDialog="true" AllowDeleting="true"></GridEditSettings>
-				<GridSelectionSettings CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
 				<GridPageSettings PageSizes="true" PageSize="5" PageCount="5"></GridPageSettings>
 				<GridTemplates>
 					<DetailTemplate>
