@@ -251,9 +251,9 @@ else
 
 	private async Task ApplyFilter()
 	{
-		if (StartDateTime.HasValue && EndDateTime.HasValue)
+		if (StartDateTime.HasValue)
 		{
-			await eventGrid.FilterByColumnAsync("Date", "between", new List<DateTime?> { StartDateTime, EndDateTime });
+			await eventGrid.FilterByColumnAsync("Date", "Equal", StartDateTime);
 		}
 	}
 }
