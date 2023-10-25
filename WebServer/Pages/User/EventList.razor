@@ -37,7 +37,7 @@ else
 					<span>Expand All</span>
 				}
 			</SfButton>
-			<SfGrid @ref="eventGrid" DataSource="@EventViewModel" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
+			<SfGrid @ref="EventGrid" DataSource="@EventViewModel" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 				<GridEvents OnActionBegin="EventActionHandler" TValue="EventViewModel"></GridEvents>
 				<GridEditSettings ShowDeleteConfirmDialog="true" AllowDeleting="true"></GridEditSettings>
 				<GridPageSettings PageSizes="true" PageSize="5" PageCount="5"></GridPageSettings>
@@ -138,11 +138,11 @@ else
 	private IEnumerable<BoundingBoxDTO> BoundingBoxes { get; set; } = new List<BoundingBoxDTO>();
 
 	private IEnumerable<string> ToolbarItems = new List<string>() { "Delete" };
-	private SfGrid<EventViewModel> eventGrid;
+	private SfGrid<EventViewModel> EventGrid { get; set; }
 	private bool AllRowsExpanded { get; set; } = false;
 
 	private DateTime? DateTimeValue { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
-	
+
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -167,7 +167,8 @@ else
 		foreach (var video in EventVideos)
 		{
 			var first = video.Events.FirstOrDefault();
-			var date = first.Date;
+			var date = new DateTime();
+			DateTime.TryParseExact(first.Date, "yyyy-MM-dd hh:mm:ss", null, System.Globalization.DateTimeStyles.None, out date);
 			var cameraName = first.Camera.Name;
 			var labels = new HashSet<string>();
 			foreach (var boundingBox in BoundingBoxes)
@@ -225,12 +226,12 @@ else
 
 	private async Task ExpandAll()
 	{
-		await eventGrid.ExpandAllDetailRowAsync();
+		await EventGrid.ExpandAllDetailRowAsync();
 	}
 
 	private async Task CollapseAll()
 	{
-		await eventGrid.CollapseAllDetailRowAsync();
+		await EventGrid.CollapseAllDetailRowAsync();
 	}
 
 	private string CropAndEncodeImage(string imagePath, float x, float y, float width, float height)
@@ -252,7 +253,7 @@ else
 	{
 		if (DateTimeValue.HasValue)
 		{
-			await eventGrid.FilterByColumnAsync("Date", "Equal", DateTimeValue);
+			await EventGrid.FilterByColumnAsync("Date", "Equal", DateTimeValue);
 		}
 	}
 }
