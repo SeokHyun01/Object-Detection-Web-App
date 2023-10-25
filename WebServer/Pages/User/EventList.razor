@@ -252,7 +252,7 @@ else
 	{
 		if (DateTimeValue.HasValue)
 		{
-			await EventGrid.FilterByColumnAsync("Date", "Equal", DateTimeValue);
+			await EventGrid.FilterByColumnAsync("Date", "Equal", DateTimeValue.Value);
 			Console.WriteLine(DateTimeValue.Value.ToString());
 		} else
 		{
