@@ -107,9 +107,9 @@ else
 					<GridColumn Field="Id" HeaderText="ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
 					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="yyyy-MM-ddTHH:MM:ss" Type="ColumnType.Date">
 						<FilterTemplate>
-							<SfDateTimePicker TValue="DateTime?" Format="yyyy-MM-dd hh:mm:ss" @bind-Value="@StartDateTime"></SfDateTimePicker>
-							<SfDateTimePicker TValue="DateTime?" Format="yyyy-MM-dd hh:mm:ss" @bind-Value="@EndDateTime"></SfDateTimePicker>
-							<SfButton @onclick="@ApplyFilter">Apply Filter</SfButton>
+							<SfDateTimePicker TValue="DateTime?" Format="yyyy-MM-dd hh:mm:ss" @bind-Value="@DateTimeValue">
+								<DateTimePickerEvents TValue="DateTime?" ValueChange="@onChanged"></DateTimePickerEvents>
+							</SfDateTimePicker>
 						</FilterTemplate>
 					</GridColumn>
 					<GridColumn Field="CameraName" HeaderText="Camera Name" ValidationRules="@(new ValidationRules{ Required=true })" Width="120" Type="ColumnType.String"></GridColumn>
@@ -141,9 +141,8 @@ else
 	private SfGrid<EventViewModel> eventGrid;
 	private bool AllRowsExpanded { get; set; } = false;
 
-	private DateTime? StartDateTime { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
-	private DateTime? EndDateTime { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
-
+	private DateTime? DateTimeValue { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+	
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -249,11 +248,11 @@ else
 		}
 	}
 
-	private async Task ApplyFilter()
+	private async Task onChanged()
 	{
-		if (StartDateTime.HasValue)
+		if (DateTimeValue.HasValue)
 		{
-			await eventGrid.FilterByColumnAsync("Date", "Equal", StartDateTime);
+			await eventGrid.FilterByColumnAsync("Date", "Equal", DateTimeValue);
 		}
 	}
 }
