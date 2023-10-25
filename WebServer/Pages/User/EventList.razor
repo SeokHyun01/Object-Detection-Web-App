@@ -1,5 +1,6 @@
 ﻿@page "/user/event"
 
+@using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Navigations;
 @using Syncfusion.Blazor.Data;
 
@@ -104,7 +105,20 @@ else
 
 				<GridColumns>
 					<GridColumn Field="Id" HeaderText="ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
-					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="yyyy-MM-ddTHH:MM:ss" Type="ColumnType.Date"></GridColumn>
+					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="yyyy-MM-ddTHH:MM:ss" Type="ColumnType.Date">
+						<FilterTemplate>
+							@{
+								var currentEvent = (context as EventViewModel);
+								DateTime? startDate = null;
+								DateTime? endDate = null;
+							}
+							<div>
+								<SfDatePicker @bind-Value="startDate" Placeholder="Start Date"></SfDatePicker>
+								<SfDatePicker @bind-Value="endDate" Placeholder="End Date"></SfDatePicker>
+								<SfButton @onclick="()=>ApplyFilter(startDate.Value, endDate.Value)">Filter</SfButton>
+							</div>
+						</FilterTemplate>
+					</GridColumn>
 					<GridColumn Field="CameraName" HeaderText="Camera Name" ValidationRules="@(new ValidationRules{ Required=true })" Width="120" Type="ColumnType.String"></GridColumn>
 					<GridColumn Field="Labels" HeaderText="Labels" ValidationRules="@(new ValidationRules{ Required=true })" Width="240" Type="ColumnType.String"></GridColumn>
 				</GridColumns>
@@ -236,6 +250,14 @@ else
 				byte[] bytes = memory.ToArray();
 				return "data:image/jpeg;base64," + Convert.ToBase64String(bytes);
 			}
+		}
+	}
+
+	private void ApplyFilter(DateTime? startDate, DateTime? endDate)
+	{
+		if (startDate.HasValue && endDate.HasValue)
+		{
+			eventGrid.FilterByColumn("Date", "between", new List<DateTime?> { startDate, endDate });
 		}
 	}
 }
