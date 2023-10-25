@@ -26,14 +26,16 @@ else
 	@if (EventVideos.Any())
 	{
 		<div class="row">
-			<SfButton class="mb-1" @onclick="ToggleExpandCollapse">@if (AllRowsExpanded)
+			<SfButton class="mb-1" @onclick="ToggleExpandCollapse">
+				@if (AllRowsExpanded)
 				{
 					<span>Collapse All</span>
 				}
 				else
 				{
 					<span>Expand All</span>
-				}</SfButton>
+				}
+			</SfButton>
 			<SfGrid @ref="eventGrid" DataSource="@EventViewModel" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 				<GridEvents OnActionBegin="EventActionHandler" TValue="EventViewModel"></GridEvents>
 				<GridEditSettings ShowDeleteConfirmDialog="true" AllowDeleting="true"></GridEditSettings>
@@ -224,21 +226,15 @@ else
 
 	private string CropAndEncodeImage(string imagePath, float x, float y, float width, float height)
 	{
-		using (Image image = Image.FromFile(imagePath))
+		using (var image = Image.Load(imagePath))
 		{
-			using (Bitmap bmp = new Bitmap((int)width, (int)height))
-			{
-				using (Graphics g = Graphics.FromImage(bmp))
-				{
-					g.DrawImage(image, new Rectangle(0, 0, (int)width, (int)height), new Rectangle((int)x, (int)y, (int)width, (int)height), GraphicsUnit.Pixel);
-				}
+			image.Mutate(ctx => ctx.Crop(new Rectangle((int)x, (int)y, (int)width, (int)height)));
 
-				using (MemoryStream memory = new MemoryStream())
-				{
-					bmp.Save(memory, ImageFormat.Jpeg);
-					byte[] bytes = memory.ToArray();
-					return "data:image/jpeg;base64," + Convert.ToBase64String(bytes);
-				}
+			using (MemoryStream memory = new MemoryStream())
+			{
+				image.Save(memory, new JpegEncoder());
+				byte[] bytes = memory.ToArray();
+				return "data:image/jpeg;base64," + Convert.ToBase64String(bytes);
 			}
 		}
 	}
