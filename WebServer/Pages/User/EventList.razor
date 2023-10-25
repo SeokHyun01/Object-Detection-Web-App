@@ -107,7 +107,7 @@ else
 					<GridColumn Field="Id" HeaderText="ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
 					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="yyyy-MM-ddTHH:MM:ss" Type="ColumnType.Date">
 						<FilterTemplate>
-							<SfDateTimePicker TValue="DateTime?" Format="yyyy-MM-dd hh:mm:ss" @bind-Value="@DateTimeValue">
+							<SfDateTimePicker TValue="DateTime?" Format="yyyy-MM-ddTHH:MM:ss" @bind-Value="@DateTimeValue">
 								<DateTimePickerEvents TValue="DateTime?" ValueChange="@onChanged"></DateTimePickerEvents>
 							</SfDateTimePicker>
 						</FilterTemplate>
@@ -167,8 +167,7 @@ else
 		foreach (var video in EventVideos)
 		{
 			var first = video.Events.FirstOrDefault();
-			var date = new DateTime();
-			DateTime.TryParseExact(first.Date, "yyyy-MM-dd hh:mm:ss", null, System.Globalization.DateTimeStyles.None, out date);
+			var date = DateTime.Parse(first.Date);
 			var cameraName = first.Camera.Name;
 			var labels = new HashSet<string>();
 			foreach (var boundingBox in BoundingBoxes)
