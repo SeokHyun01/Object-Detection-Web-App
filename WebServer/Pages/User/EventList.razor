@@ -108,9 +108,11 @@ else
 					<GridColumn Field="Id" HeaderText="ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
 					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="@DATETIME_FORMAT" Type="ColumnType.Date">
 						<FilterTemplate>
-							<SfDateTimePicker TValue="DateTime?" Format="@DATETIME_FORMAT" @bind-Value="@StartDateTime">
-								<DateTimePickerEvents TValue="DateTime?" ValueChange="@onChanged"></DateTimePickerEvents>
-							</SfDateTimePicker>
+							@{
+								<SfDateRangePicker Width="480" ShowClearButton="true" @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime">
+									<DateRangePickerEvents TValue="DateTime" ValueChange="(args)=>OnDateChanged(args)"></DateRangePickerEvents>
+								</SfDateRangePicker>
+							}
 						</FilterTemplate>
 					</GridColumn>
 					<GridColumn Field="CameraName" HeaderText="Camera Name" ValidationRules="@(new ValidationRules{ Required=true })" Width="120" Type="ColumnType.String"></GridColumn>
@@ -143,7 +145,8 @@ else
 	private bool AllRowsExpanded { get; set; } = false;
 
 	private const string DATETIME_FORMAT = "yyyy-MM-ddTHH:mm:ss";
-	private DateTime? StartDateTime { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+	private DateTime StartDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+	private DateTime EndDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
 
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -194,7 +197,7 @@ else
 			EventViewModel.Add(new EventViewModel()
 				{
 					Id = video.Id,
-					Date = date.Value.ToString(DATETIME_FORMAT),
+					Date = date.Value,
 					CameraName = cameraName,
 					Labels = string.Join(", ", labels),
 					Path = path,
@@ -214,6 +217,40 @@ else
 
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
+		}
+
+		if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering &&
+			args.CurrentFilteringColumn == "Date")
+		{
+			args.Cancel = true;
+			if (EventGrid.FilterSettings.Columns == null)
+			{
+				EventGrid.FilterSettings.Columns = new List<GridFilterColumn>();
+			}
+			if (EventGrid.FilterSettings.Columns.Count > 0)
+			{
+				EventGrid.FilterSettings.Columns.RemoveAll(c => c.Field == "Date");
+			}
+
+			var columns = await EventGrid.GetColumns();
+			string fUid = columns[1].Uid;
+			EventGrid.FilterSettings.Columns.Add(new GridFilterColumn
+				{
+					Field = "Date",
+					Operator = Syncfusion.Blazor.Operator.GreaterThanOrEqual,
+					Predicate = "and",
+					Value = StartDate,
+					Uid = fUid
+				});
+			EventGrid.FilterSettings.Columns.Add(new GridFilterColumn
+				{
+					Field = "Date",
+					Operator = Syncfusion.Blazor.Operator.LessThanOrEqual,
+					Predicate = "and",
+					Value = EndDate.AddDays(1).AddSeconds(-1),
+					Uid = fUid
+				});
+			EventGrid.Refresh();
 		}
 	}
 
@@ -258,15 +295,9 @@ else
 		}
 	}
 
-	private async Task onChanged()
+	private void OnDateChanged(RangePickerEventArgs<DateTime> args)
 	{
-		if (StartDateTime.HasValue)
-		{
-			await EventGrid.FilterByColumnAsync("Date", "Equal", StartDateTime.Value.ToString(DATETIME_FORMAT));
-			Console.WriteLine(StartDateTime.Value.ToString(DATETIME_FORMAT));
-		} else
-		{
-			await EventGrid.ClearFilteringAsync();
-		}
+		StartDate = args.StartDate;
+		EndDate = args.EndDate;
 	}
 }
