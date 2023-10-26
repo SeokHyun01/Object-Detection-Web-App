@@ -173,7 +173,7 @@ else
 			try
 			{
 				date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
-				Console.WriteLine(date);
+				Console.WriteLine(date.Value.ToString(DATETIME_FORMAT));
 			} catch(FormatException)
 			{
 				date = new DateTime();
