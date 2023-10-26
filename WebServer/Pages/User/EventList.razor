@@ -168,6 +168,7 @@ else
 		{
 			var first = video.Events.FirstOrDefault();
 			var date = DateTime.Parse(first.Date);
+			Console.WriteLine($"{date}: date");
 			var cameraName = first.Camera.Name;
 			var labels = new HashSet<string>();
 			foreach (var boundingBox in BoundingBoxes)
@@ -252,8 +253,8 @@ else
 	{
 		if (DateTimeValue.HasValue)
 		{
-			await EventGrid.FilterByColumnAsync("Date", "Equal", DateTimeValue.Value);
-			Console.WriteLine(DateTimeValue.ToString());
+			await EventGrid.FilterByColumnAsync("Date", "Equal", DateTimeValue);
+			Console.WriteLine($"Filter by: {DateTimeValue}");
 		} else
 		{
 			await EventGrid.ClearFilteringAsync();
