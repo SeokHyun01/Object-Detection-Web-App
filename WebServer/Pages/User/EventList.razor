@@ -106,9 +106,9 @@ else
 
 				<GridColumns>
 					<GridColumn Field="Id" HeaderText="ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
-					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="yyyy-MM-ddTHH:MM:ss" Type="ColumnType.Date">
+					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="@DATETIME_FORMAT" Type="ColumnType.Date">
 						<FilterTemplate>
-							<SfDateTimePicker TValue="DateTime?" Format="yyyy-MM-ddTHH:MM:ss" @bind-Value="@DateTimeValue">
+							<SfDateTimePicker TValue="DateTime?" Format="@DATETIME_FORMAT" @bind-Value="@DateTimeValue">
 								<DateTimePickerEvents TValue="DateTime?" ValueChange="@onChanged"></DateTimePickerEvents>
 							</SfDateTimePicker>
 						</FilterTemplate>
@@ -142,6 +142,7 @@ else
 	private SfGrid<EventViewModel> EventGrid { get; set; }
 	private bool AllRowsExpanded { get; set; } = false;
 
+	private const string DATETIME_FORMAT = "yyyy-MM-ddTHH:mm:ss";
 	private DateTime? DateTimeValue { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
 
 
@@ -168,8 +169,14 @@ else
 		foreach (var video in EventVideos)
 		{
 			var first = video.Events.FirstOrDefault();
-			var date = DateTime.ParseExact(first.Date, "yyyy-MM-ddTHH:mm:ss", CultureInfo.InvariantCulture);
-			Console.WriteLine(date);
+			try
+			{
+				var date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
+				Console.WriteLine(date);
+			} catch(FormatException)
+			{
+				Console.WriteLine($"Invalid format for date string: {first.Date}");
+			}
 			var cameraName = first.Camera.Name;
 			var labels = new HashSet<string>();
 			foreach (var boundingBox in BoundingBoxes)
