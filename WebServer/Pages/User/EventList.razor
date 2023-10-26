@@ -40,6 +40,7 @@ else
 				<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
 				<GridEditSettings ShowDeleteConfirmDialog="true" AllowDeleting="true"></GridEditSettings>
 				<GridPageSettings PageSizes="true" PageSize="5" PageCount="5"></GridPageSettings>
+				<GridSelectionSettings CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
 				<GridTemplates>
 					<DetailTemplate>
 						@{
@@ -90,8 +91,8 @@ else
 																<img style="width: 15rem;" src="@boundingBoxImagePath" alt="BoundingBox Image" />
 															</Template>
 														</GridColumn>
-														<GridColumn Field="Confidence" HeaderText="Confidence" ValidationRules="@(new ValidationRules{ Required=true, Number=true })" Width="120" Type="ColumnType.Long"></GridColumn>
 														<GridColumn Field="Label" HeaderText="Label" ValidationRules="@(new ValidationRules{ Required=true })" Width="120" Type="ColumnType.String"></GridColumn>
+														<GridColumn Field="Confidence" HeaderText="Confidence" ValidationRules="@(new ValidationRules{ Required=true, Number=true })" Width="120" Type="ColumnType.Long"></GridColumn>
 													</GridColumns>
 												</SfGrid>
 											</div>
@@ -104,6 +105,7 @@ else
 				</GridTemplates>
 
 				<GridColumns>
+					<GridColumn Type="ColumnType.CheckBox" Width="60"></GridColumn>
 					<GridColumn Field="Id" HeaderText="ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
 					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="@DATETIME_FORMAT" Type="ColumnType.Date">
 						<FilterTemplate>
