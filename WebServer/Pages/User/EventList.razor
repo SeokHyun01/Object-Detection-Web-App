@@ -109,7 +109,7 @@ else
 					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="@DATETIME_FORMAT" Type="ColumnType.Date">
 						<FilterTemplate>
 							@{
-								<SfDateRangePicker Width="480" ShowClearButton="true" @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime">
+								<SfDateRangePicker Width="480" ShowClearButton="true" @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime" Format="@DATETIME_FORMAT">
 									<DateRangePickerEvents TValue="DateTime" ValueChange="(args)=>OnDateChanged(args)"></DateRangePickerEvents>
 								</SfDateRangePicker>
 							}
@@ -172,6 +172,7 @@ else
 		foreach (var video in EventVideos)
 		{
 			var first = video.Events.FirstOrDefault();
+
 			DateTime? date = null;
 			try
 			{
@@ -182,6 +183,7 @@ else
 			{
 				date = new DateTime();
 			}
+
 			var cameraName = first.Camera.Name;
 			var labels = new HashSet<string>();
 			foreach (var boundingBox in BoundingBoxes)
