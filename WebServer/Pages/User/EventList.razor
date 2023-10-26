@@ -223,7 +223,7 @@ else
 			await getEventVideos(User.Id);
 		}
 		else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
-		{			
+		{
 			args.Cancel = true;
 			if (EventGrid.FilterSettings.Columns == null)
 			{
