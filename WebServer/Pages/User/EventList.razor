@@ -54,7 +54,7 @@ else
 										</ChildContent>
 										<ContentTemplate>
 											<video style="width: 30rem;" controls autoplay>
-												<source src=@(Regex.Match(currentEvent.Path.Replace('\\', '/'), @"videos/[\w-]+\.mp4").Value) type="video/mp4">
+												<source src=@(Regex.Match(currentEvent.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
 											</video>
 										</ContentTemplate>
 									</TabItem>
