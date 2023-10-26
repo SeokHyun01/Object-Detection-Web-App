@@ -222,6 +222,8 @@ else
 		}
 		else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
 		{
+			Console.WriteLine($"{StartDate} ~ {EndDate}");
+			
 			args.Cancel = true;
 			if (EventGrid.FilterSettings.Columns == null)
 			{
