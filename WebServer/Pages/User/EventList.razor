@@ -35,7 +35,7 @@ else
 					<span>Expand All</span>
 				}
 			</SfButton>
-			<SfGrid @ref="EventGrid" DataSource="@EventViewModel" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
+			<SfGrid @ref="EventGrid" DataSource="@EventViewModel" Height="1000" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 				<GridEvents OnActionBegin="EventActionHandler" TValue="EventViewModel"></GridEvents>
 				<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
 				<GridEditSettings ShowDeleteConfirmDialog="true" AllowDeleting="true"></GridEditSettings>
@@ -91,8 +91,8 @@ else
 																<img style="width: 15rem;" src="@boundingBoxImagePath" alt="BoundingBox Image" />
 															</Template>
 														</GridColumn>
-														<GridColumn Field="Label" HeaderText="Label" ValidationRules="@(new ValidationRules{ Required=true })" Width="120" Type="ColumnType.String"></GridColumn>
-														<GridColumn Field="Confidence" HeaderText="Confidence" ValidationRules="@(new ValidationRules{ Required=true, Number=true })" Width="120" Type="ColumnType.Long"></GridColumn>
+														<GridColumn Field="Label" HeaderText="Label" ValidationRules="@(new ValidationRules{ Required=true })" Width="100" Type="ColumnType.String"></GridColumn>
+														<GridColumn Field="Confidence" HeaderText="Confidence" ValidationRules="@(new ValidationRules{ Required=true, Number=true })" Width="100" Type="ColumnType.Long"></GridColumn>
 													</GridColumns>
 												</SfGrid>
 											</div>
@@ -105,18 +105,18 @@ else
 				</GridTemplates>
 
 				<GridColumns>
-					<GridColumn Type="ColumnType.CheckBox" Width="60"></GridColumn>
-					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="@DATETIME_FORMAT" Type="ColumnType.Date">
+					<GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+					<GridColumn Field="CameraName" HeaderText="Camera Name" ValidationRules="@(new ValidationRules{ Required=true })" Width="100" Type="ColumnType.String"></GridColumn>
+					<GridColumn Field="Date" HeaderText="Date" Width="100" ValidationRules="@(new ValidationRules{ Required=true})" Format="@DATETIME_FORMAT" Type="ColumnType.Date">
 						<FilterTemplate>
 							@{
-								<SfDateRangePicker Width="480" ShowClearButton="true" @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime" Format="@DATETIME_FORMAT">
+								<SfDateRangePicker Width="500" ShowClearButton="true" @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime" Format="@DATETIME_FORMAT">
 									<DateRangePickerEvents TValue="DateTime" ValueChange="(args)=>OnDateChanged(args)"></DateRangePickerEvents>
 								</SfDateRangePicker>
 							}
 						</FilterTemplate>
 					</GridColumn>
-					<GridColumn Field="CameraName" HeaderText="Camera Name" ValidationRules="@(new ValidationRules{ Required=true })" Width="120" Type="ColumnType.String"></GridColumn>
-					<GridColumn Field="Labels" HeaderText="Labels" ValidationRules="@(new ValidationRules{ Required=true })" Width="240" Type="ColumnType.String"></GridColumn>
+					<GridColumn Field="Labels" HeaderText="Labels" ValidationRules="@(new ValidationRules{ Required=true })" Width="200" Type="ColumnType.String"></GridColumn>
 				</GridColumns>
 			</SfGrid>
 		</div>
