@@ -67,7 +67,7 @@ else
 										</ChildContent>
 										<ContentTemplate>
 											<div style="padding:25px">
-												<SfGrid DataSource="@BoundingBoxes" AllowPaging="true" Query="@(new Query().Where("Event.EventVideoId", "equal", currentEvent.Id))">
+												<SfGrid DataSource="@BoundingBoxes" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Query="@(new Query().Where("Event.EventVideoId", "equal", currentEvent.Id))">
 													<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
 													<GridPageSettings PageSizes="true" PageSize="5" PageCount="5"></GridPageSettings>
 													<GridColumns>
@@ -223,9 +223,7 @@ else
 			await getEventVideos(User.Id);
 		}
 		else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
-		{
-			Console.WriteLine($"{StartDate} ~ {EndDate}");
-			
+		{			
 			args.Cancel = true;
 			if (EventGrid.FilterSettings.Columns == null)
 			{
