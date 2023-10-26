@@ -1,9 +1,6 @@
 ﻿@page "/user/event"
 
-@using Syncfusion.Blazor.Calendars
 @using Syncfusion.Blazor.Navigations;
-@using Syncfusion.Blazor.Data;
-@using System.Globalization;
 
 @attribute [Authorize(Roles = SD.ROLE_CLIENT)]
 
@@ -40,7 +37,7 @@ else
 			</SfButton>
 			<SfGrid @ref="EventGrid" DataSource="@EventViewModel" Height="800" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 				<GridEvents OnActionBegin="EventActionHandler" TValue="EventViewModel"></GridEvents>
-				<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+				<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar"></GridFilterSettings>
 				<GridEditSettings ShowDeleteConfirmDialog="true" AllowDeleting="true"></GridEditSettings>
 				<GridPageSettings PageSizes="true" PageSize="5" PageCount="5"></GridPageSettings>
 				<GridTemplates>
@@ -68,7 +65,7 @@ else
 										<ContentTemplate>
 											<div style="padding:25px">
 												<SfGrid DataSource="@BoundingBoxes" AllowFiltering="true" AllowSorting="true" AllowPaging="true" Query="@(new Query().Where("Event.EventVideoId", "equal", currentEvent.Id))">
-													<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
+													<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.FilterBar"></GridFilterSettings>
 													<GridPageSettings PageSizes="true" PageSize="5" PageCount="5"></GridPageSettings>
 													<GridColumns>
 														<GridColumn HeaderText="Image" Width="240">
