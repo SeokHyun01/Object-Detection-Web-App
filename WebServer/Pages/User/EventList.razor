@@ -169,9 +169,10 @@ else
 		foreach (var video in EventVideos)
 		{
 			var first = video.Events.FirstOrDefault();
+			DateTime date = new DateTime();
 			try
 			{
-				var date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
+				date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
 				Console.WriteLine(date);
 			} catch(FormatException)
 			{
