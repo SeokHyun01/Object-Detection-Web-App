@@ -68,6 +68,7 @@ else
 										<ContentTemplate>
 											<div style="padding:25px">
 												<SfGrid DataSource="@BoundingBoxes" AllowPaging="true" Query="@(new Query().Where("Event.EventVideoId", "equal", currentEvent.Id))">
+													<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
 													<GridPageSettings PageSizes="true" PageSize="5" PageCount="5"></GridPageSettings>
 													<GridColumns>
 														<GridColumn HeaderText="Image" Width="240">
