@@ -169,14 +169,14 @@ else
 		foreach (var video in EventVideos)
 		{
 			var first = video.Events.FirstOrDefault();
-			DateTime date = new DateTime();
+			DateTime? date = null;
 			try
 			{
 				date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
 				Console.WriteLine(date);
 			} catch(FormatException)
 			{
-				Console.WriteLine($"Invalid format for date string: {first.Date}");
+				date = new DateTime();
 			}
 			var cameraName = first.Camera.Name;
 			var labels = new HashSet<string>();
@@ -194,7 +194,7 @@ else
 			EventViewModel.Add(new EventViewModel()
 				{
 					Id = video.Id,
-					Date = date,
+					Date = date.Value.ToString(DATETIME_FORMAT),
 					CameraName = cameraName,
 					Labels = string.Join(", ", labels),
 					Path = path,
