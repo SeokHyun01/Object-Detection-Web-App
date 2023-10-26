@@ -177,7 +177,8 @@ else
 			{
 				date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
 				Console.WriteLine(date.Value.ToString(DATETIME_FORMAT));
-			} catch(FormatException)
+			}
+			catch (FormatException)
 			{
 				date = new DateTime();
 			}
@@ -218,9 +219,7 @@ else
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
 		}
-
-		if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering &&
-			args.CurrentFilteringColumn == "Date")
+		else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
 		{
 			args.Cancel = true;
 			if (EventGrid.FilterSettings.Columns == null)
