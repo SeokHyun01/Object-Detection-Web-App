@@ -105,7 +105,7 @@ else
 
 				<GridColumns>
 					<GridColumn Field="Id" HeaderText="ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
-					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="yyyy-MM-ddTHH:MM:ss" Type="ColumnType.Date">
+					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Type="ColumnType.String">
 						<FilterTemplate>
 							<SfDateTimePicker TValue="DateTime?" Format="yyyy-MM-ddTHH:MM:ss" @bind-Value="@DateTimeValue">
 								<DateTimePickerEvents TValue="DateTime?" ValueChange="@onChanged"></DateTimePickerEvents>
@@ -167,8 +167,7 @@ else
 		foreach (var video in EventVideos)
 		{
 			var first = video.Events.FirstOrDefault();
-			var date = DateTime.Parse(first.Date);
-			Console.WriteLine($"{date}: date");
+			var date = DateTime.Parse(first.Date).ToString();
 			var cameraName = first.Camera.Name;
 			var labels = new HashSet<string>();
 			foreach (var boundingBox in BoundingBoxes)
@@ -253,7 +252,7 @@ else
 	{
 		if (DateTimeValue.HasValue)
 		{
-			await EventGrid.FilterByColumnAsync("Date", "Equal", DateTimeValue);
+			await EventGrid.FilterByColumnAsync("Date", "Equal", DateTimeValue.ToString());
 			Console.WriteLine($"Filter by: {DateTimeValue}");
 		} else
 		{
