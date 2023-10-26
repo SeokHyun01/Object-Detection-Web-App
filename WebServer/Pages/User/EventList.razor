@@ -108,7 +108,7 @@ else
 					<GridColumn Field="Id" HeaderText="ID" Width="120" IsPrimaryKey="true" ValidationRules="@(new ValidationRules{ Required=true, Number=true})" Type="ColumnType.Integer"></GridColumn>
 					<GridColumn Field="Date" HeaderText="Date" Width="120" ValidationRules="@(new ValidationRules{ Required=true})" Format="@DATETIME_FORMAT" Type="ColumnType.Date">
 						<FilterTemplate>
-							<SfDateTimePicker TValue="DateTime?" Format="@DATETIME_FORMAT" @bind-Value="@DateTimeValue">
+							<SfDateTimePicker TValue="DateTime?" Format="@DATETIME_FORMAT" @bind-Value="@StartDateTime">
 								<DateTimePickerEvents TValue="DateTime?" ValueChange="@onChanged"></DateTimePickerEvents>
 							</SfDateTimePicker>
 						</FilterTemplate>
@@ -143,7 +143,7 @@ else
 	private bool AllRowsExpanded { get; set; } = false;
 
 	private const string DATETIME_FORMAT = "yyyy-MM-ddTHH:mm:ss";
-	private DateTime? DateTimeValue { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+	private DateTime? StartDateTime { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
 
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -260,10 +260,10 @@ else
 
 	private async Task onChanged()
 	{
-		if (DateTimeValue.HasValue)
+		if (StartDateTime.HasValue)
 		{
-			await EventGrid.FilterByColumnAsync("Date", "Equal", DateTimeValue);
-			Console.WriteLine(DateTimeValue);
+			await EventGrid.FilterByColumnAsync("Date", "Equal", StartDateTime.Value.ToString(DATETIME_FORMAT));
+			Console.WriteLine(StartDateTime.Value.ToString(DATETIME_FORMAT));
 		} else
 		{
 			await EventGrid.ClearFilteringAsync();
