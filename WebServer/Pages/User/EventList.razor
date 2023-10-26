@@ -144,7 +144,7 @@ else
 	private SfGrid<EventViewModel> EventGrid { get; set; }
 	private bool AllRowsExpanded { get; set; } = false;
 
-	private const string DATETIME_FORMAT = "yyyy-MM-ddTHH:mm:ss";
+	private const string DATETIME_FORMAT = "MM/dd/yyyy";
 	private DateTime StartDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
 	private DateTime EndDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
 
