@@ -143,7 +143,7 @@ function stop_detect(isChangeModel = false) {
 }
 
 function get_date() {
-    //yyyy-MM-ddThh:mm:ss
+    //MM/dd/yyyy
     const date = new Date();
     const year = date.getFullYear().toString();
     let month = (date.getMonth() + 1).toString();
@@ -157,7 +157,7 @@ function get_date() {
     if (minute.length == 1) minute = "0" + minute;
     if (second.length == 1) second = "0" + second;
 
-    return year + "-" + month + "-" + day + "T" + hour + ":" + minute + ":" + second;
+    return month/day/year;
 }
 
 function start_rtc() {
