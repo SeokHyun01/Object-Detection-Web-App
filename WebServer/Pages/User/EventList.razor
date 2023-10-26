@@ -105,7 +105,7 @@ else
 				</GridTemplates>
 
 				<GridColumns>
-					<GridColumn Type="ColumnType.CheckBox" Width="100"></GridColumn>
+					<GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
 					<GridColumn Field="CameraName" HeaderText="Camera Name" ValidationRules="@(new ValidationRules{ Required=true })" Width="100" Type="ColumnType.String"></GridColumn>
 					<GridColumn Field="Date" HeaderText="Date" Width="100" ValidationRules="@(new ValidationRules{ Required=true})" Format="@DATETIME_FORMAT" Type="ColumnType.Date">
 						<FilterTemplate>
