@@ -106,6 +106,7 @@ async function send_mqtt(message, destinationName) {
     msg.destinationName = destinationName;
 
     client.send(msg);
+    console.log("send mqtt!");
 }
 
 function send_list() {
