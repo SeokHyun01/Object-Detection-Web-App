@@ -105,6 +105,7 @@ function sendImage(canvas) {
         data["Model"] = model_name;
 
         send_mqtt(JSON.stringify(data), TOPIC_EVENT);
+        console.log("send mqtt!");
     }
     // } else {
     //     data["Id"] = camera_id;
