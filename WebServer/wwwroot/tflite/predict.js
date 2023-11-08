@@ -12,6 +12,7 @@ let kepts = [];
 
 let prev_image_time;
 let send_interval = 500;
+let isSend = false;
 
 // 좌우 반전 추가한 detect
 function detect() {
@@ -39,7 +40,13 @@ function predict() {
 
         if (model_name == "face" && boxes.length > 0) draw_blur(ctx, boxes);
 
-        if (client != null && client.isConnected()) sendImage(canvas);
+        // 이미지 전송하는지 확인
+        getSend();
+
+        // 이벤트 토픽 전송
+        // if (client != null && client.isConnected() && isSend) sendImage(canvas);
+        if (isSend && client != null && client.isConnected()) sendEvent(canvas);
+
 
         // 현재 시간 표시
         ctx.font = "20px Arial";
@@ -48,6 +55,9 @@ function predict() {
         // boxes와 kepts를 그리기
         if (boxes.length > 0) draw_boxes(ctx, boxes);
         if (kepts.length > 0) draw_keypoints(ctx, kepts);
+
+        // 이미지 토픽 전송
+        if(isSend && client != null && client.isConnected()) sendImage(canvas);
 
         const input = tf.tidy(() => { return preprocess_input(canvas); });
 
@@ -78,44 +88,62 @@ function predict() {
     intervalId = setInterval(renderFrame, frameInterval);
 }
 
-function sendImage(canvas) {
+function getSend(){
     if (prev_image_time == null) prev_image_time = new Date().getTime();
 
     const now_time = new Date().getTime();
     
     if (now_time - prev_image_time > send_interval) {
         prev_image_time = now_time;
+        isSend = true;
     } else {
-        return;
+        isSend = false;
     }
+}
+
+function sendImage(canvas) {
+    // if (prev_image_time == null) prev_image_time = new Date().getTime();
+
+    // const now_time = new Date().getTime();
+    
+    // if (now_time - prev_image_time > send_interval) {
+    //     prev_image_time = now_time;
+    // } else {
+    //     return;
+    // }
 
     const imgData = canvas.toDataURL("image/jpeg", 0.7);
     const data = {};
     data["Image"] = imgData;
-    // data["Id"] = camera_id;
+    data["Id"] = camera_id;
 
-    data["CameraId"] = camera_id;
-    data["Date"] = get_date();
-    data["UserId"] = user_id;
-    data["CameraId"] = camera_id;
-    data["Model"] = model_name;
     send_mqtt(JSON.stringify(data), TOPIC_IMAGE);
 
-    if ((model_name == "fire" || model_name == "coco") && boxes.length > 0) {
-        // // Id 제거 
-        // delete data["Id"];
+    // if ((model_name == "fire" || model_name == "coco") && boxes.length > 0) {
+    //     // Id 제거 
+    //     delete data["Id"];
 
-        // data["Date"] = get_date();
-        // data["UserId"] = user_id;
-        // data["CameraId"] = camera_id;
-        // data["Model"] = model_name;
+    //     data["Date"] = get_date();
+    //     data["UserId"] = user_id;
+    //     data["CameraId"] = camera_id;
+    //     data["Model"] = model_name;
+
+    //     send_mqtt(JSON.stringify(data), TOPIC_EVENT);
+    // }
+}
+
+function sendEvent(canvas){
+    if ((model_name == "fire" || model_name == "coco") && boxes.length > 0) {
+        const imgData = canvas.toDataURL("image/jpeg", 0.7);
+        const data = {};
+        data["Image"] = imgData;
+        data["Date"] = get_date();
+        data["UserId"] = user_id;
+        data["CameraId"] = camera_id;
+        data["Model"] = model_name;
 
         send_mqtt(JSON.stringify(data), TOPIC_EVENT);
     }
-    // } else {
-    //     data["Id"] = camera_id;
-    //     send_mqtt(JSON.stringify(data), TOPIC_IMAGE);
-    // }
 }
 
 function unload() {
