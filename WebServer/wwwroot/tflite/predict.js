@@ -92,20 +92,25 @@ function sendImage(canvas) {
     const imgData = canvas.toDataURL("image/jpeg", 0.7);
     const data = {};
     data["Image"] = imgData;
-    data["Id"] = camera_id;
+    // data["Id"] = camera_id;
+
+    data["CameraId"] = camera_id;
+    data["Date"] = get_date();
+    data["UserId"] = user_id;
+    data["CameraId"] = camera_id;
+    data["Model"] = model_name;
     send_mqtt(JSON.stringify(data), TOPIC_IMAGE);
 
     if ((model_name == "fire" || model_name == "coco") && boxes.length > 0) {
-        // Id 제거 
-        delete data["Id"];
+        // // Id 제거 
+        // delete data["Id"];
 
-        data["Date"] = get_date();
-        data["UserId"] = user_id;
-        data["CameraId"] = camera_id;
-        data["Model"] = model_name;
+        // data["Date"] = get_date();
+        // data["UserId"] = user_id;
+        // data["CameraId"] = camera_id;
+        // data["Model"] = model_name;
 
         send_mqtt(JSON.stringify(data), TOPIC_EVENT);
-        console.log("send mqtt!");
     }
     // } else {
     //     data["Id"] = camera_id;
