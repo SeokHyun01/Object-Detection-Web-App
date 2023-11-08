@@ -37,6 +37,11 @@ else
 			</SfButton>
 			<SfGrid @ref="EventGrid" DataSource="@EventViewModel" Height="1000" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 				<GridEvents OnActionBegin="EventActionHandler" TValue="EventViewModel"></GridEvents>
+				<GridSortSettings>
+					<GridSortColumns>
+						<GridSortColumn Field="Id" Direction="SortDirection.Descending"></GridSortColumn>
+					</GridSortColumns>
+				</GridSortSettings>
 				<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
 				<GridEditSettings ShowDeleteConfirmDialog="true" AllowDeleting="true"></GridEditSettings>
 				<GridPageSettings PageSizes="true" PageSize="5" PageCount="5"></GridPageSettings>
@@ -106,8 +111,9 @@ else
 
 				<GridColumns>
 					<GridColumn Type="ColumnType.CheckBox" Width="50"></GridColumn>
+					<GridColumn Field="Id" HeaderText="Id" ValidationRules="@(new ValidationRules{ Required=true, Number=true })" Width="100" Type="ColumnType.Integer"></GridColumn>
 					<GridColumn Field="CameraName" HeaderText="Camera Name" ValidationRules="@(new ValidationRules{ Required=true })" Width="100" Type="ColumnType.String"></GridColumn>
-					<GridColumn Field="Date" HeaderText="Date" Width="100" ValidationRules="@(new ValidationRules{ Required=true})" Format="@DATETIME_FORMAT" Type="ColumnType.Date">
+					<GridColumn Field="Date" HeaderText="Date" Width="100" ValidationRules="@(new ValidationRules{ Required=true })" Format="@DATETIME_FORMAT" Type="ColumnType.Date">
 						<FilterTemplate>
 							@{
 								<SfDateRangePicker Width="100" ShowClearButton="true" @bind-StartDate="StartDate" @bind-EndDate="EndDate" TValue="DateTime" Format="@DATETIME_FORMAT">
@@ -156,6 +162,7 @@ else
 			var authState = await AuthenticationState;
 			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 			await getEventVideos(User.Id);
+			await ToggleExpandCollapse();
 		}
 	}
 

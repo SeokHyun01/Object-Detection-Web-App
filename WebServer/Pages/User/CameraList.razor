@@ -174,12 +174,6 @@ else
 					{
 						await _jsRuntime.InvokeVoidAsync("set_img_src", $"img-{cameraMessage.Id}", cameraMessage.Image);
 					}
-
-					@* // 시간 확인
-					DateTime currentTime = DateTime.Now;
-					string logMessage = $"now time: {currentTime.ToString("yyyy-MM-dd HH:mm:ss.fff")}";
-					Console.WriteLine(logMessage); *@
-
 				}
 				else if (e.ApplicationMessage.Topic == "camera/update/angle/ack")
 				{
