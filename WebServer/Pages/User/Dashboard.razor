@@ -63,7 +63,7 @@ else
 			StateHasChanged();
 		}
 
-		Cameras = await _cameraRepository.GetAllByUserId(User.Id);
+		Cameras = await _cameraRepository.GetAll();
 
 		IsLoading = false;
 		StateHasChanged();
