@@ -249,7 +249,7 @@ namespace WebServer.Service
 								});
 
 								//var hubConnection = new HubConnectionBuilder()
-								//.WithUrl(_navigationManager.ToAbsoluteUri("/hub/observer"), (opts) =>
+								//.WithUrl("https://hkai.hknu.ac.kr:8103/hub/observer", (opts) =>
 								//{
 								//	opts.HttpMessageHandlerFactory = (message) =>
 								//	{
