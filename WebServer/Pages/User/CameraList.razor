@@ -124,6 +124,8 @@ else
 			var authState = await AuthenticationState;
 			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 
+			Console.WriteLine(_navigationManager.ToAbsoluteUri("/hub/rtc"));
+
 			RTCHubConnection = new HubConnectionBuilder()
 			.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), (opts) =>
 			{
