@@ -31,8 +31,6 @@ namespace WebServer.Service
 		private IMqttClient? MqttClient { get; set; } = null;
 		private IMqttClient? AckSender { get; set; } = null;
 
-		private HubConnection HubConnection { get; set; } = null;
-
 		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
 		//private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
 		private static readonly string FCM_SERVER_KEY = "AAAAlAPqkMU:APA91bEpsixt1iwXs5ymw67EvF8urDy9Mi3gVbLEYYlgAit94zctOhQuO12pvsD2tuk5oJtzZ9eGAwblxebKyBM8WEQDhYm2ihhBuud5P7cESyFfAycI--IhY4jJ4m2Yr-lJ27qSGK7w";
