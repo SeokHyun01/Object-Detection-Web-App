@@ -59,23 +59,6 @@ namespace WebServer.Service
 				//using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx");
 				//using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" });
 
-				HubConnection = new HubConnectionBuilder()
-					.WithUrl("https://hkai.hknu.ac.kr:8103/hub/observer", (opts) =>
-					{
-						opts.HttpMessageHandlerFactory = (message) =>
-						{
-							if (message is HttpClientHandler clientHandler)
-							{
-								// SSL 무시
-								clientHandler.ServerCertificateCustomValidationCallback +=
-									(sender, certificate, chain, sslPolicyErrors) => { return true; };
-							}
-							return message;
-						};
-					}).Build();
-
-				await HubConnection.StartAsync();
-
 				var mqttFactory = new MqttFactory();
 				AckSender = mqttFactory.CreateMqttClient();
 				var options = new MqttClientOptionsBuilder()
@@ -267,14 +250,14 @@ namespace WebServer.Service
 									Path = videoPath
 								});
 
-								if (HubConnection.State == HubConnectionState.Connected)
-								{
-									await HubConnection.SendAsync("CreateEvent", createdVideoDTO.UserId, createdVideoDTO.Id);
-								} else
-								{
-									await HubConnection.StartAsync();
-									await HubConnection.SendAsync("CreateEvent", createdVideoDTO.UserId, createdVideoDTO.Id);
-								}
+								//if (HubConnection.State == HubConnectionState.Connected)
+								//{
+								//	await HubConnection.SendAsync("CreateEvent", createdVideoDTO.UserId, createdVideoDTO.Id);
+								//} else
+								//{
+								//	await HubConnection.StartAsync();
+								//	await HubConnection.SendAsync("CreateEvent", createdVideoDTO.UserId, createdVideoDTO.Id);
+								//}
 
 								// FCM
 								var labels = new HashSet<string>();
