@@ -23,8 +23,6 @@ namespace WebServer.Service
 	{
 		private readonly IServiceProvider _serviceProvider;
 
-		private NavigationManager _navigationManager = null;
-
 		private IEventRepository? _eventRepositroy = null;
 		private IBoundingBoxRepository? _boundingBoxRepository = null;
 		private IEventVideoRepository? _eventVideoRepository = null;
@@ -46,8 +44,6 @@ namespace WebServer.Service
 		{
 			using (var scope = _serviceProvider.CreateScope())
 			{
-				_navigationManager = scope.ServiceProvider.GetRequiredService<NavigationManager>();
-
 				_eventRepositroy = scope.ServiceProvider.GetRequiredService<IEventRepository>();
 				_boundingBoxRepository = scope.ServiceProvider.GetRequiredService<IBoundingBoxRepository>();
 				_eventVideoRepository = scope.ServiceProvider.GetRequiredService<IEventVideoRepository>();
@@ -252,22 +248,22 @@ namespace WebServer.Service
 									Path = videoPath
 								});
 
-								var hubConnection = new HubConnectionBuilder()
-								.WithUrl(_navigationManager.ToAbsoluteUri("/hub/observer"), (opts) =>
-								{
-									opts.HttpMessageHandlerFactory = (message) =>
-									{
-										if (message is HttpClientHandler clientHandler)
-										{
-											// SSL 무시
-											clientHandler.ServerCertificateCustomValidationCallback +=
-												(sender, certificate, chain, sslPolicyErrors) => { return true; };
-										}
-										return message;
-									};
-								}).Build();
+								//var hubConnection = new HubConnectionBuilder()
+								//.WithUrl(_navigationManager.ToAbsoluteUri("/hub/observer"), (opts) =>
+								//{
+								//	opts.HttpMessageHandlerFactory = (message) =>
+								//	{
+								//		if (message is HttpClientHandler clientHandler)
+								//		{
+								//			// SSL 무시
+								//			clientHandler.ServerCertificateCustomValidationCallback +=
+								//				(sender, certificate, chain, sslPolicyErrors) => { return true; };
+								//		}
+								//		return message;
+								//	};
+								//}).Build();
 
-								await hubConnection.SendAsync("CreateEvent", createdVideoDTO.UserId, createdVideoDTO.Id);
+								//await hubConnection.SendAsync("CreateEvent", createdVideoDTO.UserId, createdVideoDTO.Id);
 
 								// FCM
 								var labels = new HashSet<string>();
