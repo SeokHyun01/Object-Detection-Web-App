@@ -190,7 +190,7 @@ else
 
 				var video = await _eventVideoRepository.Get(videoId);
 				BoundingBoxes.AddRange(video.Events.SelectMany(x => x.BoundingBoxes).ToList());
-				
+
 				var first = video.Events.FirstOrDefault();
 
 				DateTime? date = null;
@@ -204,9 +204,9 @@ else
 				}
 
 				var cameraName = first.Camera.Name;
-				
+
 				var labels = new HashSet<string>();
-				
+
 				foreach (var boundingBox in BoundingBoxes)
 				{
 					if (boundingBox.Event.EventVideoId == video.Id)
@@ -232,7 +232,7 @@ else
 			});
 
 			await getEventVideos(User.Id);
-			
+
 			await ToggleExpandCollapse();
 		}
 	}
@@ -250,6 +250,13 @@ else
 		foreach (var video in EventVideos)
 		{
 			var first = video.Events.FirstOrDefault();
+			if (first == null)
+			{
+				Console.WriteLine("Video 의 Event 일부가 null 입니다.");
+			} else
+			{
+				Console.WriteLine($"Date: {first.Date}");
+			}
 
 			DateTime? date = null;
 			try
