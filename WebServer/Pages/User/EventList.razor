@@ -252,10 +252,8 @@ else
 			var first = video.Events.FirstOrDefault();
 			if (first == null)
 			{
-				Console.WriteLine("Video 의 Event 일부가 null 입니다.");
-			} else
-			{
-				Console.WriteLine($"Date: {first.Date}");
+				Console.WriteLine($"null인 Event의 Video ID: {video.Id}");
+				continue;
 			}
 
 			DateTime? date = null;
