@@ -31,6 +31,8 @@ namespace WebServer.Service
 		private IMqttClient? MqttClient { get; set; } = null;
 		private IMqttClient? AckSender { get; set; } = null;
 
+		private HubConnection HubConnection { get; set; } = null;
+
 		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
 		//private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
 		private static readonly string FCM_SERVER_KEY = "AAAAlAPqkMU:APA91bEpsixt1iwXs5ymw67EvF8urDy9Mi3gVbLEYYlgAit94zctOhQuO12pvsD2tuk5oJtzZ9eGAwblxebKyBM8WEQDhYm2ihhBuud5P7cESyFfAycI--IhY4jJ4m2Yr-lJ27qSGK7w";
@@ -56,6 +58,23 @@ namespace WebServer.Service
 
 				//using var coco = YoloV8Predictor.Create($"{ROOT}/models/coco.onnx");
 				//using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" });
+
+				HubConnection = new HubConnectionBuilder()
+					.WithUrl("https://hkai.hknu.ac.kr:8103/hub/observer", (opts) =>
+					{
+						opts.HttpMessageHandlerFactory = (message) =>
+						{
+							if (message is HttpClientHandler clientHandler)
+							{
+								// SSL 무시
+								clientHandler.ServerCertificateCustomValidationCallback +=
+									(sender, certificate, chain, sslPolicyErrors) => { return true; };
+							}
+							return message;
+						};
+					}).Build();
+
+				await HubConnection.StartAsync();
 
 				var mqttFactory = new MqttFactory();
 				AckSender = mqttFactory.CreateMqttClient();
@@ -248,22 +267,14 @@ namespace WebServer.Service
 									Path = videoPath
 								});
 
-								var hubConnection = new HubConnectionBuilder()
-								.WithUrl("https://hkai.hknu.ac.kr:8103/hub/observer", (opts) =>
+								if (HubConnection.State == HubConnectionState.Connected)
 								{
-									opts.HttpMessageHandlerFactory = (message) =>
-									{
-										if (message is HttpClientHandler clientHandler)
-										{
-											// SSL 무시
-											clientHandler.ServerCertificateCustomValidationCallback +=
-												(sender, certificate, chain, sslPolicyErrors) => { return true; };
-										}
-										return message;
-									};
-								}).Build();
-
-								await hubConnection.SendAsync("CreateEvent", createdVideoDTO.UserId, createdVideoDTO.Id);
+									await HubConnection.SendAsync("CreateEvent", createdVideoDTO.UserId, createdVideoDTO.Id);
+								} else
+								{
+									await HubConnection.StartAsync();
+									await HubConnection.SendAsync("CreateEvent", createdVideoDTO.UserId, createdVideoDTO.Id);
+								}
 
 								// FCM
 								var labels = new HashSet<string>();
