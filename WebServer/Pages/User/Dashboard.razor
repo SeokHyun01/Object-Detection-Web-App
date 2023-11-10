@@ -10,106 +10,120 @@
 
 @if (IsLoading)
 {
-	<p class="placeholder-glow">
-		<span class="placeholder w-50 bg-primary"></span>
-		<span class="placeholder w-75 bg-primary"></span>
-		<span class="placeholder w-25 bg-primary"></span>
-	</p>
+    <p class="placeholder-glow">
+        <span class="placeholder w-50 bg-primary"></span>
+        <span class="placeholder w-75 bg-primary"></span>
+        <span class="placeholder w-25 bg-primary"></span>
+    </p>
 }
 else
 {
-	@if (Cameras.Any())
-	{
-		<div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
-			@foreach (var camera in Cameras)
-			{
-				<div class="col">
-					<div class="card shadow-sm">
-						<div class="card-header" style="text-align: center;">
-							<span class="card-text">@($"{UserNames[camera.UserId]}.{camera.Name}")</span>
-						</div>
-						<div class="card-body" width="100%" height="225">
-							<img id="@($"img-{camera.Id}")" src="data:image/svg+xml,%3Csvg class='bd-placeholder-img card-img-top' width='100%25' height='225' xmlns='http://www.w3.org/2000/svg' role='img' aria-label='Placeholder: Thumbnail' preserveAspectRatio='xMidYMid slice' focusable='false'%3E%3Ctitle%3EPlaceholder%3C/title%3E%3Crect width='100%25' height='100%25' fill='%2355595c'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' fill='%23eceeef' text-anchor='middle' dominant-baseline='middle' dy='.3em'%3EThumbnail%3C/text%3E%3C/svg%3E" style="width: 100%;" class="mt-3">
-						</div>
-					</div>
-				</div>
-			}
-		</div>
-	}
-	else
-	{
-		<p>Not found.</p>
-	}
+    @if (Cameras.Any())
+    {
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-3">
+            @foreach (var camera in Cameras)
+            {
+                <div class="col">
+                    <div class="card shadow-sm">
+                        <div class="card-header" style="text-align: center;">
+                            <span class="card-text">@($"{UserNames[camera.UserId]}.{camera.Name}")</span>
+                        </div>
+                        <div class="card-body" width="100%" height="225">
+                            <img id="@($"img-{camera.Id}")" src="data:image/svg+xml,%3Csvg class='bd-placeholder-img card-img-top' width='100%25' height='225' xmlns='http://www.w3.org/2000/svg' role='img' aria-label='Placeholder: Thumbnail' preserveAspectRatio='xMidYMid slice' focusable='false'%3E%3Ctitle%3EPlaceholder%3C/title%3E%3Crect width='100%25' height='100%25' fill='%2355595c'%3E%3C/rect%3E%3Ctext x='50%25' y='50%25' fill='%23eceeef' text-anchor='middle' dominant-baseline='middle' dy='.3em'%3EThumbnail%3C/text%3E%3C/svg%3E" style="width: 100%;" class="mt-3">
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-sm btn-outline-danger"
+                                    @onclick="()=>OnCameraDeleted(camera)">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <p>Not found.</p>
+    }
 }
 
 
 @code {
-	[CascadingParameter]
-	public Task<AuthenticationState> AuthenticationState { get; set; }
-	private IdentityUser? User { get; set; } = null;
-	private Dictionary<string, string> UserNames { get; set; } = new Dictionary<string, string>();
+    [CascadingParameter]
+    public Task<AuthenticationState> AuthenticationState { get; set; }
+    private IdentityUser? User { get; set; } = null;
+    private Dictionary<string, string> UserNames { get; set; } = new Dictionary<string, string>();
 
-	private bool IsLoading { get; set; } = true;
+    private bool IsLoading { get; set; } = true;
 
-	private IEnumerable<CameraDTO> Cameras { get; set; } = new List<CameraDTO>();
+    private IEnumerable<CameraDTO> Cameras { get; set; } = new List<CameraDTO>();
 
-	private IMqttClient? MqttClient { get; set; } = null;
+    private IMqttClient? MqttClient { get; set; } = null;
 
 
-	private async ValueTask getCameras(string userId)
-	{
-		if (!IsLoading)
-		{
-			IsLoading = true;
-			StateHasChanged();
-		}
+    private async Task OnCameraDeleted(CameraDTO camera)
+    {
+        await _cameraRepository.Delete(camera.Id);
+        await getCameras(User.Id);
+    }
 
-		Cameras = await _cameraRepository.GetAll();
+    private async ValueTask getCameras(string userId)
+    {
+        if (!IsLoading)
+        {
+            IsLoading = true;
+            StateHasChanged();
+        }
 
-		var userIds = Cameras.Select(x => x.UserId).ToHashSet();
-		foreach (var id in userIds)
-		{
-			var user = await _userManager.FindByIdAsync(id);
-			UserNames[id] = user.UserName;
-		}
+        Cameras = await _cameraRepository.GetAll();
 
-		IsLoading = false;
-		StateHasChanged();
-	}
+        var userIds = Cameras.Select(x => x.UserId).ToHashSet();
+        foreach (var id in userIds)
+        {
+            var user = await _userManager.FindByIdAsync(id);
+            UserNames[id] = user.UserName;
+        }
 
-	protected override async Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (firstRender)
-		{
-			var authState = await AuthenticationState;
-			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
+        IsLoading = false;
+        StateHasChanged();
+    }
 
-			var mqttFactory = new MqttFactory();
-			MqttClient = mqttFactory.CreateMqttClient();
-			MqttClient.ApplicationMessageReceivedAsync += async e =>
-			{
-				var message = e.ApplicationMessage;
-				if (message.Topic == "camera/image")
-				{
-					var cameraMessage = JsonSerializer.Deserialize<CameraDTO>(message.PayloadSegment);
-					if (cameraMessage != null)
-					{
-						await _jsRuntime.InvokeVoidAsync("set_img_src", $"img-{cameraMessage.Id}", cameraMessage.Image);
-					}
-				}
-			};
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            var authState = await AuthenticationState;
+            User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 
-			var mqttClientOptions = new MqttClientOptionsBuilder()
-			.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
-			.Build();
-			await MqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
+            var mqttFactory = new MqttFactory();
+            MqttClient = mqttFactory.CreateMqttClient();
+            MqttClient.ApplicationMessageReceivedAsync += async e =>
+            {
+                var message = e.ApplicationMessage;
+                if (message.Topic == "camera/image")
+                {
+                    var cameraMessage = JsonSerializer.Deserialize<CameraDTO>(message.PayloadSegment);
+                    if (cameraMessage != null)
+                    {
+                        await _jsRuntime.InvokeVoidAsync("set_img_src", $"img-{cameraMessage.Id}", cameraMessage.Image);
+                    }
+                }
+            };
 
-			var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
-			.WithTopicFilter(f => { f.WithTopic("camera/image"); })
-			.Build();
-			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
+            var mqttClientOptions = new MqttClientOptionsBuilder()
+            .WithTcpServer("ictrobot.hknu.ac.kr", 8085)
+            .Build();
+            await MqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
 
-			await getCameras(User.Id);
-		}
-	}
+            var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
+            .WithTopicFilter(f => { f.WithTopic("camera/image"); })
+            .Build();
+            await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
+
+            await getCameras(User.Id);
+        }
+    }
 }

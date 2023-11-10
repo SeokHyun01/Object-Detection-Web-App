@@ -4,6 +4,8 @@
 
 @attribute [Authorize(Roles = SD.ROLE_CLIENT)]
 
+@inject NavigationManager _navigationManager
+
 @inject UserManager<IdentityUser> _userManager
 
 @inject ICameraRepository _cameraRepository
@@ -144,7 +146,7 @@ else
 	private List<EventViewModel> EventViewModel { get; set; } = new();
 
 	private IEnumerable<EventVideoDTO> EventVideos { get; set; } = new List<EventVideoDTO>();
-	private IEnumerable<BoundingBoxDTO> BoundingBoxes { get; set; } = new List<BoundingBoxDTO>();
+	private List<BoundingBoxDTO> BoundingBoxes { get; set; } = new List<BoundingBoxDTO>();
 
 	private IEnumerable<string> ToolbarItems = new List<string>() { "Delete" };
 	private SfGrid<EventViewModel> EventGrid { get; set; }
@@ -154,6 +156,8 @@ else
 	private DateTime StartDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
 	private DateTime EndDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
 
+	private HubConnection? hubConnection;
+
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -161,7 +165,74 @@ else
 		{
 			var authState = await AuthenticationState;
 			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
+
+			hubConnection = new HubConnectionBuilder()
+			.WithUrl(_navigationManager.ToAbsoluteUri("/hub/observer"), (opts) =>
+			{
+				opts.HttpMessageHandlerFactory = (message) =>
+				{
+					if (message is HttpClientHandler clientHandler)
+					{
+						// SSL 무시
+						clientHandler.ServerCertificateCustomValidationCallback +=
+							(sender, certificate, chain, sslPolicyErrors) => { return true; };
+					}
+					return message;
+				};
+			}).Build();
+
+			hubConnection.On<String, int>("OnEventCreated", async (userId, videoId) =>
+			{
+				if (userId != User.Id)
+				{
+					return;
+				}
+
+				var video = await _eventVideoRepository.Get(videoId);
+				BoundingBoxes.AddRange(video.Events.SelectMany(x => x.BoundingBoxes).ToList());
+				
+				var first = video.Events.FirstOrDefault();
+
+				DateTime? date = null;
+				try
+				{
+					date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
+				}
+				catch (FormatException)
+				{
+					date = new DateTime();
+				}
+
+				var cameraName = first.Camera.Name;
+				
+				var labels = new HashSet<string>();
+				
+				foreach (var boundingBox in BoundingBoxes)
+				{
+					if (boundingBox.Event.EventVideoId == video.Id)
+					{
+						if (!string.IsNullOrEmpty(boundingBox.Label))
+						{
+							labels.Add(boundingBox.Label);
+						}
+					}
+				}
+				var path = video.Path;
+				EventViewModel.Add(new EventViewModel()
+					{
+						Id = video.Id,
+						Date = date.Value,
+						CameraName = cameraName,
+						Labels = string.Join(", ", labels),
+						Path = path,
+					});
+
+				await EventGrid.Refresh();
+				await ToggleExpandCollapse();
+			});
+
 			await getEventVideos(User.Id);
+			
 			await ToggleExpandCollapse();
 		}
 	}

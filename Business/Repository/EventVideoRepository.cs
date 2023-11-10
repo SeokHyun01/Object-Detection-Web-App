@@ -74,6 +74,26 @@ namespace Business.Repository
 			}
 		}
 
+		public async ValueTask<EventVideoDTO> Get(int id)
+		{
+			try
+			{
+				return _mapper.Map<EventVideo, EventVideoDTO>(await _db.EventVideos
+					.Include(ev => ev.Events)
+					.ThenInclude(e => e.Camera)
+					.Include(ev => ev.Events)
+					.ThenInclude(e => e.BoundingBoxes)
+					.FirstOrDefaultAsync(x => x.Id == id));
+
+			} catch(Exception ex)
+			{
+				Console.WriteLine(ex.StackTrace);
+				Console.WriteLine(ex.Message);
+
+				throw;
+			}
+		}
+
 		public async ValueTask<IEnumerable<EventVideoDTO>> GetAllByUserId(string userId)
 		{
 			try
