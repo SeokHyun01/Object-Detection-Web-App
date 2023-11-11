@@ -233,7 +233,10 @@ else
 
 			await getEventVideos(User.Id);
 
-			await ToggleExpandCollapse();
+			if (EventVideos.Any())
+			{
+				await ToggleExpandCollapse();
+			}
 		}
 	}
 
