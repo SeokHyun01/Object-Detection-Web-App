@@ -27,7 +27,6 @@
 				<div class="card-header">Caller</div>
 				<div class="card-body" width="100%" height="225">
 					<video id="peer_video" style="transform: scaleX(-1); width:100%;" autoplay></video>
-					<span class="card-text mt-3">Angle</span>
 					<input id="input" type="range" class="form-range" value=@(Camera.Angle) min="0" max="180" step="1" @onchange="(args)=>SetCameraAngle(args, CameraId)" />
 				</div>
 			</div>

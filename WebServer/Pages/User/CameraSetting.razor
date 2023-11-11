@@ -199,10 +199,32 @@
 
 
 	// 객체 검출 모델 선택
-	private void OnSelectedItemChanged(ChangeEventArgs e)
+	private async Task OnSelectedItemChanged(ChangeEventArgs e)
 	{
 		selectedItem = e.Value?.ToString();
-		_jsRuntime.InvokeVoidAsync("change_model", selectedItem);
+		await _jsRuntime.InvokeVoidAsync("change_model", selectedItem);
+
+		var modelSelectMessage = new ModelSelectDTO
+			{
+				CameraId = CameraId,
+				Model = selectedItem,
+			};
+		var payload = JsonSerializer.Serialize<ModelSelectDTO>(modelSelectMessage);
+
+		var mqttFactory = new MqttFactory();
+		using (var mqttClient = mqttFactory.CreateMqttClient())
+		{
+			var mqttClientOptions = new MqttClientOptionsBuilder()
+				.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
+				.Build();
+			await mqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
+			var applicationMessage = new MqttApplicationMessageBuilder()
+				.WithTopic("model/select")
+				.WithPayload(payload)
+				.Build();
+			await mqttClient.PublishAsync(applicationMessage, CancellationToken.None);
+			await mqttClient.DisconnectAsync();
+		}
 	}
 
 	// confidence threshold 변경

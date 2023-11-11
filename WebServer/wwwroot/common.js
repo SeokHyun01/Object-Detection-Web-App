@@ -17,3 +17,8 @@ function set_checkbox_value(id, value) {
     const view = document.getElementById(id);
     view.checked = value;
 }
+
+function set_text_content(id, value) {
+    const view = document.getElementById(id);
+    view.textContent = value;
+}
