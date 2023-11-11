@@ -31,9 +31,9 @@ namespace WebServer.Service
 
 		private IMqttClient? MqttClient { get; set; } = null;
 		private IMqttClient? EventSender { get; set; } = null;
-        private IMqttClient? OnEventCreated { get; set; } = null;
+		//private IMqttClient? OnEventCreated { get; set; } = null;
 
-        private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
+		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
 		//private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
 		private static readonly string FCM_SERVER_KEY = "AAAAlAPqkMU:APA91bEpsixt1iwXs5ymw67EvF8urDy9Mi3gVbLEYYlgAit94zctOhQuO12pvsD2tuk5oJtzZ9eGAwblxebKyBM8WEQDhYm2ihhBuud5P7cESyFfAycI--IhY4jJ4m2Yr-lJ27qSGK7w";
 
@@ -66,8 +66,8 @@ namespace WebServer.Service
 					.Build();
 				await EventSender.ConnectAsync(options, CancellationToken.None);
 
-                OnEventCreated = mqttFactory.CreateMqttClient();
-				await OnEventCreated.ConnectAsync(options, CancellationToken.None);
+				//            OnEventCreated = mqttFactory.CreateMqttClient();
+				//await OnEventCreated.ConnectAsync(options, CancellationToken.None);
 
 				MqttClient = mqttFactory.CreateMqttClient();
 				MqttClient.ApplicationMessageReceivedAsync += async e =>
@@ -253,15 +253,15 @@ namespace WebServer.Service
 									Path = videoPath
 								});
 
-								var onEventCreatedMessage = new OnEventCreatedDTO { UserId = createdVideoDTO.UserId, VideoId = createdVideoDTO.Id };
-                                var applicationMessage = new MqttApplicationMessageBuilder()
-                                        .WithTopic("event/oncreated")
-                                        .WithPayload(JsonSerializer.Serialize<OnEventCreatedDTO>(onEventCreatedMessage))
-                                        .Build();
-                                await OnEventCreated.PublishAsync(applicationMessage, CancellationToken.None);
+								//var onEventCreatedMessage = new OnEventCreatedDTO { UserId = createdVideoDTO.UserId, VideoId = createdVideoDTO.Id };
+								//                        var applicationMessage = new MqttApplicationMessageBuilder()
+								//                                .WithTopic("event/oncreated")
+								//                                .WithPayload(JsonSerializer.Serialize<OnEventCreatedDTO>(onEventCreatedMessage))
+								//                                .Build();
+								//                        await OnEventCreated.PublishAsync(applicationMessage, CancellationToken.None);
 
-                                // FCM
-                                var labels = new HashSet<string>();
+								// FCM
+								var labels = new HashSet<string>();
 								foreach (var eventDTO in eventDTOs)
 								{
 									eventDTO.EventVideoId = createdVideoDTO.Id;
