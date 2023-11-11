@@ -44,7 +44,7 @@ function predict() {
         getSend();
 
         // 이벤트 토픽 전송
-        // if (client != null && client.isConnected() && isSend) sendImage(canvas);
+        // if (client != null && client.isConnected()) sendImage(canvas);
         if (isSend && client != null && client.isConnected()) sendEvent(canvas);
 
 
@@ -143,6 +143,7 @@ function sendEvent(canvas){
         data["Model"] = model_name;
 
         send_mqtt(JSON.stringify(data), TOPIC_EVENT);
+        console.log("send event");
     }
 }
 
