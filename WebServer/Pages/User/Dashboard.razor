@@ -108,7 +108,8 @@ else
                     {
                         await _jsRuntime.InvokeVoidAsync("set_img_src", $"img-{cameraMessage.Id}", cameraMessage.Image);
                     }
-                } else if (message.Topic == "model/select")
+                }
+                else if (message.Topic == "model/select")
                 {
                     var modelSelectMessage = JsonSerializer.Deserialize<ModelSelectDTO>(message.PayloadSegment);
                     if (modelSelectMessage != null)
@@ -125,6 +126,7 @@ else
 
             var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
             .WithTopicFilter(f => { f.WithTopic("camera/image"); })
+            .WithTopicFilter(f => { f.WithTopic("model/select"); })
             .Build();
             await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
