@@ -232,7 +232,12 @@ else
 					await EventGrid.Refresh();
 					if (EventViewModel.Any())
 					{
-						await ToggleExpandCollapse();
+						await ExpandAll();
+						if (!AllRowsExpanded)
+						{
+							AllRowsExpanded = true;
+						}
+						await InvokeAsync(StateHasChanged);
 					}
 				}
 			};
