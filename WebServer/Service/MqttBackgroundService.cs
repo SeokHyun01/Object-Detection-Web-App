@@ -16,6 +16,7 @@ using DataAccess;
 using System.Net.Http.Headers;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.AspNetCore.Components;
+using MQTTnet.Server;
 
 namespace WebServer.Service
 {
@@ -29,9 +30,10 @@ namespace WebServer.Service
 		private IFCMInfoRepository? _fCMInfoRepository = null;
 
 		private IMqttClient? MqttClient { get; set; } = null;
-		private IMqttClient? AckSender { get; set; } = null;
+		private IMqttClient? EventSender { get; set; } = null;
+        private IMqttClient? OnEventCreated { get; set; } = null;
 
-		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
+        private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
 		//private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
 		private static readonly string FCM_SERVER_KEY = "AAAAlAPqkMU:APA91bEpsixt1iwXs5ymw67EvF8urDy9Mi3gVbLEYYlgAit94zctOhQuO12pvsD2tuk5oJtzZ9eGAwblxebKyBM8WEQDhYm2ihhBuud5P7cESyFfAycI--IhY4jJ4m2Yr-lJ27qSGK7w";
 
@@ -58,11 +60,14 @@ namespace WebServer.Service
 				//using var fire = YoloV8Predictor.Create($"{ROOT}/models/fire.onnx", labels: new string[] { "fire", "smoke" });
 
 				var mqttFactory = new MqttFactory();
-				AckSender = mqttFactory.CreateMqttClient();
+				EventSender = mqttFactory.CreateMqttClient();
 				var options = new MqttClientOptionsBuilder()
 					.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
 					.Build();
-				await AckSender.ConnectAsync(options, CancellationToken.None);
+				await EventSender.ConnectAsync(options, CancellationToken.None);
+
+                OnEventCreated = mqttFactory.CreateMqttClient();
+				await OnEventCreated.ConnectAsync(options, CancellationToken.None);
 
 				MqttClient = mqttFactory.CreateMqttClient();
 				MqttClient.ApplicationMessageReceivedAsync += async e =>
@@ -168,7 +173,7 @@ namespace WebServer.Service
 								.WithTopic("event/create")
 								.WithPayload(createdEvent)
 								.Build();
-							await AckSender.PublishAsync(applicationMessage, CancellationToken.None);
+							await EventSender.PublishAsync(applicationMessage, CancellationToken.None);
 
 							foreach (var boundingBox in boundingBoxes)
 							{
@@ -248,17 +253,16 @@ namespace WebServer.Service
 									Path = videoPath
 								});
 
-								//if (HubConnection.State == HubConnectionState.Connected)
-								//{
-								//	await HubConnection.SendAsync("CreateEvent", createdVideoDTO.UserId, createdVideoDTO.Id);
-								//} else
-								//{
-								//	await HubConnection.StartAsync();
-								//	await HubConnection.SendAsync("CreateEvent", createdVideoDTO.UserId, createdVideoDTO.Id);
-								//}
+								var onEventCreatedMessage = new OnEventCreatedDTO { UserId = createdVideoDTO.UserId, VideoId = createdVideoDTO.Id };
+                                var applicationMessage = new MqttApplicationMessageBuilder()
+                                        .WithTopic("event/oncreated")
+                                        .WithPayload(JsonSerializer.Serialize<OnEventCreatedDTO>(onEventCreatedMessage))
+                                        .Build();
+                                await OnEventCreated.PublishAsync(applicationMessage, CancellationToken.None);
+                                await OnEventCreated.DisconnectAsync();
 
-								// FCM
-								var labels = new HashSet<string>();
+                                // FCM
+                                var labels = new HashSet<string>();
 								foreach (var eventDTO in eventDTOs)
 								{
 									eventDTO.EventVideoId = createdVideoDTO.Id;

@@ -202,7 +202,7 @@
 	private async Task OnSelectedItemChanged(ChangeEventArgs e)
 	{
 		selectedItem = e.Value?.ToString();
-		_jsRuntime.InvokeVoidAsync("change_model", selectedItem);
+		await _jsRuntime.InvokeVoidAsync("change_model", selectedItem);
 
 		var modelSelectMessage = new ModelSelectDTO
 			{

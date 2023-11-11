@@ -87,7 +87,6 @@ app.UseAuthorization();
 
 app.MapBlazorHub();
 app.MapHub<RTCHub>("/hub/rtc");
-app.MapHub<ObserverHub>("/hub/observer");
 app.MapFallbackToPage("/_Host");
 
 await SeedDatabase();
