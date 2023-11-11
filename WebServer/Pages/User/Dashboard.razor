@@ -36,7 +36,7 @@ else
                                     @onclick="()=>OnCameraDeleted(camera)">
                                         Remove
                                     </button>
-                                    <input id=@($"input-{camera.Id}") type="range" class="form-range" value=@(camera.Angle) min="0"
+                                    <input id=@($"input-{camera.Id}") type="range" class="form-range ml-3" value=@(camera.Angle) min="0"
                                            max="180" step="1" @onchange="(args)=>SetCameraAngle(args, camera.Id)" />
                                 </div>
                             </div>
