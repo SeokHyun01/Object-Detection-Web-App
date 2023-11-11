@@ -327,6 +327,16 @@ else
 
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
+			await EventGrid.Refresh();
+			if (EventViewModel.Any())
+			{
+				await ExpandAll();
+				if (!AllRowsExpanded)
+				{
+					AllRowsExpanded = true;
+				}
+				await InvokeAsync(StateHasChanged);
+			}
 		}
 		else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
 		{
@@ -368,13 +378,13 @@ else
 		{
 			await CollapseAll();
 			AllRowsExpanded = false;
-			StateHasChanged();
+			await InvokeAsync(StateHasChanged);
 		}
 		else
 		{
 			await ExpandAll();
 			AllRowsExpanded = true;
-			StateHasChanged();
+			await InvokeAsync(StateHasChanged);
 		}
 	}
 
