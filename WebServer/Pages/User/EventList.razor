@@ -61,7 +61,7 @@ else
 											<TabHeader Text="Video"></TabHeader>
 										</ChildContent>
 										<ContentTemplate>
-											<video style="width: 30rem;" controls autoplay>
+											<video style="width: 15rem;" controls autoplay>
 												<source src=@(Regex.Match(currentEvent.Path, @"videos/[\w-]+\.mp4").Value) type="video/mp4">
 											</video>
 										</ContentTemplate>
@@ -255,7 +255,7 @@ else
 			var first = video.Events.FirstOrDefault();
 			if (first == null)
 			{
-				Console.WriteLine($"null인 Event의 Video ID: {video.Id}");
+				Console.WriteLine($"{video.Id}");
 				continue;
 			}
 
@@ -269,7 +269,7 @@ else
 				date = new DateTime();
 			}
 
-			var cameraName = first.Camera.Name;
+			var cameraName = first.Camera?.Name;
 			var labels = new HashSet<string>();
 			foreach (var boundingBox in BoundingBoxes)
 			{

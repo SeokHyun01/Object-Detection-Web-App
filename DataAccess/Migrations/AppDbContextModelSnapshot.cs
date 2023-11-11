@@ -55,7 +55,7 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("EventId");
 
-                    b.ToTable("BoundingBoxes");
+                    b.ToTable("BoundingBoxes", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.Camera", b =>
@@ -80,7 +80,7 @@ namespace DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Cameras");
+                    b.ToTable("Cameras", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.Event", b =>
@@ -109,7 +109,7 @@ namespace DataAccess.Migrations
 
                     b.HasIndex("EventVideoId");
 
-                    b.ToTable("Events");
+                    b.ToTable("Events", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.EventVideo", b =>
@@ -128,7 +128,7 @@ namespace DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("EventVideos");
+                    b.ToTable("EventVideos", (string)null);
                 });
 
             modelBuilder.Entity("DataAccess.FCMInfo", b =>
@@ -150,7 +150,7 @@ namespace DataAccess.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FCMInfos");
+                    b.ToTable("FCMInfos", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>

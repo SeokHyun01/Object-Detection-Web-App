@@ -16,7 +16,7 @@ namespace DataAccess
 		public string? Date { get; set; }
 		public int CameraId { get; set; }
 		[ForeignKey(nameof(CameraId))]
-		public Camera Camera { get; set; }
+		public Camera? Camera { get; set; }
 		public IEnumerable<BoundingBox> BoundingBoxes { get; set; }
 		public string? Path { get; set; }
 		public int? EventVideoId { get; set; }
