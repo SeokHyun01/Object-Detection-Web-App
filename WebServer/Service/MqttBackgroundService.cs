@@ -31,7 +31,6 @@ namespace WebServer.Service
 
 		private IMqttClient? MqttClient { get; set; } = null;
 		private IMqttClient? EventSender { get; set; } = null;
-		//private IMqttClient? OnEventCreated { get; set; } = null;
 
 		private static readonly string ROOT = @"/home/shyoun/Desktop/GraduationWorks/WebServer/wwwroot";
 		//private static readonly string ROOT = @"C:\Users\hisn16.DESKTOP-HGVGADP\source\repos\GraduationWorks\WebServer\wwwroot\";
@@ -65,9 +64,6 @@ namespace WebServer.Service
 					.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
 					.Build();
 				await EventSender.ConnectAsync(options, CancellationToken.None);
-
-				//            OnEventCreated = mqttFactory.CreateMqttClient();
-				//await OnEventCreated.ConnectAsync(options, CancellationToken.None);
 
 				MqttClient = mqttFactory.CreateMqttClient();
 				MqttClient.ApplicationMessageReceivedAsync += async e =>
@@ -253,12 +249,12 @@ namespace WebServer.Service
 									Path = videoPath
 								});
 
-								//var onEventCreatedMessage = new OnEventCreatedDTO { UserId = createdVideoDTO.UserId, VideoId = createdVideoDTO.Id };
-								//                        var applicationMessage = new MqttApplicationMessageBuilder()
-								//                                .WithTopic("event/oncreated")
-								//                                .WithPayload(JsonSerializer.Serialize<OnEventCreatedDTO>(onEventCreatedMessage))
-								//                                .Build();
-								//                        await OnEventCreated.PublishAsync(applicationMessage, CancellationToken.None);
+								var onEventCreatedMessage = new OnEventCreatedDTO { UserId = createdVideoDTO.UserId, VideoId = createdVideoDTO.Id };
+								var applicationMessage = new MqttApplicationMessageBuilder()
+										.WithTopic("event/oncreated")
+										.WithPayload(JsonSerializer.Serialize<OnEventCreatedDTO>(onEventCreatedMessage))
+										.Build();
+								await EventSender.PublishAsync(applicationMessage, CancellationToken.None);
 
 								// FCM
 								var labels = new HashSet<string>();
