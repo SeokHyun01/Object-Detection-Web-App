@@ -259,7 +259,6 @@ namespace WebServer.Service
                                         .WithPayload(JsonSerializer.Serialize<OnEventCreatedDTO>(onEventCreatedMessage))
                                         .Build();
                                 await OnEventCreated.PublishAsync(applicationMessage, CancellationToken.None);
-                                await OnEventCreated.DisconnectAsync();
 
                                 // FCM
                                 var labels = new HashSet<string>();
