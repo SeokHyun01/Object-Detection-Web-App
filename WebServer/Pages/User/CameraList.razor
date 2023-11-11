@@ -48,10 +48,10 @@ else
 										Remove
 									</button>
 								</div>
-								<div class="form-check form-switch" style="text-align: right;">
-									<input id=@($"rtc-{camera.Id}") value="false" class="form-check-input" type="checkbox" role="switch" @onchange="(args)=>StopRTC(args, camera.Id)" disabled>
-									<label class="d-none d-block-lg form-check-label" for=@($"rtc-{camera.Id}")>RTC</label>
-								</div>
+							</div>
+							<div class="form-check form-switch" style="text-align: right;">
+								<input id=@($"rtc-{camera.Id}") value="false" class="form-check-input" type="checkbox" role="switch" @onchange="(args)=>StopRTC(args, camera.Id)" disabled>
+								<label class="d-none d-block-lg form-check-label" for=@($"rtc-{camera.Id}")>RTC</label>
 							</div>
 						</div>
 					</div>
