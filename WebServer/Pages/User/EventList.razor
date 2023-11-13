@@ -268,7 +268,7 @@ else
 			IsLoading = true;
 			StateHasChanged();
 		}
-
+		EventViewModel = new List<EventViewModel>();
 		EventVideos = await _eventVideoRepository.GetAllByUserId(userId);
 		BoundingBoxes = EventVideos.SelectMany(x => x.Events.SelectMany(e => e.BoundingBoxes)).ToList();
 		foreach (var video in EventVideos)
