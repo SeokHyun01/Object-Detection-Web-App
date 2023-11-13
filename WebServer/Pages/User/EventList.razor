@@ -37,7 +37,7 @@ else
 					<span>Expand All</span>
 				}
 			</SfButton>
-			<SfGrid @ref="EventGrid" DataSource="@EventViewModel" Height="1000" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
+			<SfGrid @ref="EventGrid" DataSource="@EventViewModel" Height="1000" AllowSelection="true" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
 				<GridEvents OnActionBegin="OnActionBeginHandler" TValue="EventViewModel"></GridEvents>
 				<GridSortSettings>
 					<GridSortColumns>
@@ -47,7 +47,7 @@ else
 				<GridFilterSettings Type="Syncfusion.Blazor.Grids.FilterType.Menu"></GridFilterSettings>
 				<GridEditSettings ShowDeleteConfirmDialog="true" AllowDeleting="true"></GridEditSettings>
 				<GridPageSettings PageSizes="true" PageSize="5" PageCount="5"></GridPageSettings>
-				<GridSelectionSettings CheckboxOnly="true" PersistSelection="true"></GridSelectionSettings>
+				<GridSelectionSettings CheckboxMode="CheckboxSelectionType.ResetOnRowClick" Type="Syncfusion.Blazor.Grids.SelectionType.Multiple"></GridSelectionSettings>
 				<GridTemplates>
 					<DetailTemplate>
 						@{
@@ -321,7 +321,7 @@ else
 			IsLoading = true;
 			await InvokeAsync(StateHasChanged);
 
-			Console.WriteLine("###############\n");
+			Console.WriteLine("###############");
 			Console.WriteLine(args.Data.Id);
 
 			await _eventVideoRepository.Delete(args.Data.Id);
