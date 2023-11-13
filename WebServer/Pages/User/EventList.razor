@@ -38,7 +38,7 @@ else
 				}
 			</SfButton>
 			<SfGrid @ref="EventGrid" DataSource="@EventViewModel" Height="1000" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
-				<GridEvents OnActionBegin="OnActionBeginHandler" OnActionComplete="OnActionCompleteHandler" OnActionFailure="OnActionFailureHandler" TValue="EventViewModel"></GridEvents>
+				<GridEvents OnActionBegin="OnActionBeginHandler" OnActionComplete="OnActionCompleteHandler" TValue="EventViewModel"></GridEvents>
 				<GridSortSettings>
 					<GridSortColumns>
 						<GridSortColumn Field="Id" Direction="SortDirection.Descending"></GridSortColumn>
@@ -137,89 +137,89 @@ else
 
 
 @code {
-    [CascadingParameter]
-    public Task<AuthenticationState> AuthenticationState { get; set; }
-    private IdentityUser? User { get; set; } = null;
+	[CascadingParameter]
+	public Task<AuthenticationState> AuthenticationState { get; set; }
+	private IdentityUser? User { get; set; } = null;
 
-    private bool IsLoading { get; set; } = true;
+	private bool IsLoading { get; set; } = true;
 
-    private List<EventViewModel> EventViewModel { get; set; } = new();
+	private List<EventViewModel> EventViewModel { get; set; } = new();
 
-    private IEnumerable<EventVideoDTO> EventVideos { get; set; } = new List<EventVideoDTO>();
-    private List<BoundingBoxDTO> BoundingBoxes { get; set; } = new List<BoundingBoxDTO>();
+	private IEnumerable<EventVideoDTO> EventVideos { get; set; } = new List<EventVideoDTO>();
+	private List<BoundingBoxDTO> BoundingBoxes { get; set; } = new List<BoundingBoxDTO>();
 
-    private IEnumerable<string> ToolbarItems = new List<string>() { "Delete" };
-    private SfGrid<EventViewModel> EventGrid { get; set; }
-    private bool AllRowsExpanded { get; set; } = false;
+	private IEnumerable<string> ToolbarItems = new List<string>() { "Delete" };
+	private SfGrid<EventViewModel> EventGrid { get; set; }
+	private bool AllRowsExpanded { get; set; } = false;
 
-    private const string DATETIME_FORMAT = "yyyy-MM-ddTHH:mm:ss";
-    private DateTime StartDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
-    private DateTime EndDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+	private const string DATETIME_FORMAT = "yyyy-MM-ddTHH:mm:ss";
+	private DateTime StartDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
+	private DateTime EndDate { get; set; } = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Hour, DateTime.Now.Minute, DateTime.Now.Second);
 
-    private HubConnection? hubConnection;
+	private HubConnection? hubConnection;
 
-    private IMqttClient? MqttClient { get; set; } = null;
+	private IMqttClient? MqttClient { get; set; } = null;
 
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            var authState = await AuthenticationState;
-            User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
+	protected override async Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			var authState = await AuthenticationState;
+			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 
-            var mqttFactory = new MqttFactory();
-            MqttClient = mqttFactory.CreateMqttClient();
+			var mqttFactory = new MqttFactory();
+			MqttClient = mqttFactory.CreateMqttClient();
 
-            MqttClient.ApplicationMessageReceivedAsync += async e =>
-            {
-                var message = e.ApplicationMessage;
-                if (e.ApplicationMessage.Topic == "event/oncreated")
-                {
-                    var onEventCreatedMessage = JsonSerializer.Deserialize<OnEventCreatedDTO>(message.PayloadSegment);
-                    if (onEventCreatedMessage == null)
-                    {
-                        return;
-                    }
-                    var userId = onEventCreatedMessage.UserId;
-                    var videoId = onEventCreatedMessage.VideoId;
+			MqttClient.ApplicationMessageReceivedAsync += async e =>
+			{
+				var message = e.ApplicationMessage;
+				if (e.ApplicationMessage.Topic == "event/oncreated")
+				{
+					var onEventCreatedMessage = JsonSerializer.Deserialize<OnEventCreatedDTO>(message.PayloadSegment);
+					if (onEventCreatedMessage == null)
+					{
+						return;
+					}
+					var userId = onEventCreatedMessage.UserId;
+					var videoId = onEventCreatedMessage.VideoId;
 
-                    if (userId != User.Id)
-                    {
-                        return;
-                    }
+					if (userId != User.Id)
+					{
+						return;
+					}
 
-                    var video = await _eventVideoRepository.Get(videoId);
-                    BoundingBoxes.AddRange(video.Events.SelectMany(x => x.BoundingBoxes).ToList());
+					var video = await _eventVideoRepository.Get(videoId);
+					BoundingBoxes.AddRange(video.Events.SelectMany(x => x.BoundingBoxes).ToList());
 
-                    var first = video.Events.FirstOrDefault();
+					var first = video.Events.FirstOrDefault();
 
-                    DateTime? date = null;
-                    try
-                    {
-                        date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
-                    }
-                    catch (FormatException)
-                    {
-                        date = new DateTime();
-                    }
+					DateTime? date = null;
+					try
+					{
+						date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
+					}
+					catch (FormatException)
+					{
+						date = new DateTime();
+					}
 
-                    var cameraName = first.Camera.Name;
+					var cameraName = first.Camera.Name;
 
-                    var labels = new HashSet<string>();
+					var labels = new HashSet<string>();
 
-                    foreach (var boundingBox in BoundingBoxes)
-                    {
-                        if (boundingBox.Event.EventVideoId == video.Id)
-                        {
-                            if (!string.IsNullOrEmpty(boundingBox.Label))
-                            {
-                                labels.Add(boundingBox.Label);
-                            }
-                        }
-                    }
-                    var path = video.Path;
-                    EventViewModel.Add(new EventViewModel()
+					foreach (var boundingBox in BoundingBoxes)
+					{
+						if (boundingBox.Event.EventVideoId == video.Id)
+						{
+							if (!string.IsNullOrEmpty(boundingBox.Label))
+							{
+								labels.Add(boundingBox.Label);
+							}
+						}
+					}
+					var path = video.Path;
+					EventViewModel.Add(new EventViewModel()
 						{
 							Id = video.Id,
 							Date = date.Value,
@@ -228,79 +228,79 @@ else
 							Path = path,
 						});
 
-                    if (EventViewModel.Any())
-                    {
-                        await EventGrid.Refresh();
-                        if (AllRowsExpanded)
-                        {
-                            await ExpandAll();
-                        }
-                    }
-                }
-            };
+					if (EventViewModel.Any())
+					{
+						await EventGrid.Refresh();
+						if (AllRowsExpanded)
+						{
+							await ExpandAll();
+						}
+					}
+				}
+			};
 
-            var mqttClientOptions = new MqttClientOptionsBuilder()
-                .WithTcpServer("ictrobot.hknu.ac.kr", 8085)
-                .Build();
-            await MqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
+			var mqttClientOptions = new MqttClientOptionsBuilder()
+				.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
+				.Build();
+			await MqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
 
-            var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
-                .WithTopicFilter(f => { f.WithTopic("event/oncreated"); })
-                .Build();
+			var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
+				.WithTopicFilter(f => { f.WithTopic("event/oncreated"); })
+				.Build();
 
-            await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
+			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
-            await getEventVideos(User.Id);
+			await getEventVideos(User.Id);
 
-            if (EventViewModel.Any())
-            {
-                await ToggleExpandCollapse();
-            }
-        }
-    }
+			if (EventViewModel.Any())
+			{
+				await ToggleExpandCollapse();
+			}
+		}
+	}
 
-    private async ValueTask getEventVideos(string userId)
-    {
-        if (!IsLoading)
-        {
-            IsLoading = true;
-            StateHasChanged();
-        }
-        EventViewModel = new List<EventViewModel>();
-        EventVideos = await _eventVideoRepository.GetAllByUserId(userId);
-        BoundingBoxes = EventVideos.SelectMany(x => x.Events.SelectMany(e => e.BoundingBoxes)).ToList();
-        foreach (var video in EventVideos)
-        {
-            var first = video.Events.FirstOrDefault();
-            if (first == null)
-            {
-                continue;
-            }
+	private async ValueTask getEventVideos(string userId)
+	{
+		if (!IsLoading)
+		{
+			IsLoading = true;
+			StateHasChanged();
+		}
+		EventViewModel = new List<EventViewModel>();
+		EventVideos = await _eventVideoRepository.GetAllByUserId(userId);
+		BoundingBoxes = EventVideos.SelectMany(x => x.Events.SelectMany(e => e.BoundingBoxes)).ToList();
+		foreach (var video in EventVideos)
+		{
+			var first = video.Events.FirstOrDefault();
+			if (first == null)
+			{
+				continue;
+			}
 
-            DateTime? date = null;
-            try
-            {
-                date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
-            }
-            catch (FormatException)
-            {
-                date = new DateTime();
-            }
+			DateTime? date = null;
+			try
+			{
+				date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
+			}
+			catch (FormatException)
+			{
+				date = new DateTime();
+			}
 
-            var cameraName = first.Camera?.Name;
-            var labels = new HashSet<string>();
-            foreach (var boundingBox in BoundingBoxes)
-            {
-                if (boundingBox.Event.EventVideoId == video.Id)
-                {
-                    if (!string.IsNullOrEmpty(boundingBox.Label))
-                    {
-                        labels.Add(boundingBox.Label);
-                    }
-                }
-            }
-            var path = video.Path;
-            EventViewModel.Add(new EventViewModel()
+			var cameraName = first.Camera?.Name;
+			var labels = new HashSet<string>();
+			foreach (var boundingBox in BoundingBoxes)
+			{
+				if (boundingBox.Event.EventVideoId == video.Id)
+				{
+					if (!string.IsNullOrEmpty(boundingBox.Label))
+					{
+						labels.Add(boundingBox.Label);
+					}
+				}
+			}
+			var path = video.Path;
+			EventViewModel.Add(new EventViewModel()
 				{
 					Id = video.Id,
 					Date = date.Value,
@@ -308,42 +308,42 @@ else
 					Labels = string.Join(", ", labels),
 					Path = path,
 				});
-        }
+		}
 
-        IsLoading = false;
-        StateHasChanged();
-    }
+		IsLoading = false;
+		StateHasChanged();
+	}
 
-    private async Task OnActionBeginHandler(ActionEventArgs<EventViewModel> args)
-    {
-        if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
-        {
-            IsLoading = true;
-            await InvokeAsync(StateHasChanged);
+	private async Task OnActionBeginHandler(ActionEventArgs<EventViewModel> args)
+	{
+		if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
+		{
+			IsLoading = true;
+			await InvokeAsync(StateHasChanged);
 
-            await _eventVideoRepository.Delete(args.Data.Id);
-            await getEventVideos(User.Id);
-            if (EventViewModel.Any())
-            {
-                await EventGrid.Refresh();
-            }
-        }
+			await _eventVideoRepository.Delete(args.Data.Id);
+			await getEventVideos(User.Id);
+			if (EventViewModel.Any())
+			{
+				await EventGrid.Refresh();
+			}
+		}
 
-        else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
-        {
-            args.Cancel = true;
-            if (EventGrid.FilterSettings.Columns == null)
-            {
-                EventGrid.FilterSettings.Columns = new List<GridFilterColumn>();
-            }
-            if (EventGrid.FilterSettings.Columns.Count > 0)
-            {
-                EventGrid.FilterSettings.Columns.RemoveAll(c => c.Field == "Date");
-            }
+		else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
+		{
+			args.Cancel = true;
+			if (EventGrid.FilterSettings.Columns == null)
+			{
+				EventGrid.FilterSettings.Columns = new List<GridFilterColumn>();
+			}
+			if (EventGrid.FilterSettings.Columns.Count > 0)
+			{
+				EventGrid.FilterSettings.Columns.RemoveAll(c => c.Field == "Date");
+			}
 
-            var columns = await EventGrid.GetColumns();
-            string fUid = columns[1].Uid;
-            EventGrid.FilterSettings.Columns.Add(new GridFilterColumn
+			var columns = await EventGrid.GetColumns();
+			string fUid = columns[1].Uid;
+			EventGrid.FilterSettings.Columns.Add(new GridFilterColumn
 				{
 					Field = "Date",
 					Operator = Syncfusion.Blazor.Operator.GreaterThanOrEqual,
@@ -351,7 +351,7 @@ else
 					Value = StartDate,
 					Uid = fUid
 				});
-            EventGrid.FilterSettings.Columns.Add(new GridFilterColumn
+			EventGrid.FilterSettings.Columns.Add(new GridFilterColumn
 				{
 					Field = "Date",
 					Operator = Syncfusion.Blazor.Operator.LessThanOrEqual,
@@ -359,47 +359,35 @@ else
 					Value = EndDate,
 					Uid = fUid
 				});
-            await EventGrid.Refresh();
-        }
+			await EventGrid.Refresh();
+		}
 
-        if (EventViewModel.Any())
-        {
-            if (AllRowsExpanded)
-            {
-                await ExpandAll();
-            } else
-            {
-                await CollapseAll();
-            }
-        }
-    }
-
-    private async Task OnActionCompleteHandler(ActionEventArgs<EventViewModel> args)
-    {
-        if (EventViewModel.Any())
-        {
-            if (AllRowsExpanded)
-            {
-                await ExpandAll();
-            }
-            else
-            {
-                await CollapseAll();
-            }
-        }
-    }
-
-    private async Task OnActionFailureHandler(Syncfusion.Blazor.Grids.FailureEventArgs args)
-    {
 		if (EventViewModel.Any())
 		{
 			if (AllRowsExpanded)
 			{
 				await ExpandAll();
-			}
-			else
+			} else
 			{
 				await CollapseAll();
+			}
+		}
+	}
+
+	private async Task OnActionCompleteHandler(ActionEventArgs<EventViewModel> args)
+	{
+		if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Sorting) || args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Filtering))
+		{
+			if (EventViewModel.Any())
+			{
+				if (AllRowsExpanded)
+				{
+					await ExpandAll();
+				}
+				else
+				{
+					await CollapseAll();
+				}
 			}
 		}
 	}
