@@ -325,6 +325,7 @@ else
 
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
+			await EventGrid.Refresh();
 		}
 
 		else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
@@ -357,9 +358,9 @@ else
 					Value = EndDate,
 					Uid = fUid
 				});
+			await EventGrid.Refresh();
 		}
 
-		await EventGrid.Refresh();
 		if (EventViewModel.Any())
 		{
 			if (AllRowsExpanded)
