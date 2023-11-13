@@ -367,12 +367,12 @@ else
 		{
 			if (AllRowsExpanded)
 			{
+				Console.WriteLine($"AllRowsExpanded: {AllRowsExpanded}");
 				await ExpandAll();
-				await InvokeAsync(StateHasChanged);
 			} else
 			{
 				await CollapseAll();
-				await InvokeAsync(StateHasChanged);
+				Console.WriteLine($"AllRowsExpanded: {AllRowsExpanded}");
 			}
 		}
 	}
