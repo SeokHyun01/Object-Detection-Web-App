@@ -323,10 +323,7 @@ else
 
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
-			if (EventViewModel.Any())
-			{
-				await EventGrid.Refresh();
-			}
+			await EventGrid.Refresh();
 		}
 
 		if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
