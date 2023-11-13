@@ -329,7 +329,7 @@ else
 			}
 		}
 
-		else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
+		if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
 		{
 			args.Cancel = true;
 			if (EventGrid.FilterSettings.Columns == null)
@@ -360,17 +360,6 @@ else
 					Uid = fUid
 				});
 			await EventGrid.Refresh();
-		}
-
-		if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Refresh) && EventViewModel.Any())
-		{
-			if (AllRowsExpanded)
-			{
-				await ExpandAll();
-			} else
-			{
-				await CollapseAll();
-			}
 		}
 	}
 
