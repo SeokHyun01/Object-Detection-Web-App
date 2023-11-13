@@ -38,7 +38,7 @@ else
 				}
 			</SfButton>
 			<SfGrid @ref="EventGrid" DataSource="@EventViewModel" Height="1000" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
-				<GridEvents OnActionBegin="OnActionBeginHandler" OnActionComplete="OnActionCompleteHandler" TValue="EventViewModel"></GridEvents>
+				<GridEvents OnActionBegin="OnActionBeginHandler" TValue="EventViewModel"></GridEvents>
 				<GridSortSettings>
 					<GridSortColumns>
 						<GridSortColumn Field="Id" Direction="SortDirection.Descending"></GridSortColumn>
@@ -362,7 +362,7 @@ else
 			await EventGrid.Refresh();
 		}
 
-		if (EventViewModel.Any())
+		if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Refresh) && EventViewModel.Any())
 		{
 			if (AllRowsExpanded)
 			{
@@ -370,24 +370,6 @@ else
 			} else
 			{
 				await CollapseAll();
-			}
-		}
-	}
-
-	private async Task OnActionCompleteHandler(ActionEventArgs<EventViewModel> args)
-	{
-		if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Sorting) || args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Filtering))
-		{
-			if (EventViewModel.Any())
-			{
-				if (AllRowsExpanded)
-				{
-					await ExpandAll();
-				}
-				else
-				{
-					await CollapseAll();
-				}
 			}
 		}
 	}
