@@ -332,6 +332,7 @@ else
 				return;
 			}
 
+			Console.WriteLine(SelectedRowIndexes.Count);
 			await _eventVideoRepository.Delete(SelectedRowIndexes);
 			await getEventVideos(User.Id);
 			await EventGrid.Refresh();
