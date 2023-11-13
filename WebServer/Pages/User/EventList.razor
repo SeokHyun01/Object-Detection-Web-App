@@ -320,24 +320,13 @@ else
 	{
 		if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
 		{
-			Console.WriteLine(args.Data.Id);
-
 			IsLoading = true;
-			StateHasChanged();
+			await InvokeAsync(StateHasChanged);
 
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
-			await EventGrid.Refresh();
-			if (EventViewModel.Any())
-			{
-				await ExpandAll();
-				if (!AllRowsExpanded)
-				{
-					AllRowsExpanded = true;
-				}
-				await InvokeAsync(StateHasChanged);
-			}
 		}
+
 		else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
 		{
 			args.Cancel = true;
@@ -368,7 +357,18 @@ else
 					Value = EndDate,
 					Uid = fUid
 				});
-			EventGrid.Refresh();
+		}
+
+		await EventGrid.Refresh();
+		if (EventViewModel.Any())
+		{
+			if (AllRowsExpanded)
+			{
+				await CollapseAll();
+			} else
+			{
+				await ExpandAll();
+			}
 		}
 	}
 
