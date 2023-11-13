@@ -38,7 +38,7 @@ else
 				}
 			</SfButton>
 			<SfGrid @ref="EventGrid" DataSource="@EventViewModel" Height="1000" AllowSelection="true" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
-				<GridEvents OnActionBegin="OnActionBeginHandler" TValue="EventViewModel"></GridEvents>
+				<GridEvents RowSelected="GetSelectedRowIndexes" OnActionBegin="OnActionBeginHandler" TValue="EventViewModel"></GridEvents>
 				<GridSortSettings>
 					<GridSortColumns>
 						<GridSortColumn Field="Id" Direction="SortDirection.Descending"></GridSortColumn>
@@ -150,6 +150,9 @@ else
 
 	private IEnumerable<string> ToolbarItems = new List<string>() { "Delete" };
 	private SfGrid<EventViewModel> EventGrid { get; set; }
+
+	private List<int> SelectedRowIndexes { get; set; }
+
 	private bool AllRowsExpanded { get; set; } = false;
 
 	private const string DATETIME_FORMAT = "yyyy-MM-ddTHH:mm:ss";
@@ -321,10 +324,15 @@ else
 			IsLoading = true;
 			await InvokeAsync(StateHasChanged);
 
-			Console.WriteLine("###############");
-			Console.WriteLine(args.Data.Id);
+			if (!SelectedRowIndexes.Any())
+			{
+				IsLoading = false;
+				await InvokeAsync(StateHasChanged);
 
-			await _eventVideoRepository.Delete(args.Data.Id);
+				return;
+			}
+
+			await _eventVideoRepository.Delete(SelectedRowIndexes);
 			await getEventVideos(User.Id);
 			await EventGrid.Refresh();
 		}
@@ -408,5 +416,10 @@ else
 	{
 		StartDate = args.StartDate;
 		EndDate = args.EndDate;
+	}
+
+	private async Task GetSelectedRowIndexes(RowSelectEventArgs<EventViewModel> args)
+	{
+		SelectedRowIndexes = await this.EventGrid.GetSelectedRowIndexesAsync();
 	}
 }

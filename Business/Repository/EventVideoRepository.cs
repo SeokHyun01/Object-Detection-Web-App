@@ -42,24 +42,21 @@ namespace Business.Repository
 			}
 		}
 
-		public async ValueTask Delete(int id)
+		public async ValueTask Delete(List<int> ids)
 		{
-			var video = await _db.EventVideos.FirstOrDefaultAsync(x => x.Id == id);
-			if (video == null)
+			var videos = await _db.EventVideos.Where(x => ids.Contains(x.Id)).ToListAsync();
+			foreach (var video in videos)
 			{
-				return;
+				if (!string.IsNullOrEmpty(video.Path) && File.Exists(video.Path))
+				{
+					// 이벤트 영상 삭제
+					File.Delete(video.Path);
+				}
 			}
-			var path = video.Path;
-			if (!string.IsNullOrEmpty(path) && File.Exists(path))
-			{
-				// 이벤트 영상 삭제
-				File.Delete(path);
-			}
-			_db.EventVideos.Remove(video);
-			await _db.SaveChangesAsync();
+			_db.EventVideos.RemoveRange(videos);
 
-			var objs = await _db.Events.Where(x => x.EventVideoId == id).ToListAsync();
-			foreach (var obj in objs)
+			var events = await _db.Events.Where(x => ids.Contains(x.EventVideoId.Value)).ToListAsync();
+			foreach (var obj in events)
 			{
 				if (!string.IsNullOrEmpty(obj.Path) && File.Exists(obj.Path))
 				{
@@ -67,11 +64,11 @@ namespace Business.Repository
 					File.Delete(obj.Path);
 				}
 
-				var boundingBoxes = _db.BoundingBoxes.Where(x => x.EventId == obj.Id);
+				var boundingBoxes = _db.BoundingBoxes.Where(x => x.EventId == obj.Id).ToList();
 				_db.BoundingBoxes.RemoveRange(boundingBoxes);
-				_db.Events.Remove(obj);
-				await _db.SaveChangesAsync();
 			}
+			_db.Events.RemoveRange(events);
+			await _db.SaveChangesAsync();
 		}
 
 		public async ValueTask<EventVideoDTO> Get(int id)
