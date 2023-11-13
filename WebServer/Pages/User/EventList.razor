@@ -324,8 +324,14 @@ else
 			IsLoading = true;
 			await InvokeAsync(StateHasChanged);
 
-			SelectedRowIndexes = await EventGrid.GetSelectedRowIndexesAsync();
-
+			var selectedRecords = await EventGrid.GetSelectedRecordsAsync();
+			
+			SelectedRowIndexes = new List<int>();
+			foreach (var record in selectedRecords)
+			{
+				SelectedRowIndexes.Add(record.Id);
+			}
+			
 			if (!SelectedRowIndexes.Any())
 			{
 				IsLoading = false;
