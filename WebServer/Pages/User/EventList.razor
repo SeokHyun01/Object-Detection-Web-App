@@ -38,7 +38,7 @@ else
 				}
 			</SfButton>
 			<SfGrid @ref="EventGrid" DataSource="@EventViewModel" Height="1000" AllowSelection="true" AllowFiltering="true" AllowSorting="true" AllowGrouping="true" AllowPaging="true" Toolbar="@ToolbarItems">
-				<GridEvents RowSelected="GetSelectedRowIndexes" OnActionBegin="OnActionBeginHandler" TValue="EventViewModel"></GridEvents>
+				<GridEvents OnActionBegin="OnActionBeginHandler" TValue="EventViewModel"></GridEvents>
 				<GridSortSettings>
 					<GridSortColumns>
 						<GridSortColumn Field="Id" Direction="SortDirection.Descending"></GridSortColumn>
@@ -324,6 +324,8 @@ else
 			IsLoading = true;
 			await InvokeAsync(StateHasChanged);
 
+			SelectedRowIndexes = await EventGrid.GetSelectedRowIndexesAsync();
+
 			if (!SelectedRowIndexes.Any())
 			{
 				IsLoading = false;
@@ -417,10 +419,5 @@ else
 	{
 		StartDate = args.StartDate;
 		EndDate = args.EndDate;
-	}
-
-	private async Task GetSelectedRowIndexes(RowSelectEventArgs<EventViewModel> args)
-	{
-		SelectedRowIndexes = await this.EventGrid.GetSelectedRowIndexesAsync();
 	}
 }
