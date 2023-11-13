@@ -368,9 +368,11 @@ else
 			if (AllRowsExpanded)
 			{
 				await ExpandAll();
+				await EventGrid.Refresh();
 			} else
 			{
 				await CollapseAll();
+				await EventGrid.Refresh();
 			}
 		}
 	}
