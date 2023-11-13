@@ -228,15 +228,13 @@ else
 							Path = path,
 						});
 
-					await EventGrid.Refresh();
 					if (EventViewModel.Any())
 					{
-						await ExpandAll();
-						if (!AllRowsExpanded)
+						await EventGrid.Refresh();
+						if (AllRowsExpanded)
 						{
-							AllRowsExpanded = true;
+							await ExpandAll();
 						}
-						await InvokeAsync(StateHasChanged);
 					}
 				}
 			};
@@ -325,7 +323,10 @@ else
 
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
-			await EventGrid.Refresh();
+			if (EventViewModel.Any())
+			{
+				await EventGrid.Refresh();
+			}
 		}
 
 		else if (args.RequestType == Syncfusion.Blazor.Grids.Action.Filtering && args.CurrentFilteringColumn == "Date")
@@ -365,10 +366,10 @@ else
 		{
 			if (AllRowsExpanded)
 			{
-				await CollapseAll();
+				await ExpandAll();
 			} else
 			{
-				await ExpandAll();
+				await CollapseAll();
 			}
 		}
 	}
