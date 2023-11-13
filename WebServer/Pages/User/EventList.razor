@@ -321,6 +321,9 @@ else
 			IsLoading = true;
 			await InvokeAsync(StateHasChanged);
 
+			Console.WriteLine("###############\n");
+			Console.WriteLine(args.Data.Id);
+
 			await _eventVideoRepository.Delete(args.Data.Id);
 			await getEventVideos(User.Id);
 			await EventGrid.Refresh();
