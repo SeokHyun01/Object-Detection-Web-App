@@ -320,8 +320,11 @@ else
 
 	private async void EventActionHandler(ActionEventArgs<EventViewModel> args)
 	{
+		Console.WriteLine(args.Data.Id);
 		if (args.RequestType.Equals(Syncfusion.Blazor.Grids.Action.Delete))
 		{
+			Console.WriteLine(args.RequestType);
+
 			IsLoading = true;
 			StateHasChanged();
 
