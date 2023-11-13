@@ -362,6 +362,7 @@ else
 			await EventGrid.Refresh();
 		}
 
+		Console.WriteLine(args.RequestType);
 		if (EventViewModel.Any())
 		{
 			if (AllRowsExpanded)
