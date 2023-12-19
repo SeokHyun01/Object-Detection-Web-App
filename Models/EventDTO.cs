@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Models
 {
+	/*
+	 * 서버에서 Object Detection한 결과를 저장하는 클래스
+	 */
 	public class EventDTO
 	{
 		public int Id { get; set; }

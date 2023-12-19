@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace Models
 {
+	/*
+	 * 카메라에서 Object Detection한 결과를 저장하는 클래스
+	 */
 	public class DetectionDTO
 	{
 		public string? Date { get; set; }

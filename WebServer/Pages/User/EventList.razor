@@ -161,8 +161,6 @@ else
 
 	private HubConnection? hubConnection;
 
-	private IMqttClient? MqttClient { get; set; } = null;
-
 
 	protected override async Task OnAfterRenderAsync(bool firstRender)
 	{
@@ -170,88 +168,6 @@ else
 		{
 			var authState = await AuthenticationState;
 			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
-
-			var mqttFactory = new MqttFactory();
-			MqttClient = mqttFactory.CreateMqttClient();
-
-			MqttClient.ApplicationMessageReceivedAsync += async e =>
-			{
-				var message = e.ApplicationMessage;
-				if (e.ApplicationMessage.Topic == "event/oncreated")
-				{
-					var onEventCreatedMessage = JsonSerializer.Deserialize<OnEventCreatedDTO>(message.PayloadSegment);
-					if (onEventCreatedMessage == null)
-					{
-						return;
-					}
-					var userId = onEventCreatedMessage.UserId;
-					var videoId = onEventCreatedMessage.VideoId;
-
-					if (userId != User.Id)
-					{
-						return;
-					}
-
-					var video = await _eventVideoRepository.Get(videoId);
-					BoundingBoxes.AddRange(video.Events.SelectMany(x => x.BoundingBoxes).ToList());
-
-					var first = video.Events.FirstOrDefault();
-
-					DateTime? date = null;
-					try
-					{
-						date = DateTime.ParseExact(first.Date, DATETIME_FORMAT, CultureInfo.InvariantCulture);
-					}
-					catch (FormatException)
-					{
-						date = new DateTime();
-					}
-
-					var cameraName = first.Camera.Name;
-
-					var labels = new HashSet<string>();
-
-					foreach (var boundingBox in BoundingBoxes)
-					{
-						if (boundingBox.Event.EventVideoId == video.Id)
-						{
-							if (!string.IsNullOrEmpty(boundingBox.Label))
-							{
-								labels.Add(boundingBox.Label);
-							}
-						}
-					}
-					var path = video.Path;
-					EventViewModel.Add(new EventViewModel()
-						{
-							Id = video.Id,
-							Date = date.Value,
-							CameraName = cameraName,
-							Labels = string.Join(", ", labels),
-							Path = path,
-						});
-
-					if (EventViewModel.Any())
-					{
-						await EventGrid.Refresh();
-						if (AllRowsExpanded)
-						{
-							await ExpandAll();
-						}
-					}
-				}
-			};
-
-			var mqttClientOptions = new MqttClientOptionsBuilder()
-				.WithTcpServer("ictrobot.hknu.ac.kr", 8085)
-				.Build();
-			await MqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
-
-			var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
-				.WithTopicFilter(f => { f.WithTopic("event/oncreated"); })
-				.Build();
-
-			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
 			await getEventVideos(User.Id);
 

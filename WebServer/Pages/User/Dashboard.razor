@@ -127,13 +127,13 @@ else
             };
 
             var mqttClientOptions = new MqttClientOptionsBuilder()
-            .WithTcpServer("ictrobot.hknu.ac.kr", 8085)
-            .Build();
+                .WithTcpServer("ictrobot.hknu.ac.kr", 8085)
+                .Build();
             await MqttClient.ConnectAsync(mqttClientOptions, CancellationToken.None);
 
             var mqttSubscribeOptions = mqttFactory.CreateSubscribeOptionsBuilder()
-            .WithTopicFilter(f => { f.WithTopic("camera/image"); })
-            .WithTopicFilter(f => { f.WithTopic("model/select"); })
+                .WithTopicFilter(f => { f.WithTopic("camera/image"); })
+                .WithTopicFilter(f => { f.WithTopic("model/select"); })
             .Build();
             await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 

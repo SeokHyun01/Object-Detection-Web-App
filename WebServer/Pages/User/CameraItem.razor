@@ -47,15 +47,23 @@
 
 	private CameraDTO Camera { get; set; } = new CameraDTO();
 
+	/*
+	 * 카메라 이미지 수신 및 모터 동작 확인을 위한 Mqtt 클라이언트
+	 */
 	private IMqttClient? MqttClient { get; set; } = null;
 
+	/*
+	 * Web RTC Signaling을 위한 SignalR Hub
+	 */
 	private HubConnection? RTCHubConnection { get; set; } = null;
 	private string RoomName { get; set; } = string.Empty;
 	private string ConnectionId { get; set; } = string.Empty;
-
 	private bool isEnabledRTC { get; set; } = false;
 
 
+	/*
+	 * 카메라 ID에 해당하는 카메라 데이터를 쿼리하는 코드
+	 */
 	private async ValueTask getCamera(int id)
 	{
 		Camera = await _cameraRepository.Get(id);
@@ -66,22 +74,26 @@
 	{
 		if (firstRender)
 		{
+			// 현재 로그인한 계정의 인증 상태 가져옴
 			var authState = await AuthenticationState;
+			// 가져온 인증 상태에서 해당 계정의 이메일을 가져오고,
+			// 그 이메일을 통하여 User 필드에 유저 정보를 할당
 			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
 
-			// MQTT
 			var mqttFactory = new MqttFactory();
 			MqttClient = mqttFactory.CreateMqttClient();
 
 			MqttClient.ApplicationMessageReceivedAsync += async e =>
 			{
 				var message = e.ApplicationMessage;
+				// 모터가 동작하였는지 확인하는 부분
 				if (e.ApplicationMessage.Topic == "camera/update/angle/ack")
 				{
 					var cameraMessage = JsonSerializer.Deserialize<CameraDTO>(message.PayloadSegment);
 					if (cameraMessage != null)
 					{
 						var input = "input";
+						// 모터가 지정한 각도만큼 정상 작동하였을 때 각도 입력 슬라이더를 활성화
 						await _jsRuntime.InvokeVoidAsync("set_input_disabled", input, false);
 					}
 				}
@@ -99,7 +111,6 @@
 
 			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
-			// SignalR 클라이언트 빌드
 			RTCHubConnection = new HubConnectionBuilder()
 			.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), (opts) =>
 			{
@@ -167,7 +178,6 @@
 
 			await RTCHubConnection.StartAsync();
 
-			// Etc.
 			await getCamera(CameraId);
 			await _jsRuntime.InvokeVoidAsync("start_video", "video");
 
@@ -179,6 +189,7 @@
 		}
 	}
 
+	// 페이지가 종료되었을 때 실행
 	private async Task SetCameraAngle(ChangeEventArgs args, int id)
 	{
 		if (args.Value != null)

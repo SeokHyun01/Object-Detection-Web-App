@@ -102,6 +102,7 @@ else
 		}
 	}
 
+	// 유저 ID의 모든 카메라를 쿼리하는 메서드
 	private async ValueTask getCameras(string userId)
 	{
 		if (!IsLoading)
@@ -122,8 +123,6 @@ else
 		{
 			var authState = await AuthenticationState;
 			User = await _userManager.FindByNameAsync(authState.User.Identity.Name);
-
-			Console.WriteLine(_navigationManager.ToAbsoluteUri("/hub/rtc"));
 
 			RTCHubConnection = new HubConnectionBuilder()
 			.WithUrl(_navigationManager.ToAbsoluteUri("/hub/rtc"), (opts) =>
@@ -167,14 +166,17 @@ else
 			MqttClient.ApplicationMessageReceivedAsync += async e =>
 			{
 				var message = e.ApplicationMessage;
+				// 카메라에게 이미지 수신
 				if (message.Topic == "camera/image")
 				{
 					var cameraMessage = JsonSerializer.Deserialize<CameraDTO>(message.PayloadSegment);
 					if (cameraMessage != null)
 					{
+						// 수신한 이미지 렌더링
 						await _jsRuntime.InvokeVoidAsync("set_img_src", $"img-{cameraMessage.Id}", cameraMessage.Image);
 					}
 				}
+				// 모터가 정상 작동하였을 때 카메라 각도 입력 슬라이더 활성화하는 부분
 				else if (e.ApplicationMessage.Topic == "camera/update/angle/ack")
 				{
 					var cameraMessage = JsonSerializer.Deserialize<CameraDTO>(message.PayloadSegment);
@@ -198,6 +200,7 @@ else
 			await MqttClient.SubscribeAsync(mqttSubscribeOptions, CancellationToken.None);
 
 			await getCameras(User.Id);
+
 			if (RTCHubConnection.State == HubConnectionState.Connected)
 			{
 				await RTCHubConnection.SendAsync("GetAllEnabledRTCs", Cameras.Select(x => x.Id.ToString()));
