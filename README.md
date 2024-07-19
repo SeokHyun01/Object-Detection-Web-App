@@ -1,1 +1,1 @@
-## Object Detection Web App
+## Object Detection Web App with Blazor
